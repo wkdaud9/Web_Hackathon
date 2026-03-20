@@ -1,28 +1,45 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, NavLink } from 'react-router-dom';
+
+const navItems = [
+  { to: '/hackathons', label: '해커톤 탐색' },
+  { to: '/camp', label: '팀 모집 라운지' },
+  { to: '/rankings', label: '명예의 전당' },
+];
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-bg text-text flex flex-col font-body">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 mx-4 mt-4 bg-primary/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/5 flex items-center justify-between">
-        <Link to="/" className="text-xl font-heading font-bold flex items-center gap-2">
-          해커톤 허브
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link to="/hackathons" className="text-sm font-semibold hover:text-cta transition-colors">해커톤 탐색</Link>
-          <Link to="/camp" className="text-sm font-semibold hover:text-cta transition-colors">팀 모집 라운지</Link>
-          <Link to="/rankings" className="text-sm font-semibold hover:text-cta transition-colors">명예의 전당</Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-bg text-primary flex flex-col font-body selection:bg-blue-100 selection:text-blue-900">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+        <nav className="mx-auto w-[min(1200px,calc(100%-1.5rem))] px-4 h-16 flex items-center justify-between gap-4">
+          <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary">
+            Hackathon Hub
+          </Link>
+          <div className="flex items-center gap-1 md:gap-2 overflow-x-auto">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `px-3 md:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-cta'
+                      : 'text-secondary hover:bg-gray-100 hover:text-primary'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-32 pb-16">
+      <main className="relative flex-1 w-full max-w-7xl mx-auto px-4 pt-10 pb-16">
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-8 border-t border-white/10 text-center text-sm text-gray-400">
-        &copy; {new Date().getFullYear()} 해커톤 허브 (Hackathon Hub). Vibe 코딩으로 제작되었습니다.
+      <footer className="w-full py-8 text-center text-sm text-tertiary">
+        &copy; {new Date().getFullYear()} Hackathon Hub. Built for monthly hackathon challenge.
       </footer>
     </div>
   );

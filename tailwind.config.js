@@ -7,15 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#1E293B",
-        secondary: "#334155",
-        cta: "#22C55E",
-        bg: "#0F172A",
-        text: "#F8FAFC",
+        primary: "#191F28",
+        secondary: "#4E5968",
+        tertiary: "#8B95A1",
+        cta: "#3182F6",
+        bg: "#F2F4F6",
+        surface: "#FFFFFF",
       },
       fontFamily: {
-        heading: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"DM Sans"', 'sans-serif'],
+        heading: ['Pretendard', 'sans-serif'],
+        body: ['Pretendard', 'sans-serif'],
       }
     },
   },

@@ -15,7 +15,7 @@ export function setupData() {
         title: detailData.title,
         sections: detailData.sections,
       },
-      ...detailData.extraDetails.map((extra: any) => ({
+      ...detailData.extraDetails.map((extra: { slug: string; title: string; sections: unknown }) => ({
         slug: extra.slug,
         title: extra.title,
         sections: extra.sections,
@@ -35,7 +35,7 @@ export function setupData() {
         updatedAt: leaderboardData.updatedAt,
         entries: leaderboardData.entries
       },
-      ...leaderboardData.extraLeaderboards.map((extra: any) => ({
+      ...leaderboardData.extraLeaderboards.map((extra: { hackathonSlug: string; updatedAt: string; entries: unknown[] }) => ({
         hackathonSlug: extra.hackathonSlug,
         updatedAt: extra.updatedAt,
         entries: extra.entries
@@ -46,5 +46,9 @@ export function setupData() {
 
   if (!localStorage.getItem('submissions')) {
     localStorage.setItem('submissions', JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem('team_invites')) {
+    localStorage.setItem('team_invites', JSON.stringify([]));
   }
 }

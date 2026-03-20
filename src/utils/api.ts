@@ -1,52 +1,85 @@
+import type {
+  Hackathon,
+  HackathonDetail,
+  Leaderboard,
+  Submission,
+  Team,
+  TeamInvite,
+} from '../types/models';
+
+function readFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeToStorage<T>(key: string, value: T) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
 export function getHackathons() {
-  const data = localStorage.getItem('hackathons');
-  return data ? JSON.parse(data) : [];
+  return readFromStorage<Hackathon[]>('hackathons', []);
 }
 
 export function getHackathonDetail(slug: string) {
-  const data = localStorage.getItem('hackathon_details');
-  if (!data) return null;
-  const parsed = JSON.parse(data);
-  return parsed.find((h: any) => h.slug === slug) || null;
+  const parsed = readFromStorage<HackathonDetail[]>('hackathon_details', []);
+  return parsed.find((h) => h.slug === slug) || null;
 }
 
 export function getTeams(hackathonSlug?: string) {
-  const data = localStorage.getItem('teams');
-  if (!data) return [];
-  const parsed = JSON.parse(data);
+  const parsed = readFromStorage<Team[]>('teams', []);
   if (hackathonSlug) {
-    return parsed.filter((t: any) => t.hackathonSlug === hackathonSlug);
+    return parsed.filter((t) => t.hackathonSlug === hackathonSlug);
   }
   return parsed;
 }
 
-export function addTeam(team: any) {
-  const data = localStorage.getItem('teams');
-  const parsed = data ? JSON.parse(data) : [];
+export function addTeam(team: Team) {
+  const parsed = readFromStorage<Team[]>('teams', []);
   parsed.push(team);
-  localStorage.setItem('teams', JSON.stringify(parsed));
+  writeToStorage('teams', parsed);
 }
 
 export function getLeaderboard(hackathonSlug: string) {
-  const data = localStorage.getItem('leaderboards');
-  if (!data) return null;
-  const parsed = JSON.parse(data);
-  return parsed.find((l: any) => l.hackathonSlug === hackathonSlug) || null;
+  const parsed = readFromStorage<Leaderboard[]>('leaderboards', []);
+  return parsed.find((l) => l.hackathonSlug === hackathonSlug) || null;
 }
 
 export function getAllLeaderboards() {
-  const data = localStorage.getItem('leaderboards');
-  return data ? JSON.parse(data) : [];
+  return readFromStorage<Leaderboard[]>('leaderboards', []);
 }
 
 export function getSubmissions() {
-  const data = localStorage.getItem('submissions');
-  return data ? JSON.parse(data) : [];
+  return readFromStorage<Submission[]>('submissions', []);
 }
 
-export function addSubmission(submission: any) {
-  const data = localStorage.getItem('submissions');
-  const parsed = data ? JSON.parse(data) : [];
+export function addSubmission(submission: Submission) {
+  const parsed = readFromStorage<Submission[]>('submissions', []);
   parsed.push(submission);
-  localStorage.setItem('submissions', JSON.stringify(parsed));
+  writeToStorage('submissions', parsed);
+}
+
+export function getInvites(hackathonSlug?: string) {
+  const parsed = readFromStorage<TeamInvite[]>('team_invites', []);
+  if (hackathonSlug) {
+    return parsed.filter((invite) => invite.hackathonSlug === hackathonSlug);
+  }
+  return parsed;
+}
+
+export function addInvite(invite: TeamInvite) {
+  const parsed = readFromStorage<TeamInvite[]>('team_invites', []);
+  parsed.push(invite);
+  writeToStorage('team_invites', parsed);
+}
+
+export function updateInviteStatus(id: number, status: TeamInvite['status']) {
+  const parsed = readFromStorage<TeamInvite[]>('team_invites', []);
+  const updated = parsed.map((invite) => (invite.id === id ? { ...invite, status } : invite));
+  writeToStorage('team_invites', updated);
+  return updated;
 }

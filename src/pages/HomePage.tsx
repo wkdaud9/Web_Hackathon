@@ -1,49 +1,53 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Rocket, Users, Trophy, ArrowRight } from 'lucide-react';
+import { Rocket, Users, Trophy, ChevronRight } from 'lucide-react';
 
 const MotionLink = motion(Link);
 
 export default function HomePage() {
   const cards = [
     {
-      title: "해커톤 탐색",
+      title: "해커톤 보러가기",
       description: "현재 진행 중이거나 오픈 예정인 해커톤을 확인하고 개발 실력을 뽐내보세요.",
-      icon: <Rocket className="w-12 h-12 text-blue-400" />,
+      icon: <Rocket className="w-10 h-10 text-cta" />,
       link: "/hackathons",
-      color: "from-blue-900/40 to-blue-600/10",
-      border: "hover:border-blue-500/50"
+      bgColor: "bg-white",
+      hoverRing: "hover:ring-1 hover:ring-cta/30"
     },
     {
-      title: "팀 모집 라운지",
+      title: "팀 찾기",
       description: "함께 아이디어를 실현할 드림팀을 찾거나 우수한 팀원들을 직접 모집해보세요.",
-      icon: <Users className="w-12 h-12 text-cta" />,
+      icon: <Users className="w-10 h-10 text-emerald-500" />,
       link: "/camp",
-      color: "from-green-900/40 to-green-600/10",
-      border: "hover:border-cta/50"
+      bgColor: "bg-white",
+      hoverRing: "hover:ring-1 hover:ring-emerald-500/30"
     },
     {
-      title: "명예의 전당",
+      title: "랭킹 보기",
       description: "글로벌 리더보드를 거쳐 치열한 개발 경연의 최종 승자와 결과물을 확인하세요.",
-      icon: <Trophy className="w-12 h-12 text-amber-400" />,
+      icon: <Trophy className="w-10 h-10 text-amber-500" />,
       link: "/rankings",
-      color: "from-amber-900/40 to-amber-600/10",
-      border: "hover:border-amber-500/50"
+      bgColor: "bg-white",
+      hoverRing: "hover:ring-1 hover:ring-amber-500/30"
     }
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] gap-12 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[72vh] gap-12 text-center">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-3xl pt-10"
+        className="max-w-3xl pt-8"
       >
-        <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent break-keep">
-          도전하고. 만들고. <br/> 증명하세요.
+        <h1 className="text-4xl md:text-6xl font-bold font-heading mb-6 tracking-tight text-primary break-keep leading-tight">
+          문서만 남은 프로젝트,
+          <br />
+          서비스로 완성하세요
         </h1>
-        <p className="text-xl text-gray-400 break-keep">
-          개발자와 기획자를 위한 최고의 해커톤 및 팀 빌딩 종합 플랫폼입니다.
+        <p className="text-lg md:text-xl text-secondary break-keep leading-relaxed font-medium">
+          해커톤 탐색부터 팀 빌딩, 제출 관리와 리더보드까지.
+          <br />
+          심사 기준을 통과할 수 있도록 핵심 흐름을 빠르게 점검하세요.
         </p>
       </motion.div>
 
@@ -55,20 +59,15 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -8, scale: 1.02 }}
-            className={`group relative p-8 rounded-3xl bg-gradient-to-br ${card.color} border border-white/5 ${card.border} transition-all duration-300 overflow-hidden text-left flex flex-col h-full`}
+            whileHover={{ y: -6, scale: 1.02 }}
+            className={`group relative p-8 rounded-[28px] ${card.bgColor} ${card.hoverRing} transition-all duration-300 overflow-hidden text-left flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]`}
           >
-            <div className="absolute -top-6 -right-6 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-               {/* background icon */}
-              <div className="scale-[3]">{card.icon}</div>
+            <div className="mb-6 bg-gray-50/50 inline-flex p-4 rounded-2xl">{card.icon}</div>
+            <h2 className="text-2xl font-bold font-heading mb-3 text-primary">{card.title}</h2>
+            <p className="text-secondary font-medium leading-relaxed mb-8 flex-1">{card.description}</p>
+            <div className="flex items-center text-sm font-bold text-tertiary group-hover:text-primary transition-colors mt-auto">
+              바로가기 <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
-            <div className="mb-6">{card.icon}</div>
-            <h2 className="text-2xl font-bold font-heading mb-3">{card.title}</h2>
-            <p className="text-gray-400 mb-8 flex-1">{card.description}</p>
-            <div className="flex items-center text-sm font-semibold text-white group-hover:text-cta transition-colors mt-auto">
-              바로가기 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </div>
-            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors pointer-events-none" />
           </MotionLink>
         ))}
       </div>
