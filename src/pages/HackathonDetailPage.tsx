@@ -29,7 +29,7 @@ export default function HackathonDetailPage() {
   if (!detail) {
     return <div className="text-center py-20 text-gray-500 flex flex-col items-center justify-center min-h-[50vh]">
       <div className="w-10 h-10 border-4 border-cta border-t-transparent rounded-full animate-spin mb-4"></div>
-      Loading details...
+      데이터를 불러오는 중입니다...
     </div>;
   }
 
@@ -51,19 +51,19 @@ export default function HackathonDetailPage() {
   };
 
   const tabs = [
-    { id: 'overview', label: '개요 (Overview)' },
-    { id: 'eval', label: '평가 (Eval)' },
-    { id: 'schedule', label: '일정 (Schedule)' },
-    { id: 'prize', label: '상금 (Prize)' },
-    { id: 'teams', label: '팀 현황 (Teams)' },
-    { id: 'submit', label: '결과 제출 (Submit)' },
-    { id: 'leaderboard', label: '리더보드 (Rank)' }
+    { id: 'overview', label: '해커톤 개요' },
+    { id: 'eval', label: '평가 기준' },
+    { id: 'schedule', label: '일정 안내' },
+    { id: 'prize', label: '상금 내역' },
+    { id: 'teams', label: '참여 팀 현황' },
+    { id: 'submit', label: '결과물 제출' },
+    { id: 'leaderboard', label: '현재 순위 (Rank)' }
   ];
 
   return (
     <div className="w-full">
       <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}} className="mb-8">
-        <Link to="/hackathons" className="text-sm font-bold text-gray-500 hover:text-white mb-2 inline-block transition-colors">&larr; Back to list</Link>
+        <Link to="/hackathons" className="text-sm font-bold text-gray-500 hover:text-white mb-2 inline-block transition-colors">&larr; 목록으로 돌아가기</Link>
         <h1 className="text-4xl md:text-5xl font-bold font-heading text-white mb-4 bg-clip-text truncate">{detail.title}</h1>
       </motion.div>
 
@@ -281,10 +281,10 @@ export default function HackathonDetailPage() {
                    <table className="w-full text-left border-collapse min-w-[600px]">
                      <thead>
                        <tr className="bg-secondary/50 text-gray-400 text-xs uppercase tracking-wider">
-                         <th className="py-4 px-6 font-semibold">Rank</th>
-                         <th className="py-4 px-6 font-semibold">Team Name</th>
-                         <th className="py-4 px-6 font-semibold text-right">Score</th>
-                         <th className="py-4 px-6 font-semibold text-right">Submitted At</th>
+                         <th className="py-4 px-6 font-semibold">순위</th>
+                         <th className="py-4 px-6 font-semibold">팀명</th>
+                         <th className="py-4 px-6 font-semibold text-right">최종 점수</th>
+                         <th className="py-4 px-6 font-semibold text-right">제출 일자</th>
                        </tr>
                      </thead>
                      <tbody className="bg-primary/20 divide-y divide-white/5">

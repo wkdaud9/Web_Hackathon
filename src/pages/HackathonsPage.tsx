@@ -41,9 +41,9 @@ export default function HackathonsPage() {
             animate={{ opacity: 1, x: 0 }}
             className="text-4xl font-bold font-heading mb-2 text-white"
           >
-            Explore Hackathons
+            해커톤 탐색
           </motion.h1>
-          <p className="text-gray-400">Discover coding challenges to elevate your career.</p>
+          <p className="text-gray-400">당신의 커리어를 한 단계 성장시킬 코딩 챌린지를 만나보세요.</p>
         </div>
         
         {/* Filters */}
@@ -56,7 +56,7 @@ export default function HackathonsPage() {
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
              <input 
                type="text"
-               placeholder="Search..."
+               placeholder="검색어 입력..."
                className="w-full bg-secondary/50 text-white rounded-xl py-2 pl-9 pr-4 outline-none border border-transparent focus:border-cta/50 transition-colors"
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
@@ -69,17 +69,17 @@ export default function HackathonsPage() {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
-              <option value="all">All Status</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="ended">Ended</option>
+              <option value="all">상태 전체</option>
+              <option value="ongoing">진행 중</option>
+              <option value="upcoming">시작 전</option>
+              <option value="ended">종료됨</option>
             </select>
             <select 
               className="bg-secondary/50 text-white rounded-xl px-3 py-2 outline-none border border-transparent focus:border-cta/50 appearance-none min-w-[100px]"
               value={filterTag}
               onChange={(e) => setFilterTag(e.target.value)}
             >
-              <option value="all">All Tags</option>
+              <option value="all">태그 전체</option>
               {allTags.map(t => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -146,7 +146,7 @@ export default function HackathonsPage() {
                   to={`/hackathons/${hackathon.slug}`}
                   className="mt-6 w-full py-3 bg-white/5 hover:bg-cta hover:text-black rounded-xl text-center text-sm font-semibold transition-colors duration-300"
                 >
-                  View Details
+                  상세 보기
                 </Link>
               </div>
             </motion.div>
@@ -157,7 +157,7 @@ export default function HackathonsPage() {
       {filtered.length === 0 && (
         <div className="py-20 text-center text-gray-500">
           <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p className="text-lg">No hackathons found matching your criteria.</p>
+          <p className="text-lg">조건에 맞는 해커톤을 찾을 수 없습니다.</p>
         </div>
       )}
     </div>

@@ -24,9 +24,9 @@ export default function RankingsPage() {
         <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}}>
           <h1 className="text-4xl md:text-5xl font-bold font-heading text-white mb-2 flex items-center gap-3">
             <Trophy className="w-10 h-10 text-amber-400" />
-            Hall of Fame
+            명예의 전당
           </h1>
-          <p className="text-gray-400">명예의 전당. 해커톤별 리더보드를 확인하세요.</p>
+          <p className="text-gray-400">치열한 경쟁의 글로벌 해커톤 리더보드를 확인하세요.</p>
         </motion.div>
         
         <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}}>

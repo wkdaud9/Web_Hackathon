@@ -49,7 +49,7 @@ export default function CampPage() {
     <div className="w-full relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}}>
-          <h1 className="text-4xl md:text-5xl font-bold font-heading text-white mb-2">Team Camp</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-heading text-white mb-2">팀 모집 라운지</h1>
           <p className="text-gray-400">
             {hackathonSlugParam ? '이 해커톤에 참여할 팀을 찾거나 모집해보세요!' : '모든 해커톤의 팀 빌딩 라운지입니다.'}
           </p>
@@ -180,7 +180,7 @@ export default function CampPage() {
                 <div className="space-y-4 mt-auto">
                   {team.lookingFor?.length > 0 && (
                     <div>
-                      <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider block mb-2">Looking for</span>
+                      <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider block mb-2">모집 포지션</span>
                       <div className="flex flex-wrap gap-2">
                         {team.lookingFor.map((role:string) => (
                           <span key={role} className="px-2 py-1 bg-white/10 text-white rounded-md text-xs font-medium">

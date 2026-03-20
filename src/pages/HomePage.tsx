@@ -7,24 +7,24 @@ const MotionLink = motion(Link);
 export default function HomePage() {
   const cards = [
     {
-      title: "Hackathons",
-      description: "Explore ongoing and upcoming hackathons to showcase your skills.",
+      title: "해커톤 탐색",
+      description: "현재 진행 중이거나 오픈 예정인 해커톤을 확인하고 개발 실력을 뽐내보세요.",
       icon: <Rocket className="w-12 h-12 text-blue-400" />,
       link: "/hackathons",
       color: "from-blue-900/40 to-blue-600/10",
       border: "hover:border-blue-500/50"
     },
     {
-      title: "Team Camp",
-      description: "Find your dream team or recruit top talents for your project.",
+      title: "팀 모집 라운지",
+      description: "함께 아이디어를 실현할 드림팀을 찾거나 우수한 팀원들을 직접 모집해보세요.",
       icon: <Users className="w-12 h-12 text-cta" />,
       link: "/camp",
       color: "from-green-900/40 to-green-600/10",
       border: "hover:border-cta/50"
     },
     {
-      title: "Rankings",
-      description: "Check the global leaderboard and see who's dominating.",
+      title: "명예의 전당",
+      description: "글로벌 리더보드를 거쳐 치열한 개발 경연의 최종 승자와 결과물을 확인하세요.",
       icon: <Trophy className="w-12 h-12 text-amber-400" />,
       link: "/rankings",
       color: "from-amber-900/40 to-amber-600/10",
@@ -39,11 +39,11 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-3xl pt-10"
       >
-        <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-          Innovate. Build. <br/> Conquer.
+        <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 tracking-tight bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent break-keep">
+          도전하고. 만들고. <br/> 증명하세요.
         </h1>
-        <p className="text-xl text-gray-400">
-          The ultimate platform for developer hackathons and team building.
+        <p className="text-xl text-gray-400 break-keep">
+          개발자와 기획자를 위한 최고의 해커톤 및 팀 빌딩 종합 플랫폼입니다.
         </p>
       </motion.div>
 
@@ -65,8 +65,8 @@ export default function HomePage() {
             <div className="mb-6">{card.icon}</div>
             <h2 className="text-2xl font-bold font-heading mb-3">{card.title}</h2>
             <p className="text-gray-400 mb-8 flex-1">{card.description}</p>
-            <div className="flex items-center text-sm font-semibold text-white group-hover:text-cta transition-colors">
-              Explore <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <div className="flex items-center text-sm font-semibold text-white group-hover:text-cta transition-colors mt-auto">
+              바로가기 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </div>
             <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors pointer-events-none" />
           </MotionLink>
