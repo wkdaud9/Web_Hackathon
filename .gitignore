@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Security and Custom Local Files
+.env
+.env.*
+!.env.example
+.agent/
+.temp-vite/
