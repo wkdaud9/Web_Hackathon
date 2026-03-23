@@ -59,10 +59,10 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            whileHover={{ y: -6, scale: 1.02 }}
+            whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.15, ease: "easeOut" } }}
             className={`group relative p-8 rounded-[28px] ${card.bgColor} ${card.hoverRing} transition-all duration-300 overflow-hidden text-left flex flex-col h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]`}
           >
-            <div className="mb-6 bg-gray-50/50 inline-flex p-4 rounded-2xl">{card.icon}</div>
+            <div className="mb-6 inline-flex text-white">{card.icon}</div>
             <h2 className="text-2xl font-bold font-heading mb-3 text-primary">{card.title}</h2>
             <p className="text-secondary font-medium leading-relaxed mb-8 flex-1">{card.description}</p>
             <div className="flex items-center text-sm font-bold text-tertiary group-hover:text-primary transition-colors mt-auto">

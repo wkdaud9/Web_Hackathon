@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 import {
   getHackathonDetail,
   getTeams,
@@ -11,6 +12,7 @@ import {
   addInvite,
   updateInviteStatus,
 } from '../utils/api';
+import TeamDetailModal from '../components/TeamDetailModal';
 import type {
   HackathonDetail,
   Leaderboard,
@@ -31,14 +33,17 @@ export default function HackathonDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { currentUser } = useAuth();
+  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+
   const [submitNotes, setSubmitNotes] = useState('');
   const [submitFile, setSubmitFile] = useState('');
   const [submitFileName, setSubmitFileName] = useState('');
   const [submitTeamName, setSubmitTeamName] = useState('');
 
-  const [inviteApplicantName, setInviteApplicantName] = useState('');
   const [inviteTeamCode, setInviteTeamCode] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -72,18 +77,18 @@ export default function HackathonDetailPage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleSection = entries.reduce((prev, current) => {
-          return (current.intersectionRatio > prev.intersectionRatio) ? current : prev;
-        });
-
-        if (visibleSection.isIntersecting && visibleSection.intersectionRatio > 0.5) {
-          const id = visibleSection.target.getAttribute('data-section-id');
-          if (id && id !== activeTab) {
-            setActiveTab(id);
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('data-section-id');
+            if (id && id !== activeTab) {
+              setActiveTab(id);
+            }
           }
-        }
+        });
       },
-      { root: scrollContainerRef.current, threshold: 0.6 }
+      // rootMargin: 상단에서 20% 내려온 지점부터 하단에서 60% 올라온 지점까지의 "센서 영역"을 만듭니다.
+      // 이 센서 영역에 카드가 들어오면 entry.isIntersecting이 단번에 true가 됩니다.
+      { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 }
     );
 
     Object.values(sectionRefs.current).forEach((el) => {
@@ -93,52 +98,13 @@ export default function HackathonDetailPage() {
     return () => observer.disconnect();
   }, [loading, error, detail, activeTab]);
 
-  // 유저가 제시한 브라우저 수직 휠 입력을 가로 스크롤로 완벽 직접 연결(Bridge)
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const onWheel = (e: WheelEvent) => {
-      // 상하 휠에만 반응하도록 조치
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        
-        // 1. 카드 내부에서 내부 스크롤이 우선 동작하도록 보장하는 로직
-        let target = e.target as HTMLElement | null;
-        let canScrollVertically = false;
-        
-        while (target && target !== container) {
-          const overflowY = window.getComputedStyle(target).overflowY;
-          if ((overflowY === 'auto' || overflowY === 'scroll') && target.scrollHeight > target.clientHeight) {
-            const isAtTop = target.scrollTop <= 0;
-            const isAtBottom = Math.ceil(target.scrollTop + target.clientHeight) >= (target.scrollHeight - 2); // 2px 여유 (유저 제시 반영)
-            if (e.deltaY > 0 && !isAtBottom) { canScrollVertically = true; break; }
-            if (e.deltaY < 0 && !isAtTop) { canScrollVertically = true; break; }
-          }
-          target = target.parentElement;
-        }
-
-        if (canScrollVertically) return;
-
-        // 2. 가로 스크롤로 다이렉트 매핑 (유저 제시 Bridge 로직 반영)
-        e.preventDefault(); 
-        
-        // CSS scrollBehavior smooth를 아까 뺐으므로 직접 매핑이 정상 동작함
-        // snap-x mandatory 속성과 결합되어, 스크롤 후 자동으로 목적지에 안착함
-        container.scrollLeft += e.deltaY;
-      }
-    };
-
-    container.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      container.removeEventListener('wheel', onWheel);
-    };
-  }, []);
+  // 가로 스크롤 관련 wheel 이벤트를 제거하고 수직 배치로 원복합니다.
 
   const scrollToSection = (id: string) => {
     setActiveTab(id);
     const element = sectionRefs.current[id];
-    if (element && scrollContainerRef.current) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -160,13 +126,13 @@ export default function HackathonDetailPage() {
 
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!slug || !inviteTeamCode || !inviteApplicantName.trim()) return;
+    if (!slug || !inviteTeamCode || !currentUser) return;
 
     const newInvite: TeamInvite = {
       id: Date.now(),
       hackathonSlug: slug,
       teamCode: inviteTeamCode,
-      applicantName: inviteApplicantName.trim(),
+      applicantName: currentUser.nickname,
       message: inviteMessage.trim(),
       status: 'pending',
       createdAt: new Date().toISOString(),
@@ -174,7 +140,6 @@ export default function HackathonDetailPage() {
 
     addInvite(newInvite);
     setInvites((prev) => [...prev, newInvite]);
-    setInviteApplicantName('');
     setInviteTeamCode('');
     setInviteMessage('');
   };
@@ -251,36 +216,61 @@ export default function HackathonDetailPage() {
         <h1 className="text-3xl md:text-5xl font-bold font-heading text-primary mb-4 truncate tracking-tight">{detail.title}</h1>
       </motion.div>
 
-      {/* Tabs Menu (Sticky) */}
-      <div className="sticky top-[80px] z-30 bg-[#F2F4F6]/90 backdrop-blur-md pt-4 border-b border-gray-200 pb-3 mb-6">
-        <div className="flex flex-nowrap overflow-x-auto gap-2 scrollbar-hide">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => scrollToSection(tab.id)}
-              className={`px-5 py-3 rounded-[16px] text-[15px] font-bold transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab.id ? 'bg-primary text-white shadow-md' : 'bg-transparent text-tertiary hover:bg-white hover:text-primary hover:shadow-sm'
-                }`}
-              >
-                {tab.label}
-            </button>
-          ))}
+      {/* 2-Column Layout */}
+      <div className="flex flex-col lg:flex-row gap-10 items-start relative pb-20">
+        
+        {/* Left Sidebar Navigation (Desktop Only) */}
+        <div className="hidden lg:flex flex-col sticky top-[100px] w-64 flex-shrink-0 bg-white p-4 rounded-[24px] border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] z-30">
+          <h3 className="text-[14px] font-bold text-tertiary mb-3 px-3">빠른 이동</h3>
+          <div className="flex flex-col gap-1.5">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => scrollToSection(tab.id)}
+                className={`text-left px-5 py-3.5 rounded-[16px] text-[15px] font-bold transition-all duration-200 ${
+                    activeTab === tab.id ? 'bg-primary text-white shadow-md' : 'bg-transparent text-secondary hover:bg-gray-50 hover:text-primary'
+                  }`}
+                >
+                  {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Horizontal Scroll Snap Container */}
-      <div 
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-10 pt-4"
-      >
+        {/* Mobile Top Bar (Hidden on Desktop) */}
+        <div className="lg:hidden sticky top-[64px] z-30 w-full min-w-0 bg-[#F2F4F6]/95 backdrop-blur-md pt-5 border-b border-gray-200 pb-3 mb-6">
+          <div className="w-full overflow-x-auto scrollbar-hide py-1">
+            <div className="flex flex-nowrap gap-2 w-max px-1">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => scrollToSection(tab.id)}
+                  className={`flex-shrink-0 px-5 py-2.5 rounded-[14px] text-[14px] font-bold transition-all duration-200 whitespace-nowrap ${
+                      activeTab === tab.id ? 'bg-primary text-white shadow-md' : 'bg-transparent text-tertiary hover:bg-white hover:text-primary hover:shadow-sm'
+                    }`}
+                  >
+                    {tab.label}
+                </button>
+              ))}
+              {/* 우측 끝 여백을 줘서 마지막 아이템 그림자나 컨텐츠가 잘리지 않게 함 */}
+              <div className="w-2 flex-shrink-0"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Content Area (Vertical Flow) */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 flex flex-col gap-10 w-full min-w-0"
+        >
         {tabs.map(tab => (
           <div 
             key={tab.id} 
             data-section-id={tab.id}
             ref={(el) => { sectionRefs.current[tab.id] = el; }}
-            className="w-full flex-shrink-0 snap-center snap-always px-4 md:px-0"
+            className="w-full px-4 md:px-0 scroll-mt-32"
           >
-            <div className="bg-white p-6 md:p-10 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mx-auto w-full max-w-[900px] max-h-[75vh] overflow-y-auto scrollbar-hide">
+            <div className="bg-white p-6 md:p-12 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mx-auto w-full max-w-[900px]">
               {tab.id === 'overview' && (
                 <div className="relative">
                    <h2 className="text-2xl font-bold font-heading mb-6 text-primary flex items-center gap-3">
@@ -359,10 +349,19 @@ export default function HackathonDetailPage() {
               {tab.id === 'teams' && (
                 <div className="relative">
                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
-                      <h2 className="text-2xl font-bold font-heading text-primary flex items-center gap-3">
-                        <span className="w-1.5 h-6 bg-cta rounded-full"></span> 참여/모집 팀 ({teams.length})
-                      </h2>
-                      <Link to={`/camp?hackathon=${slug}`} className="px-6 py-3.5 bg-cta text-white rounded-[16px] font-bold hover:bg-blue-600 transition-colors shadow-[0_8px_20px_rgba(49,130,246,0.3)] flex items-center gap-2 w-fit">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold font-heading text-primary flex items-center gap-3">
+                          <span className="w-1.5 h-6 bg-cta rounded-full"></span> 참여/모집 팀 ({teams.length})
+                        </h2>
+                        <button 
+                          onClick={() => setIsNoticeOpen(true)}
+                          className="w-6 h-6 rounded-full bg-blue-50 text-cta flex items-center justify-center font-bold text-[12px] hover:bg-blue-100 transition-colors shadow-sm"
+                          title="팀 구성 유의사항"
+                        >
+                          ?
+                        </button>
+                      </div>
+                      <Link to={`/camp?hackathon=${slug}&new=true`} className="px-6 py-3.5 bg-cta text-white rounded-[16px] font-bold hover:bg-blue-600 transition-colors shadow-[0_8px_20px_rgba(49,130,246,0.3)] flex items-center justify-center gap-2 w-full sm:w-fit">
                         + 팀 모집글 등록
                       </Link>
                     </div>
@@ -374,18 +373,15 @@ export default function HackathonDetailPage() {
                       </div>
                     ) : (
                       <div className="space-y-8">
-                        <form onSubmit={handleInviteSubmit} className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-5">
-                          <div className="md:col-span-3">
-                            <h3 className="font-bold text-primary mb-4 text-[17px]">팀 합류 신청하기</h3>
+                        <form onSubmit={handleInviteSubmit} className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5 relative overflow-hidden">
+                          {!currentUser && (
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[24px]">
+                              <p className="font-bold text-primary mb-3 text-lg">팀 지원은 로그인 후 가능합니다.</p>
+                            </div>
+                          )}
+                          <div className="md:col-span-2">
+                            <h3 className="font-bold text-primary mb-2 text-[17px]">팀 합류 신청하기</h3>
                           </div>
-                          <input
-                            type="text"
-                            value={inviteApplicantName}
-                            onChange={(e) => setInviteApplicantName(e.target.value)}
-                            placeholder="신청자 이름"
-                            className="bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary"
-                            required
-                          />
                           <select
                             value={inviteTeamCode}
                             onChange={(e) => setInviteTeamCode(e.target.value)}
@@ -406,7 +402,7 @@ export default function HackathonDetailPage() {
                             value={inviteMessage}
                             onChange={(e) => setInviteMessage(e.target.value)}
                             placeholder="간단한 소개/포지션 (선택)"
-                            className="md:col-span-3 bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary"
+                            className="md:col-span-2 bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary"
                           />
                         </form>
 
@@ -418,8 +414,10 @@ export default function HackathonDetailPage() {
                             return (
                               <div key={t.teamCode} className="bg-white p-6 rounded-[24px] border border-gray-100 hover:border-cta/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all flex flex-col h-full">
                                 <div className="flex justify-between items-start mb-3">
-                                  <h3 className="font-bold text-[18px] text-primary group-hover:text-cta">{t.name}</h3>
-                                  <span className="bg-gray-50 px-2.5 py-1 rounded-lg text-[12px] font-bold font-mono text-tertiary border border-gray-100">
+                                  <button onClick={() => setSelectedTeam(t)} className="font-bold text-[18px] text-primary hover:text-cta transition-colors text-left">
+                                    {t.name}
+                                  </button>
+                                  <span className="bg-gray-50 px-2.5 py-1 rounded-lg text-[12px] font-bold font-mono text-tertiary border border-gray-100 shrink-0">
                                     <span className="text-primary">{t.memberCount}</span> MBRS
                                   </span>
                                 </div>
@@ -427,47 +425,60 @@ export default function HackathonDetailPage() {
                                 <div className="flex flex-wrap gap-1.5 mb-5">
                                   {t.lookingFor?.map((role) => <span key={role} className="text-[12px] font-bold text-cta bg-blue-50 px-2 py-0.5 rounded-md">#{role}</span>)}
                                 </div>
-                                <div className="text-[13px] font-bold text-tertiary mb-3 flex items-center justify-between border-t border-gray-100 pt-4">
-                                  <span>대기 중 신청</span>
-                                  <span className="bg-blue-50 text-cta px-2 rounded-full">{pendingCount}</span>
-                                </div>
+                                {currentUser?.nickname === t.leaderName && (
+                                  <>
+                                    <div className="flex gap-2 mb-4 mt-1">
+                                      <button 
+                                        type="button"
+                                        onClick={() => alert(`[${t.name}] 팀원으로 초대할 유저를 선택하는 기능은 준비중입니다.`)} 
+                                        className="w-full py-2 rounded-xl bg-gray-50 text-primary font-bold hover:bg-gray-100 transition-colors text-[13px] border border-gray-200"
+                                      >
+                                        + 새로운 팀원 초대하기
+                                      </button>
+                                    </div>
+                                    <div className="text-[13px] font-bold text-tertiary mb-3 flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
+                                      <span>내가 방장인 팀: 대기 중 신청</span>
+                                      <span className="bg-blue-50 text-cta px-2 rounded-full">{pendingCount}</span>
+                                    </div>
 
-                                <div className="space-y-2.5">
-                                  {invites
-                                    .filter((invite) => invite.teamCode === t.teamCode)
-                                    .slice()
-                                    .reverse()
-                                    .slice(0, 3)
-                                    .map((invite) => (
-                                      <div key={invite.id} className="bg-gray-50 border border-gray-100 rounded-[12px] p-3.5 text-[13px]">
-                                        <div className="flex justify-between font-bold mb-1.5">
-                                          <span className="text-primary">{invite.applicantName}</span>
-                                          <span className={invite.status === 'pending' ? 'text-orange-500' : invite.status === 'accepted' ? 'text-emerald-500' : 'text-gray-400'}>{
-                                            invite.status === 'pending' ? '대기 중' : invite.status === 'accepted' ? '수락됨' : '거절됨'
-                                          }</span>
-                                        </div>
-                                        {invite.message && <div className="text-secondary font-medium mb-3 mt-1 bg-white p-2 rounded-lg border border-gray-100">{invite.message}</div>}
-                                        {invite.status === 'pending' && (
-                                          <div className="flex gap-2.5 mt-2">
-                                            <button
-                                              type="button"
-                                              onClick={() => handleInviteStatusChange(invite.id, 'accepted')}
-                                              className="flex-1 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-colors"
-                                            >
-                                              수락
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => handleInviteStatusChange(invite.id, 'rejected')}
-                                              className="flex-1 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors"
-                                            >
-                                              거절
-                                            </button>
+                                    <div className="space-y-2.5">
+                                      {invites
+                                        .filter((invite) => invite.teamCode === t.teamCode)
+                                        .slice()
+                                        .reverse()
+                                        .slice(0, 3)
+                                        .map((invite) => (
+                                          <div key={invite.id} className="bg-gray-50 border border-gray-100 rounded-[12px] p-3.5 text-[13px]">
+                                            <div className="flex justify-between font-bold mb-1.5">
+                                              <span className="text-primary">{invite.applicantName}</span>
+                                              <span className={invite.status === 'pending' ? 'text-orange-500' : invite.status === 'accepted' ? 'text-emerald-500' : 'text-gray-400'}>{
+                                                invite.status === 'pending' ? '대기 중' : invite.status === 'accepted' ? '수락됨' : '거절됨'
+                                              }</span>
+                                            </div>
+                                            {invite.message && <div className="text-secondary font-medium mb-3 mt-1 bg-white p-2 rounded-lg border border-gray-100">{invite.message}</div>}
+                                            {invite.status === 'pending' && (
+                                              <div className="flex gap-2.5 mt-2">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleInviteStatusChange(invite.id, 'accepted')}
+                                                  className="flex-1 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-colors"
+                                                >
+                                                  수락
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleInviteStatusChange(invite.id, 'rejected')}
+                                                  className="flex-1 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors"
+                                                >
+                                                  거절
+                                                </button>
+                                              </div>
+                                            )}
                                           </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             );
                           })}
@@ -490,7 +501,12 @@ export default function HackathonDetailPage() {
                       </ul>
                     </div>
                    
-                    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-gray-50/50 p-6 md:p-8 rounded-[32px] border border-gray-200 w-full">
+                    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-gray-50/50 p-6 md:p-8 rounded-[32px] border border-gray-200 w-full relative overflow-hidden">
+                      {!currentUser && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[32px]">
+                          <p className="font-bold text-primary mb-3 text-lg">결과물 제출은 로그인 후 가능합니다.</p>
+                        </div>
+                      )}
                       <div>
                         <label className="block text-[15px] font-bold text-primary mb-2.5">팀명</label>
                         <input
@@ -514,7 +530,7 @@ export default function HackathonDetailPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-[15px] font-bold text-primary mb-2.5">파일 업로드 (zip/pdf 등)</label>
+                        <label className="block text-[15px] font-bold text-primary mb-2.5">파일 업로드 (zip, pdf, txt, md)</label>
                         <div className="relative">
                           <input
                             type="file"
@@ -527,7 +543,7 @@ export default function HackathonDetailPage() {
                      <div>
                        <label className="block text-[15px] font-bold text-primary mb-2.5">설명 메시지 (선택)</label>
                        <textarea 
-                          className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-4 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-40 resize-none placeholder:text-tertiary leading-[1.7]"
+                          className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-4 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary leading-[1.7]"
                          placeholder="심사위원이 확인할 참고 사항이나 서비스 소개를 남겨주세요."
                          value={submitNotes}
                          onChange={(e) => setSubmitNotes(e.target.value)}
@@ -570,6 +586,20 @@ export default function HackathonDetailPage() {
                    <h2 className="text-2xl font-bold font-heading mb-4 text-primary flex items-center gap-3">
                       <span className="w-1.5 h-6 bg-cta rounded-full"></span> 리더보드
                     </h2>
+                    
+                   {detail.sections?.eval?.scoreDisplay && (
+                     <div className="bg-blue-50/50 p-5 rounded-[20px] mb-8 border border-blue-100 flex items-start gap-4 shadow-sm max-w-3xl">
+                       <div className="text-2xl mt-1">🧮</div>
+                       <div>
+                         <h4 className="font-bold text-primary mb-1">점수 산정 방식 안내</h4>
+                         <p className="text-[14px] text-secondary font-medium leading-relaxed">
+                           최종 점수는 <strong>{detail.sections.eval.scoreDisplay.label}</strong> 기준에 따라 산정됩니다. 
+                           ({detail.sections.eval.scoreDisplay.breakdown?.map(b => `${b.label} ${b.weightPercent}%`).join(', ')})
+                         </p>
+                       </div>
+                     </div>
+                   )}
+
                    <p className="text-secondary font-medium mb-10 max-w-3xl leading-relaxed text-[16px]">{detail.sections?.leaderboard?.note}</p>
                    
                    {!leaderboard || !leaderboard.entries || leaderboard.entries.length === 0 ? (
@@ -641,7 +671,45 @@ export default function HackathonDetailPage() {
             </div>
           </div>
         ))}
+        </div>
       </div>
+
+      <AnimatePresence>
+        {isNoticeOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsNoticeOpen(false)}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[28px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100"
+            >
+              <h3 className="text-xl font-bold font-heading text-primary mb-4 flex items-center gap-2">
+                <span className="text-cta">💡</span> 팀 구성 유의사항
+              </h3>
+              <ul className="space-y-3 text-secondary text-[15px] font-medium leading-relaxed mb-8">
+                <li className="flex gap-2.5"><span className="text-cta font-bold">&middot;</span> 각 해커톤 규정에 명시된 최대 인원 수를 초과할 수 없습니다.</li>
+                <li className="flex gap-2.5"><span className="text-cta font-bold">&middot;</span> 한 사용자는 동시에 같은 해커톤의 여러 팀에 소속될 수 없습니다.</li>
+                <li className="flex gap-2.5"><span className="text-cta font-bold">&middot;</span> 제출된 팀명은 수정이 불가능하니 신중하게 결정해주세요.</li>
+              </ul>
+              <button
+                onClick={() => setIsNoticeOpen(false)}
+                className="w-full py-3.5 bg-gray-100 text-primary font-bold rounded-[16px] hover:bg-gray-200 transition-colors"
+              >
+                확인
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <TeamDetailModal isOpen={!!selectedTeam} onClose={() => setSelectedTeam(null)} team={selectedTeam} />
     </div>
   );
 }

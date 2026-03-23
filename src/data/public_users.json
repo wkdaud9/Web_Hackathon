@@ -1,0 +1,52 @@
+[
+  {
+    "id": "usr_1001",
+    "loginId": "test1",
+    "password": "123",
+    "nickname": "최파운드",
+    "email": "pound@example.com",
+    "points": 1450,
+    "createdAt": "2026-01-01T10:00:00Z",
+    "isProfilePublic": true
+  },
+  {
+    "id": "usr_1002",
+    "loginId": "test2",
+    "password": "123",
+    "nickname": "김로직",
+    "email": "logic@example.com",
+    "points": 1200,
+    "createdAt": "2026-01-05T12:00:00Z",
+    "isProfilePublic": true
+  },
+  {
+    "id": "usr_1003",
+    "loginId": "test3",
+    "password": "123",
+    "nickname": "이서버",
+    "email": "server@example.com",
+    "points": 950,
+    "createdAt": "2026-01-15T09:30:00Z",
+    "isProfilePublic": true
+  },
+  {
+    "id": "usr_1004",
+    "loginId": "test4",
+    "password": "123",
+    "nickname": "박설계",
+    "email": "arch@example.com",
+    "points": 1800,
+    "createdAt": "2025-11-20T14:20:00Z",
+    "isProfilePublic": true
+  },
+  {
+    "id": "usr_1005",
+    "loginId": "test5",
+    "password": "123",
+    "nickname": "정프론트",
+    "email": null,
+    "points": 800,
+    "createdAt": "2026-02-10T16:45:00Z",
+    "isProfilePublic": false
+  }
+]

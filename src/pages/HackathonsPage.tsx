@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Calendar, Users, Target, Search, Filter } from 'lucide-react';
+import Dropdown from '../components/Dropdown';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
+import EmptyState from '../components/ui/EmptyState';
 import { getHackathons, getTeams } from '../utils/api';
 import type { Hackathon, Team } from '../types/models';
 
@@ -44,35 +48,33 @@ export default function HackathonsPage() {
   }, [hackathons]);
 
   const filtered = useMemo(() => {
-    return hackathons.filter((h) => {
-      const matchStatus = filterStatus === 'all' || h.status === filterStatus;
-      const matchTag = filterTag === 'all' || h.tags?.includes(filterTag);
-      const matchQuery = (h.title || '').toLowerCase().includes(searchQuery.toLowerCase());
-      return matchStatus && matchTag && matchQuery;
-    });
+    const STATUS_ORDER: Record<string, number> = { 'ongoing': 1, 'upcoming': 2, 'ended': 3 };
+
+    return hackathons
+      .filter((h) => {
+        const matchStatus = filterStatus === 'all' || h.status === filterStatus;
+        const matchTag = filterTag === 'all' || h.tags?.includes(filterTag);
+        const matchQuery = (h.title || '').toLowerCase().includes(searchQuery.toLowerCase());
+        return matchStatus && matchTag && matchQuery;
+      })
+      .sort((a, b) => {
+        const orderA = STATUS_ORDER[a.status] || 99;
+        const orderB = STATUS_ORDER[b.status] || 99;
+        return orderA - orderB;
+      });
   }, [hackathons, filterStatus, filterTag, searchQuery]);
 
-  if (loading) {
-    return (
-      <div className="py-20 text-center text-secondary bg-white rounded-[24px] shadow-sm">
-        데이터를 불러오는 중입니다...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="py-20 text-center text-red-500 bg-red-50 rounded-[24px] border border-red-100">
-        {error}
-      </div>
-    );
-  }
-
+  if (loading) return <LoadingSpinner />;
+  
+  if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
+  
   if (hackathons.length === 0) {
     return (
-      <div className="py-20 text-center text-tertiary border border-dashed border-gray-300 rounded-[24px] bg-white">
-        등록된 해커톤이 없습니다.
-      </div>
+      <EmptyState
+        icon={<Target className="w-8 h-8" />}
+        title="등록된 해커톤 없음"
+        description="현재 등록된 해커톤이 없습니다."
+      />
     );
   }
 
@@ -106,28 +108,28 @@ export default function HackathonsPage() {
                onChange={(e) => setSearchQuery(e.target.value)}
              />
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <Filter className="w-4 h-4 text-tertiary hidden sm:block" />
-            <select 
-              className="w-full sm:w-auto bg-gray-50 text-primary font-medium rounded-xl px-4 py-2.5 outline-none border border-transparent focus:bg-white focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+            <Dropdown
+              className="w-full sm:w-36 flex-shrink-0"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">상태 전체</option>
-              <option value="ongoing">진행 중</option>
-              <option value="upcoming">시작 전</option>
-              <option value="ended">종료됨</option>
-            </select>
-            <select 
-              className="w-full sm:w-auto bg-gray-50 text-primary font-medium rounded-xl px-4 py-2.5 outline-none border border-transparent focus:bg-white focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer"
+              onChange={(val) => setFilterStatus(val)}
+              options={[
+                { label: '상태 전체', value: 'all' },
+                { label: '진행 중', value: 'ongoing' },
+                { label: '시작 전', value: 'upcoming' },
+                { label: '종료됨', value: 'ended' },
+              ]}
+            />
+            <Dropdown
+              className="w-full sm:w-36 flex-shrink-0"
               value={filterTag}
-              onChange={(e) => setFilterTag(e.target.value)}
-            >
-              <option value="all">태그 전체</option>
-              {allTags.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+              onChange={(val) => setFilterTag(val)}
+              options={[
+                { label: '태그 전체', value: 'all' },
+                ...allTags.map(t => ({ label: t, value: t }))
+              ]}
+            />
           </div>
         </motion.div>
       </div>
@@ -202,10 +204,12 @@ export default function HackathonsPage() {
       </div>
       
       {filtered.length === 0 && (
-        <div className="py-20 text-center text-tertiary border border-dashed border-gray-200 rounded-[24px] bg-white shadow-sm">
-          <Target className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-medium">조건에 맞는 해커톤을 찾을 수 없습니다.</p>
-        </div>
+        <EmptyState
+          icon={<Search className="w-8 h-8" />}
+          title="검색 결과 없음"
+          description="조건에 맞는 해커톤을 찾을 수 없습니다."
+          className="mt-8"
+        />
       )}
     </div>
   );

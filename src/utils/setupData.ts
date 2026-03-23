@@ -2,10 +2,30 @@ import hackathonsData from '../data/public_hackathons.json';
 import detailData from '../data/public_hackathon_detail.json';
 import teamsData from '../data/public_teams.json';
 import leaderboardData from '../data/public_leaderboard.json';
+import usersData from '../data/public_users.json';
 
 export function setupData() {
-  if (!localStorage.getItem('hackathons')) {
+  const existingHackathons = localStorage.getItem('hackathons');
+  if (!existingHackathons) {
     localStorage.setItem('hackathons', JSON.stringify(hackathonsData));
+  } else {
+    try {
+      let parsed = JSON.parse(existingHackathons);
+      let updated = false;
+      parsed = parsed.map((h: any) => {
+        const dummy = hackathonsData.find((d: any) => d.slug === h.slug);
+        if (dummy && dummy.description && !h.description) {
+          updated = true;
+          return { ...h, description: dummy.description };
+        }
+        return h;
+      });
+      if (updated) {
+        localStorage.setItem('hackathons', JSON.stringify(parsed));
+      }
+    } catch {
+      localStorage.setItem('hackathons', JSON.stringify(hackathonsData));
+    }
   }
   
   if (!localStorage.getItem('hackathon_details')) {
@@ -24,8 +44,32 @@ export function setupData() {
     localStorage.setItem('hackathon_details', JSON.stringify(details));
   }
 
-  if (!localStorage.getItem('teams')) {
+  const existingTeams = localStorage.getItem('teams');
+  if (!existingTeams) {
     localStorage.setItem('teams', JSON.stringify(teamsData));
+  } else {
+    try {
+      let parsed = JSON.parse(existingTeams);
+      let updated = false;
+      parsed = parsed.map((t: any) => {
+        const dummy = teamsData.find((d: any) => d.teamCode === t.teamCode);
+        if (dummy && !t.leaderName) {
+          updated = true;
+          return {
+            ...t,
+            leaderName: dummy.leaderName,
+            members: dummy.members,
+            history: dummy.history,
+          };
+        }
+        return t;
+      });
+      if (updated) {
+        localStorage.setItem('teams', JSON.stringify(parsed));
+      }
+    } catch {
+      localStorage.setItem('teams', JSON.stringify(teamsData));
+    }
   }
 
   if (!localStorage.getItem('leaderboards')) {
@@ -50,5 +94,9 @@ export function setupData() {
 
   if (!localStorage.getItem('team_invites')) {
     localStorage.setItem('team_invites', JSON.stringify([]));
+  }
+  
+  if (!localStorage.getItem('users')) {
+    localStorage.setItem('users', JSON.stringify(usersData));
   }
 }

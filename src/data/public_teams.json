@@ -14,7 +14,12 @@
       "type": "link",
       "url": "https://open.kakao.com/o/example1"
     },
-    "createdAt": "2026-02-20T11:00:00+09:00"
+    "createdAt": "2026-02-20T11:00:00+09:00",
+    "leaderName": "김알파",
+    "members": ["김알파(AI/ML)", "이벡터(Data)", "박텐서(Ops)"],
+    "history": [
+      { "eventName": "제7회 LG AIMERS", "prize": "최우수상" }
+    ]
   },
   {
     "teamCode": "T-BETA",
@@ -31,7 +36,10 @@
       "type": "link",
       "url": "https://forms.gle/example2"
     },
-    "createdAt": "2026-02-18T18:30:00+09:00"
+    "createdAt": "2026-02-18T18:30:00+09:00",
+    "leaderName": "정프롬",
+    "members": ["정프롬(PM/기획)"],
+    "history": []
   },
   {
     "teamCode": "T-HANDOVER-01",
@@ -48,7 +56,13 @@
       "type": "link",
       "url": "https://open.kakao.com/o/example3"
     },
-    "createdAt": "2026-03-04T11:00:00+09:00"
+    "createdAt": "2026-03-04T11:00:00+09:00",
+    "leaderName": "최파운드",
+    "members": ["최파운드(FE)", "김로직(BE)", "이서버(DevOps)"],
+    "history": [
+      { "eventName": "2025 해커톤 통합 리그", "prize": "우수상" },
+      { "eventName": "월간 해커톤 1월", "prize": "장려상" }
+    ]
   },
   {
     "teamCode": "T-HANDOVER-02",
@@ -62,6 +76,11 @@
       "type": "link",
       "url": "https://forms.gle/example4"
     },
-    "createdAt": "2026-03-05T09:20:00+09:00"
+    "createdAt": "2026-03-05T09:20:00+09:00",
+    "leaderName": "박엘지",
+    "members": ["박엘지(Fullstack)", "홍길동(FE)", "김철수(BE)", "이영희(Design)", "최민수(PM)"],
+    "history": [
+      { "eventName": "2025 글로벌 AI 해커톤", "prize": "대상" }
+    ]
   }
 ]

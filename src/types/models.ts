@@ -31,6 +31,12 @@ export interface Team {
     url?: string;
   };
   createdAt: string;
+  leaderName?: string;
+  members?: string[];
+  history?: Array<{
+    eventName: string;
+    prize: string;
+  }>;
 }
 
 export interface Submission {
@@ -55,6 +61,28 @@ export interface TeamInvite {
   createdAt: string;
 }
 
+export interface User {
+  id: string;
+  loginId?: string;
+  password?: string;
+  nickname: string;
+  email?: string | null;
+  points: number;
+  profileImage?: string;
+  createdAt: string;
+  // Options for privacy handling:
+  isProfilePublic: boolean;
+}
+
+export interface TeamChat {
+  id: number;
+  teamCode: string;
+  senderId: string;
+  senderName: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   teamName: string;
@@ -66,6 +94,16 @@ export interface Leaderboard {
   hackathonSlug: string;
   updatedAt: string;
   entries: LeaderboardEntry[];
+}
+
+export interface Message {
+  id: string;
+  senderId: string;
+  senderNickname: string;
+  receiverId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface HackathonDetail {

@@ -5,6 +5,7 @@ import type {
   Submission,
   Team,
   TeamInvite,
+  User,
 } from '../types/models';
 
 function readFromStorage<T>(key: string, fallback: T): T {
@@ -82,4 +83,14 @@ export function updateInviteStatus(id: number, status: TeamInvite['status']) {
   const updated = parsed.map((invite) => (invite.id === id ? { ...invite, status } : invite));
   writeToStorage('team_invites', updated);
   return updated;
+}
+
+export function getUsers() {
+  return readFromStorage<User[]>('users', []);
+}
+
+export function addUser(user: User) {
+  const parsed = readFromStorage<User[]>('users', []);
+  parsed.push(user);
+  writeToStorage('users', parsed);
 }

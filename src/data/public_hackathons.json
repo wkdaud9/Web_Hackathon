@@ -3,6 +3,7 @@
     "slug": "aimers-8-model-lite",
     "title": "Aimers 8기 : 모델 경량화 온라인 해커톤",
     "status": "ended",
+    "description": "제한된 컴퓨팅 자원 환경에서 대규모 언어 모델(LLM)을 효율적으로 서빙하기 위한 최적의 경량화 기술을 겨루는 대회입니다.",
     "tags": [
       "LLM",
       "Compression",
@@ -24,6 +25,7 @@
     "slug": "monthly-vibe-coding-2026-02",
     "title": "월간 해커톤 : 바이브 코딩 개선 AI 아이디어 공모전 (2026.02)",
     "status": "ongoing",
+    "description": "코딩 없는 개발 시대! AI 툴을 활용해 생산성을 극대화하는 창의적인 워크플로우와 프로덕트 아이디어를 제안해주세요.",
     "tags": [
       "Idea",
       "GenAI",
@@ -45,6 +47,7 @@
     "slug": "daker-handover-2026-03",
     "title": "긴급 인수인계 해커톤: 명세서만 보고 구현하라",
     "status": "upcoming",
+    "description": "기존 개발자가 남기고 간 API 명세서와 요구사항 문서만을 바탕으로, 프론트엔드와 백엔드를 완벽하게 복원하는 극한의 구현 해커톤입니다.",
     "tags": [
       "VibeCoding",
       "Web",
