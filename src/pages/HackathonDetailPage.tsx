@@ -2,18 +2,25 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import {
+  getHackathons,
   getHackathonDetail,
   getTeams,
   getLeaderboard,
-  addSubmission,
-  getSubmissions,
   getInvites,
   addInvite,
-  updateInviteStatus,
+  addLeaderboardEntry,
+  getSubmissionByTeam,
+  updateSubmission,
+  deleteSubmission,
+  addSubmission,
+  getSubmissions
 } from '../utils/api';
+import Dropdown from '../components/Dropdown';
 import TeamDetailModal from '../components/TeamDetailModal';
 import type {
+  Hackathon,
   HackathonDetail,
   Leaderboard,
   LeaderboardEntry,
@@ -25,25 +32,30 @@ import type {
 export default function HackathonDetailPage() {
   const { slug } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
+  const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [detail, setDetail] = useState<HackathonDetail | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [invites, setInvites] = useState<TeamInvite[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
 
   const [submitNotes, setSubmitNotes] = useState('');
   const [submitFile, setSubmitFile] = useState('');
   const [submitFileName, setSubmitFileName] = useState('');
+  const [submissionType, setSubmissionType] = useState<'individual' | 'team'>('individual');
   const [submitTeamName, setSubmitTeamName] = useState('');
 
   const [inviteTeamCode, setInviteTeamCode] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+
+  const [existingSubmission, setExistingSubmission] = useState<Submission | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -57,6 +69,7 @@ export default function HackathonDetailPage() {
       setLoading(true);
       setError(null);
       const timer = window.setTimeout(() => {
+        setHackathon(getHackathons().find((h) => h.slug === slug) || null);
         setDetail(getHackathonDetail(slug));
         setTeams(getTeams(slug));
         setLeaderboard(getLeaderboard(slug));
@@ -70,6 +83,37 @@ export default function HackathonDetailPage() {
       setLoading(false);
     }
   }, [slug]);
+
+  // Auto-detect team or individual for submission and check for existing submission
+  useEffect(() => {
+    if (currentUser) {
+      let teamName = '';
+      if (submissionType === 'individual') {
+        teamName = currentUser.nickname;
+      } else {
+        const myTeam = teams.find(t => t.leaderName === currentUser.nickname || (t.members && t.members.includes(currentUser.nickname)));
+        if (myTeam) {
+          teamName = myTeam.name;
+        }
+      }
+      setSubmitTeamName(teamName);
+
+      if (teamName && slug) {
+        const existing = getSubmissionByTeam(slug, teamName);
+        setExistingSubmission(existing);
+        if (existing) {
+          setSubmitNotes(existing.notes);
+          setSubmitFileName(existing.fileName || '');
+        } else {
+          setSubmitNotes('');
+          setSubmitFileName('');
+        }
+      }
+    } else {
+      setSubmitTeamName('');
+      setExistingSubmission(null);
+    }
+  }, [currentUser, teams, submissionType, slug]);
 
   // Set up intersection observer to update activeTab on scroll
   useEffect(() => {
@@ -142,13 +186,10 @@ export default function HackathonDetailPage() {
     setInvites((prev) => [...prev, newInvite]);
     setInviteTeamCode('');
     setInviteMessage('');
+    showToast('팀 합류 신청이 완료되었습니다!', 'success');
   };
 
-  const handleInviteStatusChange = (id: number, status: TeamInvite['status']) => {
-    if (!slug) return;
-    const updated = updateInviteStatus(id, status);
-    setInvites(updated.filter((invite) => invite.hackathonSlug === slug));
-  };
+
 
   if (loading) {
     return (
@@ -182,21 +223,78 @@ export default function HackathonDetailPage() {
     if (!slug || !submitTeamName.trim() || (!submitFile && !submitFileName)) return;
 
     const fileRef = submitFile || (submitFileName ? `local://${submitFileName}` : '');
-    const newSub: Submission = {
-      id: Date.now(),
-      hackathonSlug: slug,
-      teamName: submitTeamName.trim(),
-      notes: submitNotes,
-      fileUrl: fileRef,
-      fileName: submitFileName || undefined,
-      submittedAt: new Date().toISOString(),
-    };
-    addSubmission(newSub);
-    setSubmissions([...submissions, newSub]);
+    
+    if (existingSubmission) {
+      const updatedSub: Submission = {
+        ...existingSubmission,
+        notes: submitNotes,
+        fileUrl: fileRef || existingSubmission.fileUrl,
+        fileName: submitFileName || existingSubmission.fileName,
+        submittedAt: new Date().toISOString(),
+      };
+      updateSubmission(updatedSub);
+      setSubmissions(submissions.map(s => s.id === updatedSub.id ? updatedSub : s));
+      showToast('제출물이 수정되었습니다.', 'success');
+    } else {
+      const newSub: Submission = {
+        id: Date.now(),
+        hackathonSlug: slug,
+        teamName: submitTeamName.trim(),
+        notes: submitNotes,
+        fileUrl: fileRef,
+        fileName: submitFileName || undefined,
+        submittedAt: new Date().toISOString(),
+      };
+      addSubmission(newSub);
+      setSubmissions([...submissions, newSub]);
+      showToast('성공적으로 제출되었습니다!', 'success');
+
+      // Add to real-time leaderboard only for new submissions or handled differently
+      const mockScore = Math.floor(Math.random() * 31) + 70; // 70 ~ 100
+      const newEntry: LeaderboardEntry = {
+        rank: 0,
+        teamName: submitTeamName.trim(),
+        score: mockScore,
+        submittedAt: new Date().toISOString()
+      };
+      addLeaderboardEntry(slug, newEntry);
+      
+      setLeaderboard(prev => {
+        const updatedEntries = [...(prev?.entries || []), newEntry].sort((a,b) => b.score - a.score);
+        updatedEntries.forEach((e, idx) => { e.rank = idx + 1; });
+        return { hackathonSlug: slug, updatedAt: new Date().toISOString(), entries: updatedEntries };
+      });
+    }
+
     setSubmitNotes('');
     setSubmitFile('');
     setSubmitFileName('');
-    setSubmitTeamName('');
+    // setSubmitTeamName(''); // Keep team name for persistence/UI consistency
+  };
+
+  const handleDeleteSubmission = (id: number, teamName: string) => {
+    if (!slug) return;
+    if (!window.confirm('정말로 이 제출물을 삭제하시겠습니까? 리더보드 점수도 함께 삭제됩니다.')) return;
+    
+    deleteSubmission(id, slug, teamName);
+    setSubmissions(submissions.filter(s => s.id !== id));
+    
+    // Update local state for leaderboard
+    setLeaderboard(prev => {
+      if (!prev) return null;
+      const updatedEntries = prev.entries.filter(e => e.teamName !== teamName);
+      updatedEntries.forEach((e, idx) => { e.rank = idx + 1; });
+      return { ...prev, entries: updatedEntries, updatedAt: new Date().toISOString() };
+    });
+
+    // Reset form state if the deleted submission was the active one
+    if (existingSubmission?.id === id) {
+      setExistingSubmission(null);
+      setSubmitNotes('');
+      setSubmitFileName('');
+    }
+
+    showToast('제출물이 삭제되었습니다.', 'success');
   };
 
   const tabs = [
@@ -373,115 +471,60 @@ export default function HackathonDetailPage() {
                       </div>
                     ) : (
                       <div className="space-y-8">
-                        <form onSubmit={handleInviteSubmit} className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5 relative overflow-hidden">
-                          {!currentUser && (
-                            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[24px]">
-                              <p className="font-bold text-primary mb-3 text-lg">팀 지원은 로그인 후 가능합니다.</p>
-                            </div>
-                          )}
-                          <div className="md:col-span-2">
-                            <h3 className="font-bold text-primary mb-2 text-[17px]">팀 합류 신청하기</h3>
+                    {hackathon?.status === 'ended' ? (
+                      <div className="bg-gray-50 border border-gray-200 p-8 rounded-[24px] text-center w-full">
+                        <p className="text-secondary font-bold">팀 모집 및 합류가 종료되었습니다.</p>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleInviteSubmit} className="bg-gray-50 p-6 md:p-8 rounded-[24px] border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-5 relative overflow-hidden">
+                        {!currentUser && (
+                          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[24px]">
+                            <p className="font-bold text-primary mb-3 text-lg">팀 지원은 로그인 후 가능합니다.</p>
                           </div>
-                          <select
-                            value={inviteTeamCode}
-                            onChange={(e) => setInviteTeamCode(e.target.value)}
-                            className="bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-tertiary"
-                            required
-                          >
-                            <option value="">신청 팀 선택</option>
-                            {teams.map((team) => (
-                              <option key={team.teamCode} value={team.teamCode} className="text-primary">
-                                {team.name} ({team.teamCode})
-                              </option>
-                            ))}
-                          </select>
-                          <button type="submit" className="px-4 py-3 bg-primary text-white rounded-[14px] font-bold hover:bg-gray-800 transition-colors shadow-sm">
+                        )}
+                        <div className="md:col-span-2">
+                          <h3 className="font-bold text-primary mb-2 text-[17px]">팀 합류 신청하기</h3>
+                        </div>
+                          <div className="w-full">
+                            <Dropdown
+                              options={[
+                                { label: '신청 팀 선택', value: '' },
+                                ...teams.map((team) => ({
+                                  label: team.name,
+                                  value: team.teamCode,
+                                })),
+                              ]}
+                              value={inviteTeamCode}
+                              onChange={(val) => setInviteTeamCode(val)}
+                              className="w-full !rounded-[14px]"
+                            />
+                          </div>
+                          <button type="submit" disabled={!inviteTeamCode} className="px-4 py-3 bg-primary text-white rounded-[14px] font-bold hover:bg-gray-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                             팀 합류 신청
                           </button>
-                          <textarea
-                            value={inviteMessage}
-                            onChange={(e) => setInviteMessage(e.target.value)}
-                            placeholder="간단한 소개/포지션 (선택)"
-                            className="md:col-span-2 bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary"
-                          />
-                        </form>
+                        <textarea
+                          value={inviteMessage}
+                          onChange={(e) => setInviteMessage(e.target.value)}
+                          placeholder="간단한 소개/포지션 (선택)"
+                          className="md:col-span-2 bg-white border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary"
+                        />
+                      </form>
+                    )}
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          {teams.map((t) => {
-                            const pendingCount = invites.filter(
-                              (invite) => invite.teamCode === t.teamCode && invite.status === 'pending',
-                            ).length;
-                            return (
-                              <div key={t.teamCode} className="bg-white p-6 rounded-[24px] border border-gray-100 hover:border-cta/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all flex flex-col h-full">
-                                <div className="flex justify-between items-start mb-3">
-                                  <button onClick={() => setSelectedTeam(t)} className="font-bold text-[18px] text-primary hover:text-cta transition-colors text-left">
-                                    {t.name}
-                                  </button>
-                                  <span className="bg-gray-50 px-2.5 py-1 rounded-lg text-[12px] font-bold font-mono text-tertiary border border-gray-100 shrink-0">
-                                    <span className="text-primary">{t.memberCount}</span> MBRS
-                                  </span>
-                                </div>
-                                <p className="text-secondary text-[14px] font-medium mb-5 flex-1 line-clamp-3 leading-relaxed">{t.intro}</p>
-                                <div className="flex flex-wrap gap-1.5 mb-5">
-                                  {t.lookingFor?.map((role) => <span key={role} className="text-[12px] font-bold text-cta bg-blue-50 px-2 py-0.5 rounded-md">#{role}</span>)}
-                                </div>
-                                {currentUser?.nickname === t.leaderName && (
-                                  <>
-                                    <div className="flex gap-2 mb-4 mt-1">
-                                      <button 
-                                        type="button"
-                                        onClick={() => alert(`[${t.name}] 팀원으로 초대할 유저를 선택하는 기능은 준비중입니다.`)} 
-                                        className="w-full py-2 rounded-xl bg-gray-50 text-primary font-bold hover:bg-gray-100 transition-colors text-[13px] border border-gray-200"
-                                      >
-                                        + 새로운 팀원 초대하기
-                                      </button>
-                                    </div>
-                                    <div className="text-[13px] font-bold text-tertiary mb-3 flex items-center justify-between border-t border-gray-100 pt-4 mt-auto">
-                                      <span>내가 방장인 팀: 대기 중 신청</span>
-                                      <span className="bg-blue-50 text-cta px-2 rounded-full">{pendingCount}</span>
-                                    </div>
-
-                                    <div className="space-y-2.5">
-                                      {invites
-                                        .filter((invite) => invite.teamCode === t.teamCode)
-                                        .slice()
-                                        .reverse()
-                                        .slice(0, 3)
-                                        .map((invite) => (
-                                          <div key={invite.id} className="bg-gray-50 border border-gray-100 rounded-[12px] p-3.5 text-[13px]">
-                                            <div className="flex justify-between font-bold mb-1.5">
-                                              <span className="text-primary">{invite.applicantName}</span>
-                                              <span className={invite.status === 'pending' ? 'text-orange-500' : invite.status === 'accepted' ? 'text-emerald-500' : 'text-gray-400'}>{
-                                                invite.status === 'pending' ? '대기 중' : invite.status === 'accepted' ? '수락됨' : '거절됨'
-                                              }</span>
-                                            </div>
-                                            {invite.message && <div className="text-secondary font-medium mb-3 mt-1 bg-white p-2 rounded-lg border border-gray-100">{invite.message}</div>}
-                                            {invite.status === 'pending' && (
-                                              <div className="flex gap-2.5 mt-2">
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleInviteStatusChange(invite.id, 'accepted')}
-                                                  className="flex-1 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-100 transition-colors"
-                                                >
-                                                  수락
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleInviteStatusChange(invite.id, 'rejected')}
-                                                  className="flex-1 py-1.5 rounded-lg bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors"
-                                                >
-                                                  거절
-                                                </button>
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </>
-                                )}
+                          {teams.map((t) => (
+                            <div key={t.teamCode} className="bg-white p-6 rounded-[24px] border border-gray-100 hover:border-cta/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all flex flex-col h-full">
+                              <div className="flex justify-between items-start mb-3">
+                                <button onClick={() => setSelectedTeam(t)} className="font-bold text-[18px] text-primary hover:text-cta transition-colors text-left">
+                                  {t.name}
+                                </button>
                               </div>
-                            );
-                          })}
+                              <p className="text-secondary text-[14px] font-medium mb-5 flex-1 line-clamp-3 leading-relaxed">{t.intro}</p>
+                              <div className="flex flex-wrap gap-1.5 mb-5">
+                                {t.lookingFor?.map((role) => <span key={role} className="text-[12px] font-bold text-cta bg-blue-50 px-2 py-0.5 rounded-md">#{role}</span>)}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -491,7 +534,8 @@ export default function HackathonDetailPage() {
               {tab.id === 'submit' && (
                 <div className="relative w-full">
                    <h2 className="text-2xl font-bold font-heading mb-6 text-primary flex items-center gap-3">
-                      <span className="w-1.5 h-6 bg-cta rounded-full"></span> 결과물 제출
+                      <span className="w-1.5 h-6 bg-cta rounded-full"></span> 
+                      {existingSubmission ? '결과물 수정' : '결과물 제출'}
                     </h2>
                    
                    <div className="bg-blue-50 border border-blue-100 p-6 md:p-8 rounded-[24px] mb-10 w-full max-w-3xl">
@@ -501,25 +545,61 @@ export default function HackathonDetailPage() {
                       </ul>
                     </div>
                    
-                    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-gray-50/50 p-6 md:p-8 rounded-[32px] border border-gray-200 w-full relative overflow-hidden">
-                      {!currentUser && (
-                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[32px]">
-                          <p className="font-bold text-primary mb-3 text-lg">결과물 제출은 로그인 후 가능합니다.</p>
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-[15px] font-bold text-primary mb-2.5">팀명</label>
-                        <input
-                          type="text"
-                          className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary"
-                          placeholder="예: 404found"
-                          value={submitTeamName}
-                          onChange={(e) => setSubmitTeamName(e.target.value)}
-                          required
-                        />
+                    {hackathon?.status === 'ended' ? (
+                      <div className="bg-gray-50 border border-gray-200 p-10 rounded-[32px] text-center w-full max-w-3xl">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">⏰</div>
+                        <h3 className="text-xl font-bold text-primary mb-2">종료된 해커톤입니다</h3>
+                        <p className="text-secondary font-medium text-[15px]">제출 마감 기한이 지나 더 이상 결과물을 제출할 수 없습니다.<br/>리더보드 탭에서 다른 팀들의 멋진 결과물을 확인해보세요!</p>
                       </div>
-                      <div>
-                        <label className="block text-[15px] font-bold text-primary mb-2.5">제출 파일 / URL 링크</label>
+                    ) : (
+                      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl bg-gray-50/50 p-6 md:p-8 rounded-[32px] border border-gray-200 w-full relative overflow-hidden">
+                        {!currentUser && (
+                          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-[32px]">
+                            <p className="font-bold text-primary mb-3 text-lg">결과물 제출은 로그인 후 가능합니다.</p>
+                          </div>
+                        )}
+                        <div>
+                          <div className={`flex bg-white rounded-[16px] p-1.5 border border-gray-200 mb-6 max-w-xs shadow-sm ${existingSubmission ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                            <button
+                              type="button"
+                              onClick={() => !existingSubmission && setSubmissionType('individual')}
+                              disabled={!!existingSubmission}
+                              className={`flex-1 py-2 text-[14px] font-bold rounded-[12px] transition-colors ${submissionType === 'individual' ? 'bg-primary text-white shadow-sm' : 'text-tertiary hover:text-primary'} ${existingSubmission ? 'cursor-not-allowed' : ''}`}
+                            >개인 제출</button>
+                            <button
+                              type="button"
+                              onClick={() => !existingSubmission && setSubmissionType('team')}
+                              disabled={!!existingSubmission}
+                              className={`flex-1 py-2 text-[14px] font-bold rounded-[12px] transition-colors ${submissionType === 'team' ? 'bg-primary text-white shadow-sm' : 'text-tertiary hover:text-primary'} ${existingSubmission ? 'cursor-not-allowed' : ''}`}
+                            >팀 제출</button>
+                          </div>
+
+                          {submissionType === 'team' && !submitTeamName && (
+                            <div className="mb-6 bg-red-50 border border-red-100 p-4 rounded-[16px] flex items-start gap-3">
+                              <span className="text-red-500 text-lg mt-0.5">⚠️</span>
+                              <div>
+                                <h4 className="font-bold text-red-700 text-[14px]">소속된 팀이 없습니다</h4>
+                                <p className="text-[13px] text-red-600 font-medium mt-1">이 해커톤에 참여 중인 팀이 없습니다. 팀 제출을 원하시면 먼저 [참여 팀 현황] 탭에서 팀에 가입하거나 생성해주세요.</p>
+                              </div>
+                            </div>
+                          )}
+
+                          <label className="block text-[15px] font-bold text-primary mb-2.5">
+                            {submissionType === 'individual' ? '참여자 이름 (자동 입력됨)' : '소속 팀명 (자동 인식됨)'}
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-[16px] px-5 py-3.5 text-secondary font-medium focus:outline-none cursor-not-allowed"
+                            value={submitTeamName}
+                            readOnly
+                            disabled
+                          />
+                          {submissionType === 'team' && submitTeamName.length > 0 && (
+                            <p className="text-[13px] text-emerald-600 font-bold mt-2 ml-1">✓ 소속된 팀({submitTeamName})이 자동으로 선택되었습니다.</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-[15px] font-bold text-primary mb-2.5">제출 파일 / URL 링크</label>
                         <input 
                           type="text" 
                            className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary"
@@ -549,10 +629,11 @@ export default function HackathonDetailPage() {
                          onChange={(e) => setSubmitNotes(e.target.value)}
                        ></textarea>
                      </div>
-                      <button type="submit" className="w-full py-4 bg-primary text-white text-[17px] font-bold rounded-[16px] hover:bg-gray-800 transition-colors shadow-md mt-4">
-                        로컬에 제출 저장하기
+                      <button type="submit" disabled={submissionType === 'team' && !submitTeamName} className="w-full py-4 bg-cta text-white text-[17px] font-bold rounded-[16px] hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200 mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cta">
+                        {existingSubmission ? '결과물 수정하기' : '결과물 제출하기'}
                       </button>
                     </form>
+                  )}
 
                    {submissions.length > 0 && (
                      <div className="mt-12 w-full max-w-3xl">
@@ -562,18 +643,28 @@ export default function HackathonDetailPage() {
                        <div className="space-y-4">
                           {recentSubmissions.map((s) => (
                              <div key={s.id} className="bg-gray-50 p-6 rounded-[20px] border border-gray-100 flex flex-col gap-2 relative overflow-hidden group">
-                              <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-gray-200 group-hover:bg-cta transition-colors"></div>
-                              <div className="flex justify-between text-tertiary text-[13px] font-bold mb-2">
-                                <span>제출 시간</span>
-                                <span className="font-mono">{new Date(s.submittedAt).toLocaleString()}</span>
-                              </div>
-                              <div className="text-primary text-[16px] font-bold flex items-center gap-2">
-                                <span className="bg-white px-2.5 py-1 rounded-md border border-gray-200 text-[13px] text-tertiary font-bold">팀</span> {s.teamName || '미상'}
-                              </div>
-                              {s.fileName && <div className="text-secondary text-[14px] font-medium mt-2">첨부: {s.fileName}</div>}
-                               <div className="text-cta mt-1 font-mono font-bold truncate bg-blue-50/50 p-3 rounded-[12px] inline-block w-fit mt-2 border border-blue-100/50">{s.fileUrl}</div>
-                              {s.notes && <div className="text-secondary font-medium mt-4 bg-white p-4 rounded-[14px] border border-gray-100">{s.notes}</div>}
-                            </div>
+                               <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-gray-200 group-hover:bg-cta transition-colors"></div>
+                               <div className="flex justify-between text-tertiary text-[13px] font-bold mb-2">
+                                 <span>제출 시간</span>
+                                 <span className="font-mono">{new Date(s.submittedAt).toLocaleString()}</span>
+                               </div>
+                               <div className="flex justify-between items-center">
+                                 <div className="text-primary text-[16px] font-bold flex items-center gap-2">
+                                   <span className="bg-white px-2.5 py-1 rounded-md border border-gray-200 text-[13px] text-tertiary font-bold">팀</span> {s.teamName || '미상'}
+                                 </div>
+                                 {s.teamName === submitTeamName && (
+                                   <button 
+                                     onClick={() => handleDeleteSubmission(s.id, s.teamName!)}
+                                     className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors bg-red-50 px-2.5 py-1.5 rounded-lg flex items-center gap-1"
+                                   >
+                                     삭제
+                                   </button>
+                                 )}
+                               </div>
+                               {s.fileName && <div className="text-secondary text-[14px] font-medium mt-2">첨부: {s.fileName}</div>}
+                                <div className="text-cta mt-1 font-mono font-bold truncate bg-blue-50/50 p-3 rounded-[12px] inline-block w-fit mt-2 border border-blue-100/50">{s.fileUrl}</div>
+                               {s.notes && <div className="text-secondary font-medium mt-4 bg-white p-4 rounded-[14px] border border-gray-100">{s.notes}</div>}
+                             </div>
                           ))}
                         </div>
                      </div>
@@ -646,7 +737,7 @@ export default function HackathonDetailPage() {
                           </table>
                         </div>
 
-                        <div className="rounded-[24px] border border-gray-100 bg-gray-50 p-6 md:p-8">
+                        <div className="rounded-[24px] border border-gray-100 bg-gray-50 p-6 md:p-8 mt-6">
                           <h3 className="text-[15px] font-bold text-primary mb-4 flex items-center gap-2">
                             <span className="w-1.5 h-4 bg-gray-400 rounded-full"></span>
                             미제출 팀

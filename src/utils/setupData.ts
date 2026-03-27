@@ -20,6 +20,13 @@ export function setupData() {
         }
         return h;
       });
+      // Append any newly added hackathons from dummy data
+      hackathonsData.forEach((dummy: any) => {
+        if (!parsed.find((p: any) => p.slug === dummy.slug)) {
+          parsed.push(dummy);
+          updated = true;
+        }
+      });
       if (updated) {
         localStorage.setItem('hackathons', JSON.stringify(parsed));
       }
@@ -28,20 +35,38 @@ export function setupData() {
     }
   }
   
-  if (!localStorage.getItem('hackathon_details')) {
-    const details = [
-      {
-        slug: detailData.slug,
-        title: detailData.title,
-        sections: detailData.sections,
-      },
-      ...detailData.extraDetails.map((extra: { slug: string; title: string; sections: unknown }) => ({
-        slug: extra.slug,
-        title: extra.title,
-        sections: extra.sections,
-      }))
-    ];
-    localStorage.setItem('hackathon_details', JSON.stringify(details));
+  const baseDetails = [
+    {
+      slug: detailData.slug,
+      title: detailData.title,
+      sections: detailData.sections,
+    },
+    ...detailData.extraDetails.map((extra: { slug: string; title: string; sections: unknown }) => ({
+      slug: extra.slug,
+      title: extra.title,
+      sections: extra.sections,
+    }))
+  ];
+
+  const existingDetailsStr = localStorage.getItem('hackathon_details');
+  if (!existingDetailsStr) {
+    localStorage.setItem('hackathon_details', JSON.stringify(baseDetails));
+  } else {
+    try {
+      const existingDetails = JSON.parse(existingDetailsStr);
+      let updated = false;
+      baseDetails.forEach((bd) => {
+        if (!existingDetails.find((ed: any) => ed.slug === bd.slug)) {
+          existingDetails.push(bd);
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem('hackathon_details', JSON.stringify(existingDetails));
+      }
+    } catch {
+      localStorage.setItem('hackathon_details', JSON.stringify(baseDetails));
+    }
   }
 
   const existingTeams = localStorage.getItem('teams');

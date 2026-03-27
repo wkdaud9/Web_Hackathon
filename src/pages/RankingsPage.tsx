@@ -4,9 +4,13 @@ import { Trophy, Medal, Star, User } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
 import EmptyState from '../components/ui/EmptyState';
 import { getUsers } from '../utils/api';
+import { useToast } from '../contexts/ToastContext';
+import UserProfileModal from '../components/layout/UserProfileModal';
 import type { User as UserType } from '../types/models';
 
 export default function RankingsPage() {
+  const { showToast } = useToast();
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [users] = useState<UserType[]>(() => getUsers());
   const [period, setPeriod] = useState<'7d' | '30d' | 'all'>('all');
 
@@ -29,6 +33,14 @@ export default function RankingsPage() {
       rank: index + 1
     }));
   }, [users, period]);
+
+  const handleUserClick = (user: UserType) => {
+    if (!user.isProfilePublic) {
+      showToast('비공개 프로필입니다.', 'error');
+      return;
+    }
+    setSelectedUser(user);
+  };
 
   return (
     <div className="w-full">
@@ -77,21 +89,27 @@ export default function RankingsPage() {
               <div className="flex items-end justify-center gap-3 h-48 relative z-10">
                 {/* Rank 2 */}
                 {rankedUsers[1] && (
-                  <div className="w-1/3 flex flex-col items-center group">
-                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                      {rankedUsers[1].profileImage ? <img src={rankedUsers[1].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary"/>}
+                  <button 
+                    onClick={() => handleUserClick(rankedUsers[1])}
+                    className="w-1/3 flex flex-col items-center group cursor-pointer hover:-translate-y-1 transition-transform"
+                  >
+                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm group-hover:border-blue-100 transition-colors">
+                      {rankedUsers[1].profileImage ? <img src={rankedUsers[1].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary group-hover:text-cta transition-colors"/>}
                     </div>
-                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1">{rankedUsers[1].nickname}</div>
+                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[1].nickname}</div>
                     <div className="w-full bg-gray-50 h-[60%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
                       <Medal className="w-6 h-6 text-gray-400" />
                       <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[1].points.toLocaleString()}</span>
                     </div>
-                  </div>
+                  </button>
                 )}
                 {/* Rank 1 */}
                 {rankedUsers[0] && (
-                  <div className="w-1/3 flex flex-col items-center z-10 -ml-1 -mr-1 group">
-                    <div className="w-12 h-12 mb-2 rounded-full bg-amber-50 flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
+                  <button 
+                    onClick={() => handleUserClick(rankedUsers[0])}
+                    className="w-1/3 flex flex-col items-center z-10 -ml-1 -mr-1 group cursor-pointer hover:-translate-y-1 transition-transform"
+                  >
+                    <div className="w-12 h-12 mb-2 rounded-full bg-amber-50 flex items-center justify-center overflow-hidden border-4 border-white shadow-md group-hover:border-blue-100 transition-colors">
                       {rankedUsers[0].profileImage ? <img src={rankedUsers[0].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-6 h-6 text-amber-500"/>}
                     </div>
                     <div className="text-[15px] text-cta mb-2 w-full text-center px-1 font-extrabold line-clamp-1">{rankedUsers[0].nickname}</div>
@@ -100,20 +118,23 @@ export default function RankingsPage() {
                       <Trophy className="w-9 h-9 text-amber-500 drop-shadow-sm relative z-10" />
                       <span className="text-[17px] font-mono font-black mt-2 text-cta relative z-10">{rankedUsers[0].points.toLocaleString()}</span>
                     </div>
-                  </div>
+                  </button>
                 )}
                 {/* Rank 3 */}
                 {rankedUsers[2] && (
-                  <div className="w-1/3 flex flex-col items-center group">
-                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-                      {rankedUsers[2].profileImage ? <img src={rankedUsers[2].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary"/>}
+                  <button 
+                    onClick={() => handleUserClick(rankedUsers[2])}
+                    className="w-1/3 flex flex-col items-center group cursor-pointer hover:-translate-y-1 transition-transform"
+                  >
+                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm group-hover:border-blue-100 transition-colors">
+                      {rankedUsers[2].profileImage ? <img src={rankedUsers[2].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary group-hover:text-cta transition-colors"/>}
                     </div>
-                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1">{rankedUsers[2].nickname}</div>
+                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[2].nickname}</div>
                     <div className="w-full bg-gray-50 h-[45%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
                       <Medal className="w-6 h-6 text-orange-400" />
                       <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[2].points.toLocaleString()}</span>
                     </div>
-                  </div>
+                  </button>
                 )}
               </div>
             </motion.div>
@@ -135,7 +156,11 @@ export default function RankingsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-50 text-[15px]">
                   {rankedUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
+                    <tr 
+                      key={user.id} 
+                      onClick={() => handleUserClick(user)}
+                      className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
+                    >
                       <td className="py-5 px-6 text-center">
                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[14px] font-black ${
                           user.rank === 1 ? 'bg-amber-100 text-amber-600' :
@@ -172,6 +197,14 @@ export default function RankingsPage() {
           </div>
         )}
       </div>
+
+      {selectedUser && (
+        <UserProfileModal 
+          isOpen={!!selectedUser} 
+          onClose={() => setSelectedUser(null)} 
+          user={selectedUser} 
+        />
+      )}
     </div>
   );
 }

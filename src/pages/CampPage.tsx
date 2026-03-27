@@ -8,7 +8,8 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
 import { useAuth } from '../contexts/AuthContext';
-import { Users, X, Plus, ExternalLink, Hash } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
+import { Users, X, Plus, ExternalLink, Hash, Send } from 'lucide-react';
 import type { Hackathon, Team } from '../types/models';
 
 export default function CampPage() {
@@ -40,6 +41,11 @@ export default function CampPage() {
 
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
+
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [joinTarget, setJoinTarget] = useState<Team | null>(null);
+  const [joinMessage, setJoinMessage] = useState('');
 
   useEffect(() => {
     try {
@@ -285,16 +291,30 @@ export default function CampPage() {
                 
                 {/* Right Section: Action */}
                 <div className="flex flex-col items-end justify-center md:items-end gap-2.5 flex-shrink-0 md:w-36 border-t border-gray-100 md:border-t-0 pt-4 md:pt-0 shrink-0">
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedTeam(team);
-                    }}
-                    className="text-cta hover:text-white hover:bg-cta transition-colors flex items-center justify-center gap-1.5 text-[14px] font-bold bg-blue-50 px-4 py-2.5 rounded-xl w-full"
-                  >
-                    상세보기 <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-
+                  {currentUser && (team.leaderName === currentUser.nickname || team.members?.includes(currentUser.nickname)) ? (
+                    <div className="text-white bg-emerald-500 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-emerald-100 cursor-default">
+                      참여 완료
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!currentUser) {
+                          showToast('팀 합류 신청을 하려면 로그인해주세요.', 'error');
+                          return;
+                        }
+                        if (!team.isOpen) {
+                          showToast('현재 모집이 마감된 팀입니다.', 'info');
+                          return;
+                        }
+                        setJoinTarget(team);
+                        setJoinModalOpen(true);
+                      }}
+                      className="text-white bg-cta hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-blue-200"
+                    >
+                      팀 합류 신청 <Send className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   {currentUser?.nickname === team.leaderName ? (
                     <div className="flex gap-2 w-full">
                       <button 
@@ -349,6 +369,75 @@ export default function CampPage() {
         onClose={() => setSelectedTeam(null)} 
         team={selectedTeam} 
       />
+
+      <AnimatePresence>
+        {joinModalOpen && joinTarget && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setJoinModalOpen(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[28px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100"
+            >
+              <h3 className="text-xl font-bold text-primary mb-2 flex items-center gap-2">
+                🚀 팀 합류 신청하기
+              </h3>
+              <p className="text-[14px] text-tertiary mb-6">
+                <strong className="text-secondary">[{joinTarget.name}]</strong> 팀에 보낼 간략한 자기소개 및 지원 동기를 적어주세요.
+              </p>
+              <textarea
+                value={joinMessage}
+                onChange={(e) => setJoinMessage(e.target.value)}
+                placeholder="안녕하세요! 저는 이런 포지션으로 참여하고 싶습니다..."
+                className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-32 resize-none placeholder:text-tertiary mb-4"
+              />
+              <div className="flex gap-2.5">
+                <button
+                  onClick={() => setJoinModalOpen(false)}
+                  className="flex-1 py-3 bg-gray-100 text-secondary font-bold rounded-[14px] hover:bg-gray-200 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => {
+                    if (!joinMessage.trim()) {
+                      showToast('신청 메시지를 입력해주세요.', 'info');
+                      return;
+                    }
+                    
+                    // In a real app, this would be an API call
+                    import('../utils/api').then(api => {
+                      api.addInvite({
+                        id: Date.now(),
+                        hackathonSlug: joinTarget.hackathonSlug || '',
+                        teamCode: joinTarget.teamCode,
+                        applicantName: currentUser!.nickname,
+                        message: joinMessage.trim(),
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                      });
+                      
+                      showToast('팀 합류 신청이 완료되었습니다!', 'success');
+                      setJoinModalOpen(false);
+                      setJoinMessage('');
+                    });
+                  }}
+                  className="flex-1 py-3 bg-cta text-white font-bold rounded-[14px] hover:bg-blue-600 transition-colors shadow-sm"
+                >
+                  보내기
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {messageModalOpen && messageTarget && (

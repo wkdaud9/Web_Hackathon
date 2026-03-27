@@ -65,5 +65,27 @@
       "rules": "https://example.com/public/rules/daker-handover-202603",
       "faq": "https://example.com/public/faq/daker-handover-202603"
     }
+  },
+  {
+    "slug": "mystery-hackathon-2026-04",
+    "title": "비밀의 벡엔드 아키텍처 공모전",
+    "status": "upcoming",
+    "description": "아직 상세 내용이 공개되지 않은 신규 기밀 해커톤입니다.",
+    "tags": [
+      "Backend",
+      "Architecture",
+      "Secret"
+    ],
+    "thumbnailUrl": "https://example.com/public/img/mystery202604.png",
+    "period": {
+      "timezone": "Asia/Seoul",
+      "submissionDeadlineAt": "2026-04-20T10:00:00+09:00",
+      "endAt": "2026-04-25T10:00:00+09:00"
+    },
+    "links": {
+      "detail": "/hackathons/mystery-hackathon-2026-04",
+      "rules": "https://example.com/public/rules/mystery202604",
+      "faq": "https://example.com/public/faq/mystery202604"
+    }
   }
 ]
