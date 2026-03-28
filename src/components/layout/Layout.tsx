@@ -1,137 +1,145 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
 import { User, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import AuthModal from '../AuthModal';
 import MessageDropdown from './MessageDropdown';
-import { getTeams, getInvites } from '../../utils/api';
+import NotificationsFAB from '../NotificationsFAB';
 
 const navItems = [
-  { to: '/hackathons', label: '해커톤 탐색' },
-  { to: '/camp', label: '팀 모집 라운지' },
-  { to: '/rankings', label: '명예의 전당' },
+  { name: '홈', path: '/' },
+  { name: '해커톤', path: '/hackathons' },
+  { name: '팀 캠프', path: '/camp' },
+  { name: '랭킹', path: '/rankings' },
 ];
 
 export default function Layout() {
-  const { currentUser, logout, isLoading } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [hasPendingInvites, setHasPendingInvites] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
   const navigate = useNavigate();
-
-  // Polling or re-evaluating pending invites when currentUser or dropdown state changes
-  useEffect(() => {
-    if (currentUser) {
-      const allTeams = getTeams();
-      const allInvites = getInvites();
-      const ledTeamsCode = new Set(allTeams.filter(t => t.leaderName === currentUser.nickname).map(t => t.teamCode));
-      const pendingInvites = allInvites.filter(inv => ledTeamsCode.has(inv.teamCode) && inv.status === 'pending');
-      setHasPendingInvites(pendingInvites.length > 0);
-    } else {
-      setHasPendingInvites(false);
-    }
-  }, [currentUser, isDropdownOpen]);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
       }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    showToast('로그아웃 되었습니다.', 'info');
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-bg text-primary flex flex-col font-body selection:bg-blue-100 selection:text-blue-900">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-        <nav className="mx-auto w-[min(1200px,calc(100%-1.5rem))] px-4 h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary">
-            Hackathon Hub
+    <div className="min-h-screen bg-neutral-50 font-sans text-primary selection:bg-blue-100 selection:text-cta flex flex-col">
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
+          <Link to="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform">
+              <span className="text-xl font-black italic">H</span>
+            </div>
+            <span className="text-xl font-black tracking-tighter text-primary">HACKATHON HUB</span>
           </Link>
-          <div className="flex items-center gap-1 md:gap-2">
+
+          <div className="hidden md:flex items-center gap-1.5 flex-1 max-w-md justify-center">
             {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `px-3 md:px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 text-cta'
-                      : 'text-secondary hover:bg-gray-100 hover:text-primary'
+              <NavLink 
+                key={item.path} 
+                to={item.path} 
+                className={({ isActive }) => 
+                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-blue-50 text-cta shadow-sm shadow-blue-50' 
+                      : 'text-tertiary hover:text-primary hover:bg-gray-50'
                   }`
                 }
               >
-                {item.label}
+                {item.name}
               </NavLink>
             ))}
+          </div>
 
-            <div className="h-6 w-px bg-gray-200 mx-1 hidden md:block"></div>
+          <div className="flex items-center gap-4 shrink-0">
+            {currentUser ? (
+              <div className="flex items-center gap-4">
+                 <MessageDropdown />
+                 
+                 <div className="relative" ref={userMenuRef}>
+                   <button 
+                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                     className="flex items-center gap-2.5 pl-2 pr-4 py-2 bg-white border border-gray-100 rounded-full hover:border-cta/20 hover:shadow-md transition-all group"
+                   >
+                     <div className="w-9 h-9 rounded-full bg-blue-50 text-cta flex items-center justify-center border border-white shadow-sm overflow-hidden shrink-0">
+                        {currentUser.profileImage ? (
+                          <img src={currentUser.profileImage} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-5 h-5" />
+                        )}
+                     </div>
+                     <div className="text-left hidden lg:block">
+                        <div className="text-[13px] font-black text-primary leading-tight">{currentUser.nickname}</div>
+                        <div className="text-[10px] font-bold text-tertiary tracking-widest uppercase">Member</div>
+                     </div>
+                     <ChevronDown className={`w-4 h-4 text-tertiary transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                   </button>
 
-            {!isLoading && (
-              currentUser ? (
-                <div className="flex items-center gap-2 md:gap-4 h-full">
-                  <MessageDropdown />
-                  <div className="relative flex items-center h-full" ref={dropdownRef}>
-                  <button 
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 text-[14px] font-bold text-primary hover:text-cta transition-colors"
-                  >
-                    {currentUser.profileImage ? (
-                      <div className="relative">
-                        <img src={currentUser.profileImage} alt="" className="w-7 h-7 rounded-full bg-gray-100 object-cover" />
-                        {hasPendingInvites && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white"></span>}
-                      </div>
-                    ) : (
-                      <div className="relative w-7 h-7 rounded-full bg-blue-50 text-cta flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4" />
-                        {hasPendingInvites && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white"></span>}
-                      </div>
-                    )}
-                    <span className="hidden sm:inline-block truncate max-w-[100px]">{currentUser.nickname}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-36 bg-white rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-100 overflow-hidden z-[100]">
-                      <button 
-                        onClick={() => {
-                          setIsDropdownOpen(false);
-                          navigate('/mypage');
-                        }}
-                        className="block w-full flex items-center justify-between px-4 py-3 text-[14px] font-medium text-primary hover:bg-gray-50 transition-colors border-b border-gray-100"
-                      >
-                        <span>마이페이지</span>
-                        {hasPendingInvites && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setIsDropdownOpen(false);
-                          logout();
-                        }}
-                        className="block w-full text-left px-4 py-3 text-[14px] font-medium text-red-500 hover:bg-red-50 transition-colors"
-                      >
-                        로그아웃
-                      </button>
-                    </div>
-                  )}
-                </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="px-4 py-2 bg-primary text-white text-[14px] font-bold rounded-xl hover:bg-gray-800 transition-colors whitespace-nowrap shrink-0"
-                >
-                  로그인
-                </button>
-              )
+                   <AnimatePresence>
+                     {isUserMenuOpen && (
+                       <motion.div 
+                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                         animate={{ opacity: 1, scale: 1, y: 0 }}
+                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                         className="absolute right-0 mt-3 w-52 bg-white rounded-3xl shadow-xl border border-gray-100 p-2 z-[60]"
+                       >
+                         <Link 
+                           to="/mypage" 
+                           onClick={() => setIsUserMenuOpen(false)}
+                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-secondary hover:bg-blue-50 hover:text-cta rounded-2xl transition-all"
+                         >
+                           마이페이지
+                         </Link>
+                         <Link 
+                           to="/workspace" 
+                           onClick={() => setIsUserMenuOpen(false)}
+                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-secondary hover:bg-emerald-50 hover:text-emerald-500 rounded-2xl transition-all"
+                         >
+                           팀 워크스페이스
+                         </Link>
+                         <div className="h-px bg-gray-50 my-1 mx-2" />
+                         <button 
+                           onClick={handleLogout}
+                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                         >
+                           로그아웃
+                         </button>
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
+                 </div>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="px-8 py-3 bg-cta text-white text-[15px] font-black rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
+              >
+                시작하기
+              </button>
             )}
           </div>
         </nav>
       </header>
 
-      <main className="relative flex-1 w-full max-w-7xl mx-auto px-4 pt-10 pb-16">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <Outlet />
       </main>
 
@@ -140,6 +148,7 @@ export default function Layout() {
       </footer>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <NotificationsFAB />
     </div>
   );
 }

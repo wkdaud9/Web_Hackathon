@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { X, User as UserIcon, Send } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { getTeams, getHackathons } from '../../utils/api';
+import { getTeams, getHackathons, addInvite } from '../../utils/api';
+import { UserPlus, X, User as UserIcon, Send } from 'lucide-react';
 import type { User, Team, Hackathon } from '../../types/models';
 import ChatModal from './ChatModal';
 
@@ -20,6 +20,13 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
   const [userTeams, setUserTeams] = useState<Team[]>([]);
   const [userHackathons, setUserHackathons] = useState<Hackathon[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [myTeam, setMyTeam] = useState<Team | null>(null);
+
+  useEffect(() => {
+    const teams = getTeams();
+    const leading = teams.find(t => t.leaderName === currentUser?.nickname);
+    setMyTeam(leading || null);
+  }, [currentUser]);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -50,6 +57,24 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
       return;
     }
     setIsChatOpen(true);
+  };
+
+  const handleInvite = () => {
+    if (!myTeam || !user) return;
+    
+    addInvite({
+      id: Date.now(),
+      hackathonSlug: myTeam.hackathonSlug || 'common',
+      teamCode: myTeam.teamCode,
+      applicantName: user.nickname,
+      applicantId: user.id,
+      message: `${currentUser?.nickname}님이 소속 팀 [${myTeam.name}]에 초대했습니다.`,
+      status: 'pending',
+      type: 'invitation',
+      createdAt: new Date().toISOString()
+    });
+    
+    showToast('초대 완료', 'success');
   };
 
   if (!isOpen || !user) return null;
@@ -97,17 +122,28 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
                     <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
                       <div className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-lg border border-amber-100">
                         <span className="text-[13px] font-bold mr-1">획득 포인트:</span>
-                        <span className="font-mono font-black text-[15px]">{user.points.toLocaleString()} PT</span>
+                        <span className="font-mono font-black text-[15px]">{user.points.toLocaleString()}점</span>
                       </div>
                     </div>
                     {user.id !== currentUser?.id && (
-                      <button 
-                        onClick={handleSendMessage}
-                        className="inline-flex items-center justify-center gap-2 bg-cta hover:bg-blue-600 text-white px-5 py-2.5 rounded-[14px] font-bold text-[14px] transition-all shadow-[0_8px_20px_rgba(49,130,246,0.3)] hover:shadow-none bg-gradient-to-r from-blue-500 to-blue-600"
-                      >
-                        <Send className="w-4 h-4" />
-                        쪽지 보내기
-                      </button>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                        <button 
+                          onClick={handleSendMessage}
+                          className="inline-flex items-center justify-center gap-2 bg-cta hover:bg-blue-600 text-white px-5 py-2.5 rounded-[14px] font-bold text-[14px] transition-all shadow-[0_8px_20px_rgba(49,130,246,0.3)] hover:shadow-none bg-gradient-to-r from-blue-500 to-blue-600"
+                        >
+                          <Send className="w-4 h-4" />
+                          쪽지 보내기
+                        </button>
+                        {myTeam && (
+                          <button 
+                            onClick={handleInvite}
+                            className="inline-flex items-center justify-center gap-2 bg-white text-secondary border border-gray-200 px-5 py-2.5 rounded-[14px] font-bold text-[14px] hover:bg-gray-50 transition-all shadow-sm"
+                          >
+                            <UserPlus className="w-4 h-4" />
+                            팀 초대하기
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

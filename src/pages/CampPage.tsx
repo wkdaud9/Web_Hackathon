@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getTeams, addTeam, getHackathons } from '../utils/api';
+import { getTeams, addTeam, getHackathons, getUsers, sendMessage } from '../utils/api';
 import Dropdown from '../components/Dropdown';
 import TeamDetailModal from '../components/TeamDetailModal';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -9,7 +9,7 @@ import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Users, X, Plus, ExternalLink, Hash, Send } from 'lucide-react';
+import { Users, X, Plus, Hash, Send } from 'lucide-react';
 import type { Hackathon, Team } from '../types/models';
 
 export default function CampPage() {
@@ -47,20 +47,28 @@ export default function CampPage() {
   const [joinTarget, setJoinTarget] = useState<Team | null>(null);
   const [joinMessage, setJoinMessage] = useState('');
 
-  useEffect(() => {
+  const loadData = () => {
     try {
-      setLoading(true);
-      setError(null);
-      const timer = window.setTimeout(() => {
-        setTeams(getTeams());
-        setHackathons(getHackathons());
-        setLoading(false);
-      }, 250);
-      return () => window.clearTimeout(timer);
+      setTeams(getTeams());
+      setHackathons(getHackathons());
+      setLoading(false);
     } catch {
       setError('팀 모집 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = window.setTimeout(loadData, 250);
+    
+    // Listen for global storage updates
+    window.addEventListener('storage-update', loadData);
+    
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('storage-update', loadData);
+    };
   }, []);
 
   useEffect(() => {
@@ -291,10 +299,13 @@ export default function CampPage() {
                 
                 {/* Right Section: Action */}
                 <div className="flex flex-col items-end justify-center md:items-end gap-2.5 flex-shrink-0 md:w-36 border-t border-gray-100 md:border-t-0 pt-4 md:pt-0 shrink-0">
-                  {currentUser && (team.leaderName === currentUser.nickname || team.members?.includes(currentUser.nickname)) ? (
-                    <div className="text-white bg-emerald-500 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-emerald-100 cursor-default">
-                      참여 완료
-                    </div>
+                  {currentUser && (team.leaderName === currentUser.nickname || team.members?.includes(currentUser.nickname) || team.memberIds?.includes(currentUser.id)) ? (
+                    <Link 
+                      to="/workspace"
+                      className="text-white bg-emerald-500 hover:bg-emerald-600 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-emerald-100"
+                    >
+                      워크스페이스 이동
+                    </Link>
                   ) : (
                     <button 
                       onClick={(e) => {
@@ -346,7 +357,7 @@ export default function CampPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!currentUser) {
-                          alert('쪽지를 보내려면 로그인해주세요.');
+                          showToast('쪽지를 보내려면 로그인해주세요.', 'info');
                           return;
                         }
                         setMessageTarget(team);
@@ -419,8 +430,10 @@ export default function CampPage() {
                         hackathonSlug: joinTarget.hackathonSlug || '',
                         teamCode: joinTarget.teamCode,
                         applicantName: currentUser!.nickname,
+                        applicantId: currentUser!.id,
                         message: joinMessage.trim(),
                         status: 'pending',
+                        type: 'application',
                         createdAt: new Date().toISOString()
                       });
                       
@@ -476,8 +489,27 @@ export default function CampPage() {
                 </button>
                 <button
                   onClick={() => {
-                    if (!messageContent.trim()) return;
-                    alert(`요청하신 쪽지가 전송되었습니다! (내용: ${messageContent})`);
+                    if (!messageContent.trim() || !messageTarget) return;
+                    
+                    const users = getUsers();
+                    const targetUser = users.find(u => u.nickname === messageTarget.leaderName);
+                    
+                    if (!targetUser) {
+                      showToast('상대방 정보를 찾을 수 없습니다.', 'error');
+                      return;
+                    }
+
+                    sendMessage({
+                      id: Math.random().toString(36).substring(2, 9),
+                      senderId: currentUser!.id,
+                      senderNickname: currentUser!.nickname,
+                      receiverId: targetUser.id,
+                      content: messageContent.trim(),
+                      isRead: false,
+                      createdAt: new Date().toISOString()
+                    });
+
+                    showToast(`${targetUser.nickname}님에게 쪽지를 보냈습니다!`, 'success');
                     setMessageModalOpen(false);
                     setMessageContent('');
                   }}

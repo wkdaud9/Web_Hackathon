@@ -33,6 +33,7 @@ export interface Team {
   createdAt: string;
   leaderName?: string;
   members?: string[];
+  memberIds?: string[];
   history?: Array<{
     eventName: string;
     prize: string;
@@ -56,8 +57,10 @@ export interface TeamInvite {
   hackathonSlug: string;
   teamCode: string;
   applicantName: string;
+  applicantId: string;
   message?: string;
   status: TeamInviteStatus;
+  type: 'application' | 'invitation';
   createdAt: string;
 }
 
@@ -136,4 +139,33 @@ export interface HackathonDetail {
       note?: string;
     };
   };
+}
+export interface TeamSchedule {
+  id: string;
+  teamCode: string;
+  title: string;
+  description?: string;
+  startAt: string;
+  endAt?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface TeamResource {
+  id: string;
+  teamCode: string;
+  title: string;
+  description?: string;
+  url: string;
+  type: 'file' | 'link' | 'github' | 'design';
+  sharedBy: string;
+  createdAt: string;
+}
+
+export interface TeamIdea {
+  id: string;
+  teamCode: string;
+  author: string;
+  content: string;
+  createdAt: string;
 }

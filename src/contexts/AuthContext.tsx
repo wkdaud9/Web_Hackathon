@@ -1,13 +1,14 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types/models';
-import { getUsers, addUser } from '../utils/api';
+import { getUsers, addUser, updateUser as apiUpdateUser } from '../utils/api';
 
 interface AuthContextType {
   currentUser: User | null;
   login: (loginId: string, password: string) => Promise<boolean>;
   register: (loginId: string, password: string, nickname: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (user: User) => void;
   isLoading: boolean;
 }
 
@@ -71,8 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('currentUser');
   };
 
+  const updateUser = (user: User) => {
+    setCurrentUser(user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    apiUpdateUser(user);
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,7 +8,16 @@ import type {
   TeamInvite,
   User,
   Message,
+  TeamIdea,
+  TeamSchedule,
+  TeamResource,
 } from '../types/models';
+
+function dispatchUpdate() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('storage-update'));
+  }
+}
 
 function readFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -45,13 +54,73 @@ export function addTeam(team: Team) {
   const parsed = readFromStorage<Team[]>('teams', []);
   parsed.push(team);
   writeToStorage('teams', parsed);
+  dispatchUpdate();
 }
 
 export function updateTeam(team: Team) {
   const parsed = readFromStorage<Team[]>('teams', []);
   const updated = parsed.map((t) => (t.teamCode === team.teamCode ? team : t));
   writeToStorage('teams', updated);
+  dispatchUpdate();
   return team;
+}
+
+export function updateUser(user: User) {
+  const parsed = readFromStorage<User[]>('users', []);
+  const updated = parsed.map((u) => (u.id === user.id ? user : u));
+  writeToStorage('users', updated);
+  dispatchUpdate();
+}
+
+export function addUser(user: User) {
+  const parsed = readFromStorage<User[]>('users', []);
+  parsed.push(user);
+  writeToStorage('users', parsed);
+  dispatchUpdate();
+}
+
+export function leaveTeam(teamCode: string, userNickname: string, userId?: string) {
+  const allTeams = getTeams();
+  const teamIndex = allTeams.findIndex(t => t.teamCode === teamCode);
+  if (teamIndex === -1) return;
+
+  const team = allTeams[teamIndex];
+  const updatedMembers = team.members?.filter(m => m !== userNickname) || [];
+  const updatedMemberIds = userId ? (team.memberIds?.filter(id => id !== userId) || []) : (team.memberIds || []);
+  
+  const updatedTeam = { 
+    ...team, 
+    members: updatedMembers, 
+    memberIds: updatedMemberIds,
+    memberCount: Math.max(1, updatedMembers.length + (team.leaderName ? 1 : 0)) 
+    // Usually memberCount should be actual count. leaderName + members.length
+  };
+  
+  // Correction: If memberCount is used, it should be derived or updated.
+  updatedTeam.memberCount = updatedMembers.length + (team.leaderName ? 1 : 0);
+
+  updateTeam(updatedTeam);
+}
+
+export function joinTeam(teamCode: string, userNickname: string, userId: string) {
+  const allTeams = getTeams();
+  const teamIndex = allTeams.findIndex(t => t.teamCode === teamCode);
+  if (teamIndex === -1) return;
+
+  const team = allTeams[teamIndex];
+  const members = team.members || [];
+  const memberIds = team.memberIds || [];
+
+  if (members.includes(userNickname)) return;
+
+  const updatedTeam = {
+    ...team,
+    members: [...members, userNickname],
+    memberIds: [...memberIds, userId]
+  };
+  updatedTeam.memberCount = updatedTeam.members.length + (team.leaderName ? 1 : 0);
+
+  updateTeam(updatedTeam);
 }
 
 export function getLeaderboard(hackathonSlug: string) {
@@ -69,9 +138,7 @@ export function addLeaderboardEntry(hackathonSlug: string, entry: LeaderboardEnt
   
   if (boardIndex >= 0) {
     parsed[boardIndex].entries.push(entry);
-    // Sort entries by score descending
     parsed[boardIndex].entries.sort((a, b) => b.score - a.score);
-    // Re-assign ranks
     parsed[boardIndex].entries.forEach((e, idx) => { e.rank = idx + 1; });
     parsed[boardIndex].updatedAt = new Date().toISOString();
   } else {
@@ -120,52 +187,47 @@ export function addInvite(invite: TeamInvite) {
   const parsed = readFromStorage<TeamInvite[]>('team_invites', []);
   parsed.push(invite);
   writeToStorage('team_invites', parsed);
+  dispatchUpdate();
+}
+
+export function updateInviteStatus(id: number, status: 'accepted' | 'rejected') {
+  const allInvites = getInvites();
+  const inviteIndex = allInvites.findIndex((i) => i.id === id);
+  if (inviteIndex >= 0) {
+    allInvites[inviteIndex].status = status;
+    writeToStorage('team_invites', allInvites);
+    dispatchUpdate();
+  }
 }
 
 export function deleteSubmission(id: number, hackathonSlug: string, teamName: string) {
-  // 1. Remove from submissions
   const subs = readFromStorage<Submission[]>('submissions', []);
   const updatedSubs = subs.filter((s) => s.id !== id);
   writeToStorage('submissions', updatedSubs);
 
-  // 2. Remove from leaderboards
   const boards = readFromStorage<Leaderboard[]>('leaderboards', []);
   const boardIndex = boards.findIndex(b => b.hackathonSlug === hackathonSlug);
   if (boardIndex >= 0) {
     boards[boardIndex].entries = boards[boardIndex].entries.filter(e => e.teamName !== teamName);
-    // Re-rank
     boards[boardIndex].entries.sort((a,b) => b.score - a.score);
     boards[boardIndex].entries.forEach((e, idx) => { e.rank = idx + 1; });
-    boards[boardIndex].updatedAt = new Date().toISOString();
     writeToStorage('leaderboards', boards);
   }
-}
-
-export function updateInviteStatus(id: number, status: TeamInvite['status']) {
-  const parsed = readFromStorage<TeamInvite[]>('team_invites', []);
-  const updated = parsed.map((invite) => (invite.id === id ? { ...invite, status } : invite));
-  writeToStorage('team_invites', updated);
-  return updated;
+  dispatchUpdate();
 }
 
 export function getUsers() {
   return readFromStorage<User[]>('users', []);
 }
 
-export function addUser(user: User) {
-  const parsed = readFromStorage<User[]>('users', []);
-  parsed.push(user);
-  writeToStorage('users', parsed);
-}
-
-export function getMessages(receiverId: string): Message[] {
+export function getMessages(userId: string) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
   return allMsgs
-    .filter((m) => m.receiverId === receiverId)
+    .filter((m) => m.receiverId === userId || m.senderId === userId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function getConversation(userId: string, otherUserId: string): Message[] {
+export function getChatHistory(userId: string, otherUserId: string) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
   return allMsgs
     .filter((m) => 
@@ -179,12 +241,14 @@ export function sendMessage(message: Message) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
   allMsgs.push(message);
   writeToStorage('messages', allMsgs);
+  dispatchUpdate();
 }
 
 export function markMessageAsRead(msgId: string) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
   const updated = allMsgs.map((m) => (m.id === msgId ? { ...m, isRead: true } : m));
   writeToStorage('messages', updated);
+  dispatchUpdate();
 }
 
 export function markAllAsRead(receiverId: string, senderId: string) {
@@ -193,8 +257,88 @@ export function markAllAsRead(receiverId: string, senderId: string) {
     (m.receiverId === receiverId && m.senderId === senderId) ? { ...m, isRead: true } : m
   );
   writeToStorage('messages', updated);
+  dispatchUpdate();
 }
 
-export function getUnreadCount(receiverId: string): number {
-  return getMessages(receiverId).filter((m) => !m.isRead).length;
+export function getUnreadCount(userId: string): number {
+  const allMsgs = readFromStorage<Message[]>('messages', []);
+  return allMsgs.filter((m) => m.receiverId === userId && !m.isRead).length;
+}
+
+export function getTeamIdeas(teamCode: string) {
+  const all = readFromStorage<TeamIdea[]>('team_ideas', []);
+  return all.filter((i) => i.teamCode === teamCode).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function addTeamIdea(idea: TeamIdea) {
+  const all = readFromStorage<TeamIdea[]>('team_ideas', []);
+  all.push(idea);
+  writeToStorage('team_ideas', all);
+  dispatchUpdate();
+}
+
+export function updateTeamIdea(idea: TeamIdea) {
+  const all = readFromStorage<TeamIdea[]>('team_ideas', []);
+  const updated = all.map((i) => (i.id === idea.id ? idea : i));
+  writeToStorage('team_ideas', updated);
+  dispatchUpdate();
+}
+
+export function deleteTeamIdea(id: string) {
+  const all = readFromStorage<TeamIdea[]>('team_ideas', []);
+  const updated = all.filter((i) => i.id !== id);
+  writeToStorage('team_ideas', updated);
+  dispatchUpdate();
+}
+
+export function getTeamSchedules(teamCode: string) {
+  const all = readFromStorage<TeamSchedule[]>('team_schedules', []);
+  return all.filter((s) => s.teamCode === teamCode).sort((a,b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+}
+
+export function addTeamSchedule(schedule: TeamSchedule) {
+  const all = readFromStorage<TeamSchedule[]>('team_schedules', []);
+  all.push(schedule);
+  writeToStorage('team_schedules', all);
+  dispatchUpdate();
+}
+
+export function updateTeamSchedule(schedule: TeamSchedule) {
+  const all = readFromStorage<TeamSchedule[]>('team_schedules', []);
+  const updated = all.map((s) => (s.id === schedule.id ? schedule : s));
+  writeToStorage('team_schedules', updated);
+  dispatchUpdate();
+}
+
+export function deleteTeamSchedule(id: string) {
+  const all = readFromStorage<TeamSchedule[]>('team_schedules', []);
+  const updated = all.filter((s) => s.id !== id);
+  writeToStorage('team_schedules', updated);
+  dispatchUpdate();
+}
+
+export function getTeamResources(teamCode: string) {
+  const all = readFromStorage<TeamResource[]>('team_resources', []);
+  return all.filter((r) => r.teamCode === teamCode).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function addTeamResource(resource: TeamResource) {
+  const all = readFromStorage<TeamResource[]>('team_resources', []);
+  all.push(resource);
+  writeToStorage('team_resources', all);
+  dispatchUpdate();
+}
+
+export function updateTeamResource(resource: TeamResource) {
+  const all = readFromStorage<TeamResource[]>('team_resources', []);
+  const updated = all.map((r) => (r.id === resource.id ? resource : r));
+  writeToStorage('team_resources', updated);
+  dispatchUpdate();
+}
+
+export function deleteTeamResource(id: string) {
+  const all = readFromStorage<TeamResource[]>('team_resources', []);
+  const updated = all.filter((r) => r.id !== id);
+  writeToStorage('team_resources', updated);
+  dispatchUpdate();
 }

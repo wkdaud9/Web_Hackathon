@@ -35,8 +35,8 @@ export default function HackathonDetailPage() {
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [detail, setDetail] = useState<HackathonDetail | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
   const [invites, setInvites] = useState<TeamInvite[]>([]);
+  const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,6 +179,7 @@ export default function HackathonDetailPage() {
       applicantName: currentUser.nickname,
       message: inviteMessage.trim(),
       status: 'pending',
+      type: 'application',
       createdAt: new Date().toISOString(),
     };
 
@@ -726,7 +727,7 @@ export default function HackathonDetailPage() {
                                  {entry.teamName}
                                </td>
                                 <td className="py-4 px-6 text-cta font-mono font-black text-right text-[18px]">
-                                  {entry.score}
+                                  {entry.score}점
                                 </td>
                                <td className="py-4 px-6 text-[14px] text-tertiary font-mono font-medium text-right">
                                  {new Date(entry.submittedAt).toLocaleDateString()}

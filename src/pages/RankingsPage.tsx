@@ -1,30 +1,48 @@
-import { useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, Star, User } from 'lucide-react';
+import { Trophy, Medal, Star, User, UserPlus, Mail, CheckCircle } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
 import EmptyState from '../components/ui/EmptyState';
-import { getUsers } from '../utils/api';
+import { getUsers, getTeams, addInvite, getInvites } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import UserProfileModal from '../components/layout/UserProfileModal';
 import type { User as UserType } from '../types/models';
 
 export default function RankingsPage() {
+  const { currentUser } = useAuth();
   const { showToast } = useToast();
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [users] = useState<UserType[]>(() => getUsers());
   const [period, setPeriod] = useState<'7d' | '30d' | 'all'>('all');
+  const [invites, setInvites] = useState(() => getInvites());
+
+  useEffect(() => {
+    const handleUpdate = () => setInvites(getInvites());
+    window.addEventListener('storage-update', handleUpdate);
+    return () => window.removeEventListener('storage-update', handleUpdate);
+  }, []);
+  
+  const myTeam = useMemo(() => {
+    const teams = getTeams();
+    return teams.find(t => t.leaderName === currentUser?.nickname) || null;
+  }, [currentUser, invites]);
+
+  const isAlreadyInvited = (nickname: string) => {
+    if (!myTeam) return false;
+    return invites.some(inv => 
+      inv.teamCode === myTeam.teamCode && 
+      inv.applicantName === nickname && 
+      inv.status === 'pending'
+    );
+  };
 
   const rankedUsers = useMemo(() => {
-    // In a real app, points would be calculated based on the selected period.
-    // For this mock, we'll sort the users by points. If 7d or 30d, we just
-    // display the same for now or mock a calculation.
     let sorted = [...users].sort((a, b) => b.points - a.points);
     
     if (period === '7d') {
-      // Mock: slightly randomize or scale down points for 7d
       sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.3) })).sort((a, b) => b.points - a.points);
     } else if (period === '30d') {
-      // Mock: scale down points for 30d
       sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.7) })).sort((a, b) => b.points - a.points);
     }
 
@@ -42,13 +60,37 @@ export default function RankingsPage() {
     setSelectedUser(user);
   };
 
+  const inviteToTeam = (e: React.MouseEvent, targetUser: UserType) => {
+    e.stopPropagation();
+    if (!myTeam) return;
+
+    if (isAlreadyInvited(targetUser.nickname)) {
+       showToast('이미 초대를 보낸 사용자입니다.', 'info');
+       return;
+    }
+
+    addInvite({
+      id: Date.now(),
+      hackathonSlug: myTeam.hackathonSlug || 'common',
+      teamCode: myTeam.teamCode,
+      applicantName: targetUser.nickname,
+      applicantId: targetUser.id,
+      message: `${currentUser?.nickname}님이 소속 팀 [${myTeam.name}]에 초대했습니다.`,
+      status: 'pending',
+      type: 'invitation',
+      createdAt: new Date().toISOString()
+    });
+
+    showToast('초대 완료', 'success');
+  };
+
   return (
     <div className="w-full">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}}>
           <h1 className="text-3xl md:text-4xl font-bold font-heading text-primary tracking-tight mb-2 flex items-center gap-3">
             <Trophy className="w-10 h-10 text-amber-500" />
-            글로벌 랭킹
+            명예의 전당
           </h1>
           <p className="text-secondary font-medium mt-2">전체 해커톤에서 획득한 누적 포인트를 기반으로 한 유저 랭킹입니다.</p>
         </motion.div>
@@ -99,7 +141,7 @@ export default function RankingsPage() {
                     <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[1].nickname}</div>
                     <div className="w-full bg-gray-50 h-[60%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
                       <Medal className="w-6 h-6 text-gray-400" />
-                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[1].points.toLocaleString()}</span>
+                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[1].points.toLocaleString()}점</span>
                     </div>
                   </button>
                 )}
@@ -116,7 +158,7 @@ export default function RankingsPage() {
                     <div className="w-[110%] bg-blue-50 h-[85%] rounded-t-xl shadow-md border border-blue-200 border-b-0 flex flex-col items-center justify-start pt-4 relative overflow-hidden group-hover:bg-blue-100/80 transition-colors">
                       <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
                       <Trophy className="w-9 h-9 text-amber-500 drop-shadow-sm relative z-10" />
-                      <span className="text-[17px] font-mono font-black mt-2 text-cta relative z-10">{rankedUsers[0].points.toLocaleString()}</span>
+                      <span className="text-[17px] font-mono font-black mt-2 text-cta relative z-10">{rankedUsers[0].points.toLocaleString()}점</span>
                     </div>
                   </button>
                 )}
@@ -132,7 +174,7 @@ export default function RankingsPage() {
                     <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[2].nickname}</div>
                     <div className="w-full bg-gray-50 h-[45%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
                       <Medal className="w-6 h-6 text-orange-400" />
-                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[2].points.toLocaleString()}</span>
+                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[2].points.toLocaleString()}점</span>
                     </div>
                   </button>
                 )}
@@ -149,9 +191,11 @@ export default function RankingsPage() {
               <table className="w-full text-left min-w-[500px]">
                 <thead>
                   <tr className="border-b border-gray-100 text-tertiary text-[14px] bg-white">
-                    <th className="py-4 px-6 font-bold w-24 text-center">순위</th>
-                    <th className="py-4 px-6 font-bold">유저명</th>
-                    <th className="py-4 px-6 font-bold text-right">누적 포인트</th>
+                    <th className="py-3 px-3 font-bold w-16 text-center">순위</th>
+                    <th className="py-3 px-3 font-bold">유저명</th>
+                    <th className="py-3 px-3 font-bold text-right w-28">누적 점수</th>
+                    <th className="py-3 px-3 font-bold text-center w-20">쪽지</th>
+                    <th className="py-4 px-3 font-bold text-center w-20">초대</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 text-[15px]">
@@ -161,8 +205,8 @@ export default function RankingsPage() {
                       onClick={() => handleUserClick(user)}
                       className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
                     >
-                      <td className="py-5 px-6 text-center">
-                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[14px] font-black ${
+                      <td className="py-3.5 px-3 text-center">
+                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[13px] font-black ${
                           user.rank === 1 ? 'bg-amber-100 text-amber-600' :
                           user.rank === 2 ? 'bg-gray-100 text-gray-500' :
                           user.rank === 3 ? 'bg-orange-100 text-orange-600' :
@@ -171,23 +215,55 @@ export default function RankingsPage() {
                           {user.rank}
                         </span>
                       </td>
-                      <td className="py-5 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden shrink-0">
-                            {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary"/>}
+                      <td className="py-3.5 px-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden shrink-0">
+                            {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-4 h-4 text-tertiary"/>}
                           </div>
-                          <div>
-                            <div className="font-bold text-primary group-hover:text-cta tracking-tight text-[16px] transition-colors">
+                          <div className="min-w-0">
+                            <div className="font-bold text-primary group-hover:text-cta tracking-tight text-[15px] transition-colors truncate">
                               {user.nickname}
                             </div>
-                            <div className="text-[13px] text-tertiary font-medium">
-                              {user.isProfilePublic ? '공개 프로필' : '비공개 프로필'}
+                            <div className="text-[12px] text-tertiary font-medium">
+                              {user.isProfilePublic ? '공개' : '비공개'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-5 px-6 text-right font-mono font-black text-cta text-[18px]">
-                        {user.points.toLocaleString()} <span className="text-[13px] text-tertiary font-medium font-sans ml-1">PT</span>
+                      <td className="py-3.5 px-3 text-right font-mono font-black text-cta text-[17px] whitespace-nowrap">
+                        {user.points.toLocaleString()} 점
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        {user.id !== currentUser?.id ? (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleUserClick(user); }}
+                            className="bg-gray-50 text-secondary hover:bg-gray-100 p-2 rounded-xl transition-all shadow-sm border border-gray-100 mx-auto block"
+                            title="쪽지 보내기"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <span className="text-tertiary opacity-30 italic text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                         {myTeam && user.id !== currentUser?.id ? (
+                          isAlreadyInvited(user.nickname) ? (
+                            <div className="bg-emerald-50 text-emerald-500 p-2 rounded-xl border border-emerald-100 mx-auto block w-fit" title="초대 완료">
+                              <CheckCircle className="w-4 h-4" />
+                            </div>
+                          ) : (
+                            <button 
+                              onClick={(e) => inviteToTeam(e, user)}
+                              className="bg-blue-50 text-cta hover:bg-cta hover:text-white p-2 rounded-xl transition-all shadow-sm mx-auto block"
+                              title="팀 초대하기"
+                            >
+                              <UserPlus className="w-4 h-4" />
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-tertiary opacity-30 italic text-sm">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}

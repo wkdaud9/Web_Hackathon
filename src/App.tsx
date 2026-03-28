@@ -7,6 +7,7 @@ import HackathonDetailPage from './pages/HackathonDetailPage';
 import CampPage from './pages/CampPage';
 import RankingsPage from './pages/RankingsPage';
 import MyPage from './pages/MyPage';
+import TeamWorkspacePage from './pages/TeamWorkspacePage';
 import { ToastProvider } from './contexts/ToastContext';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
               <Route path="camp" element={<CampPage />} />
               <Route path="rankings" element={<RankingsPage />} />
               <Route path="mypage" element={<MyPage />} />
+              <Route path="workspace" element={<TeamWorkspacePage />} />
             </Route>
           </Routes>
         </BrowserRouter>

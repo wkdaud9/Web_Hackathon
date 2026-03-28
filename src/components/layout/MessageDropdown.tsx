@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mail, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getMessages, getUnreadCount, markAllAsRead } from '../../utils/api';
-import type { Message } from '../../types/models';
+import { getMessages, getUnreadCount, markAllAsRead, getUsers } from '../../utils/api';
+import type { Message, User as UserType } from '../../types/models';
 import { useMemo } from 'react';
 import ChatModal from './ChatModal';
 
@@ -51,20 +51,32 @@ export default function MessageDropdown() {
   };
 
   const conversations = useMemo(() => {
-    const groups: Record<string, { lastMsg: Message; unreadCount: number }> = {};
+    const allUsers = getUsers();
+    const groups: Record<string, { partnerId: string; partnerNickname: string; lastMsg: Message; unreadCount: number }> = {};
     
-    // Sort received messages by date descending (already done in getMessages)
-    messages.forEach(msg => {
-      if (!groups[msg.senderId]) {
-        groups[msg.senderId] = { lastMsg: msg, unreadCount: 0 };
-      }
-      if (!msg.isRead) {
-        groups[msg.senderId].unreadCount += 1;
-      }
+    // Create copy and sort chronological ascending to ensure lastMsg is truly the last one
+    const chrono = [...messages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    chrono.forEach(msg => {
+      const isMine = msg.senderId === currentUser!.id;
+      const partnerId = isMine ? msg.receiverId : msg.senderId;
+      
+      const partner = allUsers.find((u: UserType) => u.id === partnerId);
+      const partnerNickname = partner?.nickname || (isMine ? '상대방' : msg.senderNickname);
+
+      groups[partnerId] = { 
+        partnerId, 
+        partnerNickname,
+        lastMsg: msg, 
+        unreadCount: (groups[partnerId]?.unreadCount || 0) + (!msg.isRead && !isMine ? 1 : 0)
+      };
     });
     
-    return Object.values(groups);
-  }, [messages]);
+    // Convert to array and sort by lastMsg.createdAt descending for UI
+    return Object.values(groups).sort((a, b) => 
+      new Date(b.lastMsg.createdAt).getTime() - new Date(a.lastMsg.createdAt).getTime()
+    );
+  }, [messages, currentUser]);
 
   if (!currentUser) return null;
 
@@ -97,13 +109,13 @@ export default function MessageDropdown() {
             ) : (
               conversations.map(conv => (
                 <div 
-                  key={conv.lastMsg.senderId} 
-                  onClick={() => handleOpenChat(conv.lastMsg.senderId, conv.lastMsg.senderNickname)}
+                  key={conv.partnerId} 
+                  onClick={() => handleOpenChat(conv.partnerId, conv.partnerNickname)}
                   className={`p-3.5 rounded-xl border cursor-pointer hover:shadow-md transition-all ${conv.unreadCount > 0 ? 'bg-blue-50/50 border-blue-100 hover:border-blue-200' : 'bg-white border-gray-100 hover:border-gray-200'}`}
                 >
                   <div className="flex justify-between items-start mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[14px] text-primary">{conv.lastMsg.senderNickname}</span>
+                      <span className="font-bold text-[14px] text-primary">{conv.partnerNickname}</span>
                       {conv.unreadCount > 0 && (
                         <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] text-center">
                           {conv.unreadCount}
