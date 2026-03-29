@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getTeams, addTeam, getHackathons, getUsers, sendMessage } from '../utils/api';
+import { getTeams, addTeam, updateTeam, getHackathons, getUsers, sendMessage } from '../utils/api';
 import Dropdown from '../components/Dropdown';
 import TeamDetailModal from '../components/TeamDetailModal';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -9,8 +9,137 @@ import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Users, X, Plus, Hash, Send } from 'lucide-react';
+import { Users, X, Plus, Hash, Send, Settings } from 'lucide-react';
 import type { Hackathon, Team } from '../types/models';
+
+function TeamListCard({ 
+  team, 
+  hackathons,
+  currentUser,
+  onSelect,
+  onJoin,
+  onEdit,
+  onMessage
+}: { 
+  team: Team; 
+  hackathons: Hackathon[];
+  currentUser: any;
+  onSelect: (team: Team) => void;
+  onJoin: (team: Team) => void;
+  onEdit: (team: Team) => void;
+  onMessage: (team: Team) => void;
+}) {
+  const targetHackathon = hackathons.find(hx => hx.slug === team.hackathonSlug);
+  const isMyTeam = currentUser && (team.leaderName === currentUser.nickname || team.members?.includes(currentUser.nickname) || team.memberIds?.includes(currentUser.id));
+  const isLeader = currentUser?.nickname === team.leaderName;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white p-6 rounded-[32px] border border-gray-100 flex flex-col md:flex-row md:items-center gap-6 hover:border-cta/30 transition-all group shadow-[0_2px_15px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] cursor-pointer"
+      onClick={() => onSelect(team)}
+    >
+      {/* Left: Team Name & Status */}
+      <div className="flex-shrink-0 w-full md:w-56 flex flex-col items-start">
+        <div className="flex items-center gap-3 mb-2.5">
+          <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${team.isOpen ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
+            {team.isOpen ? '모집 중' : '모집 마감'}
+          </div>
+          <div className="text-[12px] font-black text-tertiary bg-gray-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+             <Users className="w-3 h-3" /> {team.memberCount}
+          </div>
+        </div>
+        <h3 className="font-black text-[20px] text-primary group-hover:text-cta transition-colors leading-tight mb-2 truncate w-full">
+          {team.name}
+        </h3>
+        {targetHackathon ? (
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-cta/70 bg-blue-50/50 px-2 py-1 rounded-md">
+            <Hash className="w-3.5 h-3.5" /> 
+            <span className="truncate max-w-[150px]">{targetHackathon.title}</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center text-[11px] font-black text-secondary bg-gray-100 px-2 py-1 rounded-md">
+            자유 주제
+          </div>
+        )}
+      </div>
+      
+      {/* Middle: Intro & Positions */}
+      <div className="flex-1 flex flex-col justify-center min-w-0">
+        <p className="text-secondary text-[15px] font-medium leading-relaxed mb-4 line-clamp-2">
+          {team.intro}
+        </p>
+        {team.lookingFor?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {team.lookingFor.map((role:string) => (
+              <span key={role} className="px-2.5 py-1 bg-gray-50 text-secondary border border-gray-100 rounded-lg text-[12px] font-bold">
+                {role}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Right: Leader & Action */}
+      <div className="flex items-center md:flex-col items-end md:justify-center gap-4 md:w-40 border-t border-gray-100 md:border-t-0 pt-4 md:pt-0 shrink-0">
+        <div className="flex items-center gap-2 mr-auto md:mr-0 md:mb-2">
+           <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-[10px] font-black text-cta">
+              {team.leaderName?.[0]}
+           </div>
+           <span className="text-[12px] font-bold text-tertiary truncate max-w-[80px]">{team.leaderName}</span>
+        </div>
+
+        <div className="flex gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+          {isMyTeam ? (
+            <>
+              <Link 
+                to="/workspace"
+                className="text-white bg-emerald-500 hover:bg-emerald-600 transition-all flex items-center justify-center text-[13px] font-black px-6 py-2.5 rounded-xl shadow-md shadow-emerald-100"
+              >
+                팀 관리
+              </Link>
+              {isLeader && (
+                <button 
+                  onClick={() => onEdit(team)}
+                  className="p-2.5 text-tertiary border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors"
+                  title="팀 정보 수정 및 마감"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {team.isOpen ? (
+                <button 
+                  onClick={() => onJoin(team)}
+                  className="text-white bg-cta hover:bg-blue-600 transition-all flex items-center justify-center text-[13px] font-black px-4 py-2.5 rounded-xl shadow-md shadow-blue-200"
+                >
+                  합류 신청
+                </button>
+              ) : (
+                <button 
+                  disabled
+                  className="bg-gray-100 text-gray-400 cursor-not-allowed flex items-center justify-center text-[13px] font-black px-6 py-2.5 rounded-xl border border-gray-100"
+                >
+                  모집 완료
+                </button>
+              )}
+              <button 
+                onClick={() => onMessage(team)}
+                className="p-2.5 text-tertiary border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors"
+                title="쪽지"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function CampPage() {
   const [searchParams] = useSearchParams();
@@ -21,6 +150,7 @@ export default function CampPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterHackathonSlug, setFilterHackathonSlug] = useState(hackathonSlugParam || 'all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isNewParam = searchParams.get('new') === 'true';
   const [showForm, setShowForm] = useState(isNewParam);
@@ -61,32 +191,21 @@ export default function CampPage() {
   useEffect(() => {
     setLoading(true);
     const timer = window.setTimeout(loadData, 250);
-    
-    // Listen for global storage updates
     window.addEventListener('storage-update', loadData);
-    
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('storage-update', loadData);
     };
   }, []);
 
-  useEffect(() => {
-    if (hackathonSlugParam) {
-      setFilterHackathonSlug(hackathonSlugParam);
-    }
-  }, [hackathonSlugParam]);
-
-  useEffect(() => {
-    if (searchParams.get('new') === 'true') {
-      setShowForm(true);
-    }
-  }, [searchParams]);
-
   const filteredTeams = useMemo(() => {
-    if (filterHackathonSlug === 'all') return teams;
-    return teams.filter((team) => team.hackathonSlug === filterHackathonSlug);
-  }, [filterHackathonSlug, teams]);
+    return teams.filter((team) => {
+      const matchHackathon = filterHackathonSlug === 'all' || team.hackathonSlug === filterHackathonSlug;
+      const matchQuery = team.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          team.intro.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchHackathon && matchQuery;
+    });
+  }, [filterHackathonSlug, teams, searchQuery]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,487 +233,291 @@ export default function CampPage() {
     setLookingFor('');
     setIntro('');
     setContactInfo('');
+    showToast('신규 팀이 성공적으로 모집 등록되었습니다.', 'success');
   };
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
 
   return (
-    <div className="w-full relative">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}}>
-          <h1 className="text-3xl md:text-4xl font-bold font-heading text-primary tracking-tight mb-2">팀 모집 라운지</h1>
-          <p className="text-secondary font-medium">
-            {hackathonSlugParam ? '이 해커톤에 참여할 팀을 찾거나 모집해보세요!' : '모든 해커톤의 팀 빌딩 라운지입니다.'}
-          </p>
-        </motion.div>
+    <div className="w-full min-h-screen bg-white">
+      {/* Header with Search & New Team Button */}
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 py-4">
+        <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+             <h1 className="text-xl font-black text-primary tracking-tighter uppercase">Team Building</h1>
+          </div>
 
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="w-full md:w-auto">
-          <Dropdown
-            className="w-full md:w-72"
-            value={filterHackathonSlug}
-            onChange={(val) => setFilterHackathonSlug(val)}
-            options={[
-              { label: '모든 해커톤', value: 'all' },
-              ...hackathons.map(h => ({ label: h.title, value: h.slug }))
-            ]}
-          />
-        </motion.div>
-
-        <motion.button
-          initial={{opacity:0}}
-          animate={{opacity:1}}
-          onClick={() => setShowForm(true)}
-          className="px-6 py-3 bg-cta text-white font-bold rounded-2xl hover:bg-blue-600 hover:-translate-y-0.5 transition-all shadow-[0_8px_20px_rgba(49,130,246,0.3)] flex items-center justify-center gap-2"
-        >
-          <Plus className="w-5 h-5" /> 새 팀 모집하기
-        </motion.button>
+          <div className="flex items-center gap-3">
+             <div className="relative group flex-1 md:flex-none">
+               <input 
+                 type="text"
+                 placeholder="팀명, 소개 검색"
+                 className="bg-gray-50 text-sm font-medium rounded-full py-2.5 px-6 outline-none border border-gray-100 focus:bg-white focus:border-cta focus:ring-4 focus:ring-cta/5 transition-all w-full md:w-64"
+                 value={searchQuery}
+                 onChange={(e) => setSearchQuery(e.target.value)}
+               />
+            </div>
+            <Dropdown
+              className="w-full md:w-64 h-[42px]"
+              value={filterHackathonSlug}
+              onChange={(val) => setFilterHackathonSlug(val)}
+              options={[
+                { label: '모든 해커톤', value: 'all' },
+                ...hackathons.map(h => ({ label: h.title, value: h.slug }))
+              ]}
+            />
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-cta text-white w-[42px] h-[42px] rounded-full hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 shrink-0 flex items-center justify-center"
+              title="함께 할 팀 모집하기"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden mb-10"
-          >
-            <div className="bg-white border border-blue-100 p-6 md:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
-              {!currentUser && (
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
-                  <p className="font-bold text-primary mb-3 text-lg">새 팀을 등록하려면 로그인이 필요합니다.</p>
+      <div className="max-w-[1240px] mx-auto px-6 py-10">
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="mb-12 bg-gray-50/50 border border-gray-100 rounded-[48px] p-8 md:p-12 relative overflow-hidden"
+            >
+              <button onClick={() => setShowForm(false)} className="absolute top-8 right-8 p-3 hover:bg-white rounded-2xl transition-all"><X className="w-6 h-6 text-tertiary" /></button>
+              <h2 className="text-3xl font-black text-primary mb-10 tracking-tight">팀 모집 등록</h2>
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-3 uppercase tracking-wider">팀 이름</label>
+                    <input required type="text" placeholder="팀 이름을 정해주세요" className="w-full bg-white border border-gray-100 rounded-[22px] px-6 py-4 text-primary font-bold focus:outline-none focus:border-cta transition-all" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-3 uppercase tracking-wider">모집 포지션 (쉼표로 구분)</label>
+                    <input type="text" placeholder="예: 프론트엔드, 디자이너, PM" className="w-full bg-white border border-gray-100 rounded-[22px] px-6 py-4 text-primary font-bold focus:outline-none focus:border-cta transition-all" value={lookingFor} onChange={e => setLookingFor(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-3 uppercase tracking-wider">참여 해커톤</label>
+                    <Dropdown className="w-full h-[60px]" value={hackathonSlug} onChange={(val) => setHackathonSlug(val)} options={[{ label: '자유 주제 (선택 안함)', value: '' }, ...hackathons.map(h => ({ label: h.title, value: h.slug }))]}/>
+                  </div>
                 </div>
-              )}
-              <button 
-                onClick={() => setShowForm(false)} 
-                className="absolute top-6 right-6 text-tertiary hover:text-primary transition-colors z-20"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              
-              <h2 className="text-2xl font-bold font-heading text-primary mb-6 tracking-tight">신규 팀 등록</h2>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[15px] font-bold text-primary mb-2.5">팀 이름 *</label>
-                  <input required
-                    type="text" 
-                    className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary" 
-                    placeholder="팀 이름을 입력해주세요"
-                    value={newTeamName} onChange={e => setNewTeamName(e.target.value)}
-                  />
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-3 uppercase tracking-wider">팀 소개 및 목표</label>
+                    <textarea required className="w-full bg-white border border-gray-100 rounded-[22px] px-6 py-4 text-primary font-bold focus:outline-none focus:border-cta transition-all h-[152px] resize-none" placeholder="팀의 목표와 분위기를 설명해주세요 (최대 200자)" value={intro} onChange={e => setIntro(e.target.value)} maxLength={200} />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-3 uppercase tracking-wider">연락 수단 (링크)</label>
+                    <input type="text" placeholder="오픈카톡, 디스코드 등 연락 링크" className="w-full bg-white border border-gray-100 rounded-[22px] px-6 py-4 text-primary font-bold focus:outline-none focus:border-cta transition-all" value={contactInfo} onChange={e => setContactInfo(e.target.value)} />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[15px] font-bold text-primary mb-2.5">목표 해커톤 (선택)</label>
-                  <Dropdown
-                    placeholder="참여할 해커톤을 선택하세요 (자유 가능)"
-                    className="w-full"
-                    value={hackathonSlug}
-                    onChange={(val) => setHackathonSlug(val)}
-                    options={[
-                      { label: '자유 주제 (선택 없음)', value: '' },
-                      ...hackathons.map(h => ({ label: h.title, value: h.slug }))
-                    ]}
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-[15px] font-bold text-primary mb-2.5">팀 소개 및 목표 *</label>
-                  <textarea required
-                    className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-28 resize-none placeholder:text-tertiary"
-                    placeholder="어떤 아이디어를 실현하고 싶은지 적어주세요! (최대 200자)"
-                    value={intro} onChange={e => setIntro(e.target.value)}
-                    maxLength={200}
-                  ></textarea>
-                </div>
-                <div>
-                  <label className="block text-[15px] font-bold text-primary mb-2.5">모집 포지션 (쉼표로 구분)</label>
-                  <input 
-                    type="text" 
-                    placeholder="기획자, 프론트엔드, 디자이너"
-                    className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary" 
-                    value={lookingFor} onChange={e => setLookingFor(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[15px] font-bold text-primary mb-2.5">연락처 (이메일, 카톡 ID, 링크 등 자유롭게)</label>
-                  <input
-                    type="text"
-                    className="w-full bg-white border border-gray-200 rounded-[16px] px-5 py-3.5 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-tertiary"
-                    placeholder="지원자가 연락할 수 있는 정보를 남겨주세요."
-                    value={contactInfo} onChange={(e) => setContactInfo(e.target.value)}
-                  />
-                </div>
-                <div className="md:col-span-2 flex justify-end mt-4">
-                  <button type="submit" className="px-10 py-4 bg-cta text-white font-bold text-lg rounded-[16px] hover:bg-blue-600 transition-colors shadow-md">
-                    등록하기
-                  </button>
+                <div className="md:col-span-2 flex justify-end pt-4">
+                  <button type="submit" className="px-12 py-5 bg-primary text-white font-black text-lg rounded-[24px] hover:bg-gray-800 transition-all shadow-xl shadow-gray-200">모집 시작하기</button>
                 </div>
               </form>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Team List View */}
-      {filteredTeams.length === 0 ? (
-        <EmptyState
-          icon={<Users className="w-8 h-8" />}
-          title="등록된 팀이 없습니다"
-          description="첫 번째 팀의 리더가 되어보세요!"
-        />
-      ) : (
-        <div className="flex flex-col gap-4">
-          {filteredTeams.map((team, idx) => {
-            const targetHackathon = hackathons.find(hx => hx.slug === team.hackathonSlug);
-            return (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
+        {filteredTeams.length === 0 ? (
+          <EmptyState icon={<Users className="w-12 h-12" />} title="조건과 일치하는 팀이 없습니다" description="필터를 변경하거나 새로운 팀을 직접 모집해보세요!" className="py-20" />
+        ) : (
+          <div className="flex flex-col gap-6">
+            {filteredTeams.map((team) => (
+              <TeamListCard
                 key={team.teamCode}
-                className="bg-white p-5 md:p-6 rounded-[24px] border border-gray-100 flex flex-col md:flex-row md:items-center gap-5 md:gap-8 hover:border-cta/30 transition-all group shadow-[0_2px_15px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
-              >
-                {/* Left Section: Team Name & Status */}
-                <div className="flex-shrink-0 w-full md:w-56 flex flex-col items-start cursor-pointer" onClick={() => setSelectedTeam(team)}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${team.isOpen ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-400'}`} title={team.isOpen ? '모집 중' : '모집 마감'}></span>
-                    <h3 className="font-bold text-[20px] text-primary group-hover:text-cta transition-colors flex items-center gap-2">
-                      {team.name}
-                    </h3>
-                  </div>
-                  
-                  {targetHackathon ? (
-                    <Link 
-                      to={`/hackathons/${targetHackathon.slug}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1.5 text-[12px] font-bold text-cta bg-blue-50/50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors w-full md:w-auto"
-                    >
-                      <Hash className="w-3.5 h-3.5 flex-shrink-0" /> 
-                      <span className="truncate max-w-[150px]">{targetHackathon.title}</span>
-                    </Link>
-                  ) : (
-                    <div className="inline-flex items-center text-[12px] font-bold text-secondary bg-gray-100 px-2 py-1 rounded-md">
-                      자유 주제
-                    </div>
-                  )}
-                </div>
-                
-                {/* Middle Section: Intro & Roles */}
-                <div className="flex-1 flex flex-col justify-center min-w-0 cursor-pointer" onClick={() => setSelectedTeam(team)}>
-                  <p className="text-secondary text-[15px] font-medium leading-relaxed mb-4 line-clamp-2">
-                    {team.intro}
-                  </p>
-                  {team.lookingFor?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[12px] text-tertiary font-bold shrink-0">모집 중:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {team.lookingFor.map((role:string) => (
-                          <span key={role} className="px-2 py-0.5 bg-gray-50 text-secondary border border-gray-200 rounded-md text-[12px] font-bold truncate max-w-[100px]">
-                            {role}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Right Section: Action */}
-                <div className="flex flex-col items-end justify-center md:items-end gap-2.5 flex-shrink-0 md:w-36 border-t border-gray-100 md:border-t-0 pt-4 md:pt-0 shrink-0">
-                  {currentUser && (team.leaderName === currentUser.nickname || team.members?.includes(currentUser.nickname) || team.memberIds?.includes(currentUser.id)) ? (
-                    <Link 
-                      to="/workspace"
-                      className="text-white bg-emerald-500 hover:bg-emerald-600 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-emerald-100"
-                    >
-                      워크스페이스 이동
-                    </Link>
-                  ) : (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!currentUser) {
-                          showToast('팀 합류 신청을 하려면 로그인해주세요.', 'error');
-                          return;
-                        }
-                        if (!team.isOpen) {
-                          showToast('현재 모집이 마감된 팀입니다.', 'info');
-                          return;
-                        }
-                        setJoinTarget(team);
-                        setJoinModalOpen(true);
-                      }}
-                      className="text-white bg-cta hover:bg-blue-600 transition-all flex items-center justify-center gap-1.5 text-[14px] font-bold px-4 py-2.5 rounded-xl w-full shadow-md shadow-blue-200"
-                    >
-                      팀 합류 신청 <Send className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {currentUser?.nickname === team.leaderName ? (
-                    <div className="flex gap-2 w-full">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingTeam(team);
-                          setEditIntro(team.intro);
-                          setEditLookingFor(team.lookingFor.join(', '));
-                          setEditContactInfo(team.contact?.url || '');
-                        }}
-                        className="text-[13px] font-bold text-secondary bg-gray-100 px-3 py-2 rounded-xl hover:bg-gray-200 transition-colors w-full"
-                      >
-                        수정
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // mock close action
-                          const updatedTeams = teams.map(t => t.teamCode === team.teamCode ? {...t, isOpen: !t.isOpen} : t);
-                          setTeams(updatedTeams);
-                        }}
-                        className="text-[13px] font-bold text-red-500 bg-red-50 px-3 py-2 rounded-xl hover:bg-red-100 transition-colors w-full"
-                      >
-                        {team.isOpen ? '마감' : '열기'}
-                      </button>
-                    </div>
-                  ) : (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!currentUser) {
-                          showToast('쪽지를 보내려면 로그인해주세요.', 'info');
-                          return;
-                        }
-                        setMessageTarget(team);
-                        setMessageModalOpen(true);
-                      }}
-                      className="text-[13px] font-bold text-secondary border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors w-full"
-                    >
-                      쪽지 보내기
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            )
-          })}
-        </div>
-      )}
+                team={team}
+                hackathons={hackathons}
+                currentUser={currentUser}
+                onSelect={(t) => setSelectedTeam(t)}
+                onJoin={(t) => {
+                  if(!currentUser) { showToast('로그인이 필요합니다.', 'error'); return; }
+                  setJoinTarget(t); setJoinModalOpen(true);
+                }}
+                onEdit={(t) => { 
+                  setEditingTeam(t); 
+                  setEditIntro(t.intro); 
+                  setEditLookingFor(t.lookingFor.join(', ')); 
+                  setEditContactInfo(t.contact?.url || ''); 
+                }}
+                onMessage={(t) => { if(!currentUser) { showToast('로그인이 필요합니다.', 'error'); return; } setMessageTarget(t); setMessageModalOpen(true); }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-      <TeamDetailModal 
-        isOpen={!!selectedTeam} 
-        onClose={() => setSelectedTeam(null)} 
-        team={selectedTeam} 
-      />
+      {/* Modals */}
+      <TeamDetailModal isOpen={!!selectedTeam} onClose={() => setSelectedTeam(null)} team={selectedTeam} />
 
+      {/* Join Request Modal */}
       <AnimatePresence>
         {joinModalOpen && joinTarget && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setJoinModalOpen(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[28px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100"
-            >
-              <h3 className="text-xl font-bold text-primary mb-2 flex items-center gap-2">
-                🚀 팀 합류 신청하기
-              </h3>
-              <p className="text-[14px] text-tertiary mb-6">
-                <strong className="text-secondary">[{joinTarget.name}]</strong> 팀에 보낼 간략한 자기소개 및 지원 동기를 적어주세요.
-              </p>
-              <textarea
-                value={joinMessage}
-                onChange={(e) => setJoinMessage(e.target.value)}
-                placeholder="안녕하세요! 저는 이런 포지션으로 참여하고 싶습니다..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-32 resize-none placeholder:text-tertiary mb-4"
-              />
-              <div className="flex gap-2.5">
-                <button
-                  onClick={() => setJoinModalOpen(false)}
-                  className="flex-1 py-3 bg-gray-100 text-secondary font-bold rounded-[14px] hover:bg-gray-200 transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={() => {
-                    if (!joinMessage.trim()) {
-                      showToast('신청 메시지를 입력해주세요.', 'info');
-                      return;
-                    }
-                    
-                    // In a real app, this would be an API call
-                    import('../utils/api').then(api => {
-                      api.addInvite({
-                        id: Date.now(),
-                        hackathonSlug: joinTarget.hackathonSlug || '',
-                        teamCode: joinTarget.teamCode,
-                        applicantName: currentUser!.nickname,
-                        applicantId: currentUser!.id,
-                        message: joinMessage.trim(),
-                        status: 'pending',
-                        type: 'application',
-                        createdAt: new Date().toISOString()
-                      });
-                      
-                      showToast('팀 합류 신청이 완료되었습니다!', 'success');
-                      setJoinModalOpen(false);
-                      setJoinMessage('');
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setJoinModalOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-white rounded-[40px] p-10 shadow-2xl overflow-hidden">
+               <div className="mb-8">
+                  <span className="text-cta font-black tracking-widest uppercase text-[11px] mb-2 block">Application</span>
+                  <h3 className="text-2xl font-black text-primary leading-tight">팀 합류 신청</h3>
+               </div>
+               <p className="text-[14px] text-tertiary mb-6 leading-relaxed">
+                  <strong className="text-primary">[{joinTarget.name}]</strong> 팀 리더에게 보낼 메시지입니다.
+               </p>
+               <textarea value={joinMessage} onChange={(e) => setJoinMessage(e.target.value)} placeholder="자신 있는 분야와 참여 동기를 짧게 적어주세요." className="w-full bg-gray-50 border border-gray-100 rounded-[28px] px-6 py-5 text-primary font-bold outline-none focus:border-cta transition-all h-32 resize-none placeholder:text-tertiary mb-8" />
+               <div className="flex gap-3">
+                  <button onClick={() => setJoinModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-tertiary font-black rounded-2xl hover:bg-gray-200 transition-colors">취소</button>
+                  <button onClick={() => { 
+                    if (!joinMessage.trim()) { showToast('신청 메시지를 입력해주세요.', 'info'); return; } 
+                    import('../utils/api').then(api => { 
+                      api.addInvite({ 
+                        id: Date.now(), 
+                        hackathonSlug: joinTarget.hackathonSlug || '', 
+                        teamCode: joinTarget.teamCode, 
+                        applicantName: currentUser!.nickname, 
+                        applicantId: currentUser!.id, 
+                        message: joinMessage.trim(), 
+                        status: 'pending', 
+                        type: 'application', 
+                        createdAt: new Date().toISOString() 
+                      }); 
+                      showToast('신청 완료!', 'success'); 
+                      setJoinModalOpen(false); 
+                      setJoinMessage(''); 
                     });
-                  }}
-                  className="flex-1 py-3 bg-cta text-white font-bold rounded-[14px] hover:bg-blue-600 transition-colors shadow-sm"
-                >
-                  보내기
-                </button>
-              </div>
+                  }} className="flex-1 py-4 bg-cta text-white font-black rounded-2xl transition-all shadow-lg shadow-blue-200">신청하기</button>
+               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
+      {/* Direct Message Modal */}
       <AnimatePresence>
         {messageModalOpen && messageTarget && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMessageModalOpen(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[28px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100"
-            >
-              <h3 className="text-xl font-bold text-primary mb-2 flex items-center gap-2">
-                ✉️ 쪽지 보내기
-              </h3>
-              <p className="text-[14px] text-tertiary mb-6">
-                <strong className="text-secondary">{messageTarget.leaderName}</strong> 님에게 보낼 메시지를 작성해주세요.
-              </p>
-              <textarea
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                placeholder="간단한 인사나 질문을 남겨보세요."
-                className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-32 resize-none placeholder:text-tertiary mb-4"
-              />
-              <div className="flex gap-2.5">
-                <button
-                  onClick={() => setMessageModalOpen(false)}
-                  className="flex-1 py-3 bg-gray-100 text-secondary font-bold rounded-[14px] hover:bg-gray-200 transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={() => {
-                    if (!messageContent.trim() || !messageTarget) return;
-                    
-                    const users = getUsers();
-                    const targetUser = users.find(u => u.nickname === messageTarget.leaderName);
-                    
-                    if (!targetUser) {
-                      showToast('상대방 정보를 찾을 수 없습니다.', 'error');
-                      return;
-                    }
-
-                    sendMessage({
-                      id: Math.random().toString(36).substring(2, 9),
-                      senderId: currentUser!.id,
-                      senderNickname: currentUser!.nickname,
-                      receiverId: targetUser.id,
-                      content: messageContent.trim(),
-                      isRead: false,
-                      createdAt: new Date().toISOString()
-                    });
-
-                    showToast(`${targetUser.nickname}님에게 쪽지를 보냈습니다!`, 'success');
-                    setMessageModalOpen(false);
-                    setMessageContent('');
-                  }}
-                  className="flex-1 py-3 bg-cta text-white font-bold rounded-[14px] hover:bg-blue-600 transition-colors shadow-sm"
-                >
-                  보내기
-                </button>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMessageModalOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-white rounded-[40px] p-10 shadow-2xl">
+              <div className="mb-8">
+                <span className="text-cta font-black tracking-widest uppercase text-[11px] mb-2 block">Direct Message</span>
+                <h3 className="text-2xl font-black text-primary tracking-tight">쪽지 보내기</h3>
+              </div>
+              <p className="text-[14px] text-tertiary mb-6 font-medium">리더 <strong className="text-primary">{messageTarget.leaderName}</strong> 님에게 전할 내용을 입력하세요.</p>
+              <textarea value={messageContent} onChange={(e) => setMessageContent(e.target.value)} placeholder="간단한 협업 제안이나 질문을 적어주세요." className="w-full bg-gray-50 border border-gray-100 rounded-[28px] px-6 py-5 text-primary font-bold outline-none focus:border-cta transition-all h-32 resize-none placeholder:text-tertiary mb-8" />
+              <div className="flex gap-3">
+                <button onClick={() => setMessageModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-tertiary font-black rounded-2xl">취소</button>
+                <button onClick={() => { 
+                  if (!messageContent.trim()) return; 
+                  const users = getUsers(); 
+                  const targetUser = users.find(u => u.nickname === messageTarget.leaderName); 
+                  if (!targetUser) { showToast('사용자를 찾을 수 없습니다.', 'error'); return; } 
+                  sendMessage({ 
+                    id: Math.random().toString(36).substring(2, 9), 
+                    senderId: currentUser!.id, 
+                    senderNickname: currentUser!.nickname, 
+                    receiverId: targetUser.id, 
+                    content: messageContent.trim(), 
+                    isRead: false, 
+                    createdAt: new Date().toISOString() 
+                  }); 
+                  showToast('전송 완료!', 'success'); 
+                  setMessageModalOpen(false); 
+                  setMessageContent(''); 
+                }} className="flex-1 py-4 bg-cta text-white font-black rounded-2xl shadow-lg shadow-blue-200">보내기</button>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
+      {/* Edit Recruitment Modal */}
       <AnimatePresence>
         {editingTeam && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setEditingTeam(null)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-lg bg-white rounded-[28px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100"
-            >
-              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                ✏️ 팀 정보 수정
-              </h3>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const lookingForList = editLookingFor.split(',').map(s => s.trim()).filter(Boolean);
-                const updatedTeam = {
-                  ...editingTeam,
-                  intro: editIntro,
-                  lookingFor: lookingForList,
-                  contact: editContactInfo.trim() ? { type: 'mixed', url: editContactInfo.trim() } : undefined
-                };
-                setTeams(teams.map(t => t.teamCode === editingTeam.teamCode ? updatedTeam : t));
-                setEditingTeam(null);
-              }} className="space-y-4">
-                  <label className="block text-[15px] font-bold text-primary mb-1">팀 소개 및 목표</label>
-                  <textarea required
-                    className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all h-24 resize-none placeholder:text-tertiary"
-                    value={editIntro} onChange={e => setEditIntro(e.target.value)}
-                    maxLength={200}
-                  ></textarea>
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingTeam(null)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-lg bg-white rounded-[40px] p-10 shadow-2xl">
+              <div className="flex items-center justify-between mb-8">
+                 <div>
+                    <span className="text-cta font-black tracking-widest uppercase text-[11px] mb-2 block">Management</span>
+                    <h3 className="text-2xl font-black text-primary tracking-tight">모집 글 관리</h3>
+                 </div>
+                 <button onClick={() => setEditingTeam(null)} className="p-3 hover:bg-gray-50 rounded-2xl transition-all"><X className="w-6 h-6 text-tertiary" /></button>
+              </div>
 
-                  <label className="block text-[15px] font-bold text-primary mb-1 mt-4">모집 포지션 (쉼표로 구분)</label>
-                  <input 
-                    type="text" 
-                    className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all" 
-                    value={editLookingFor} onChange={e => setEditLookingFor(e.target.value)}
-                  />
+              <form onSubmit={(e) => { 
+                e.preventDefault(); 
+                const lookingForList = editLookingFor.split(',').map(s => s.trim()).filter(Boolean); 
+                const updatedTeam = { 
+                  ...editingTeam, 
+                  intro: editIntro, 
+                  lookingFor: lookingForList, 
+                  contact: editContactInfo.trim() ? { type: 'mixed', url: editContactInfo.trim() } : editingTeam.contact 
+                }; 
+                
+                updateTeam(updatedTeam);
 
-                  <label className="block text-[15px] font-bold text-primary mb-1 mt-4">연락처</label>
-                  <input
-                    type="text"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-primary font-medium focus:outline-none focus:border-cta focus:ring-2 focus:ring-blue-100 transition-all"
-                    value={editContactInfo} onChange={(e) => setEditContactInfo(e.target.value)}
-                  />
+                setTeams(teams.map(t => t.teamCode === editingTeam.teamCode ? updatedTeam : t)); 
+                setEditingTeam(null); 
+                showToast('모집 글 정보가 저장되었습니다.', 'success'); 
+              }} className="space-y-6">
+                  <div className="p-6 bg-gray-50 rounded-[28px] border border-gray-100 flex items-center justify-between group/toggle">
+                     <div>
+                        <p className="text-[14px] font-black text-primary mb-0.5">현재 모집 현황</p>
+                        <p className="text-[11px] font-bold text-tertiary">
+                          {editingTeam.isOpen ? '현재 팀원을 모집하고 있습니다.' : '모집을 마감한 상태입니다.'}
+                        </p>
+                     </div>
+                     <div className="flex items-center gap-3">
+                        <span className={`text-[12px] font-black transition-colors ${editingTeam.isOpen ? 'text-emerald-500' : 'text-gray-400'}`}>
+                           {editingTeam.isOpen ? '모집 중' : '모집 마감'}
+                        </span>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                              const updated = { ...editingTeam, isOpen: !editingTeam.isOpen };
+                              updateTeam(updated);
+                              setTeams(teams.map(t => t.teamCode === editingTeam.teamCode ? updated : t));
+                              setEditingTeam(updated);
+                              showToast(updated.isOpen ? '팀원 모집을 시작합니다.' : '팀원 모집을 마감했습니다.', 'info');
+                          }}
+                          className={`relative w-14 h-8 rounded-full transition-all duration-300 focus:outline-none shadow-inner ${editingTeam.isOpen ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                        >
+                          <motion.div 
+                            animate={{ x: editingTeam.isOpen ? 24 : 4 }}
+                            className="absolute top-1 left-0 bg-white w-6 h-6 rounded-full shadow-md"
+                          />
+                        </button>
+                     </div>
+                  </div>
 
-                <div className="flex gap-2.5 mt-8">
-                  <button
-                    type="button"
-                    onClick={() => setEditingTeam(null)}
-                    className="flex-1 py-3 bg-gray-100 text-secondary font-bold rounded-[14px] hover:bg-gray-200 transition-colors"
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 bg-cta text-white font-bold rounded-[14px] hover:bg-blue-600 transition-colors shadow-sm"
-                  >
-                    저장하기
-                  </button>
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-2.5 ml-1 uppercase">팀 소개 문구</label>
+                    <textarea required className="w-full bg-white border border-gray-100 rounded-[22px] px-6 py-4 text-primary font-bold outline-none focus:border-cta h-28 resize-none shadow-sm transition-all" value={editIntro} onChange={e => setEditIntro(e.target.value)} maxLength={200} />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-2.5 ml-1 uppercase">찾는 포지션</label>
+                    <input type="text" className="w-full bg-white border border-gray-100 rounded-[20px] px-6 py-4 text-primary font-bold shadow-sm outline-none focus:border-cta transition-all" value={editLookingFor} onChange={e => setEditLookingFor(e.target.value)} placeholder="예: 프론트엔드, 디자이너 (쉼표 구분)" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[13px] font-black text-primary mb-2.5 ml-1 uppercase">연락 수단</label>
+                    <input type="text" className="w-full bg-white border border-gray-100 rounded-[20px] px-6 py-4 text-primary font-bold shadow-sm outline-none focus:border-cta transition-all" value={editContactInfo} onChange={(e) => setEditContactInfo(e.target.value)} placeholder="오픈카톡, 디스코드 등 링크" />
+                  </div>
+                
+                <div className="flex gap-3 pt-6">
+                  <button type="button" onClick={() => setEditingTeam(null)} className="flex-1 py-4 bg-gray-100 text-tertiary font-black rounded-2xl hover:bg-gray-200 transition-colors">취소</button>
+                  <button type="submit" className="flex-1 py-4 bg-primary text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">저장 완료</button>
                 </div>
               </form>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      <div className="h-40" />
     </div>
   );
 }

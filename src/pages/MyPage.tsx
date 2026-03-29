@@ -141,7 +141,7 @@ export default function MyPage() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h2 className="text-3xl font-black text-primary tracking-tight">{currentUser.nickname}</h2>
-                  <span className="px-3 py-1 bg-white text-tertiary text-[11px] font-black rounded-lg border border-gray-100 uppercase tracking-widest">Lv.4 Member</span>
+                  <span className="px-3 py-1 bg-white text-tertiary text-[11px] font-black rounded-lg border border-gray-100 uppercase tracking-widest">Lv.4</span>
                 </div>
                 <div className="flex items-center gap-3 text-secondary font-medium mb-4 text-[14px]">
                    <div className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-tertiary" /> {currentUser.email}</div>
@@ -210,7 +210,9 @@ export default function MyPage() {
                         <div className="flex-1 min-w-0">
                            <h4 className="font-bold text-primary truncate leading-tight mb-1">{h.title}</h4>
                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-tertiary bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded uppercase tracking-tighter">{h.status}</span>
+                              <span className="text-[10px] font-bold text-tertiary bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                {h.status === 'upcoming' ? '참가 예정' : h.status === 'ongoing' ? '진행중' : h.status === 'ended' ? '종료됨' : h.status}
+                              </span>
                               <span className="text-[11px] text-tertiary font-bold">{h.period?.submissionDeadlineAt ? new Date(h.period.submissionDeadlineAt).toLocaleDateString() : '일정 확인 중'}</span>
                            </div>
                         </div>

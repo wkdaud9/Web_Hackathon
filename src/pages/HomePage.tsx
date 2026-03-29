@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { Rocket, Users, Trophy, ChevronRight, MousePointer2 } from 'lucide-react';
-import { useRef } from 'react';
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
+import { Rocket, Users, Trophy, ChevronRight, MousePointer2, Layout as LayoutIcon, ArrowRight } from 'lucide-react';
+import { useRef, useMemo } from 'react';
+import { getTeams } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const MotionLink = motion(Link);
 
@@ -15,12 +17,12 @@ function GalleryCard({ card, index }: { card: any, index: number }) {
       to={card.link}
       initial={{ opacity: 0, scale: 0.95, y: 30 }}
       animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: 30 }}
-      transition={{ 
-        duration: 0.6, 
+      transition={{
+        duration: 0.6,
         delay: index * 0.1,
         ease: "easeOut"
       }}
-      whileHover={{ 
+      whileHover={{
         y: -12,
         transition: { duration: 0.3 }
       }}
@@ -28,14 +30,14 @@ function GalleryCard({ card, index }: { card: any, index: number }) {
     >
       {/* Background Image Container with Reveal Effect */}
       <div className="absolute inset-0 z-0">
-        <motion.img 
-          src={card.image} 
+        <motion.img
+          src={card.image}
           alt={card.title}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
         {/* Dark Opaque Overlay (Fades on Hover) */}
         <div className="absolute inset-x-0 bottom-0 top-0 bg-neutral-950 opacity-90 group-hover:opacity-40 transition-opacity duration-500 ease-out z-10" />
-        
+
         {/* Accent Color Glow on Hover */}
         <div className={`absolute inset-0 bg-gradient-to-t ${card.overlay} opacity-0 group-hover:opacity-40 transition-opacity duration-500 z-11`} />
       </div>
@@ -45,18 +47,18 @@ function GalleryCard({ card, index }: { card: any, index: number }) {
         <div className={`mb-6 w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20 transition-all duration-300 group-hover:bg-white group-hover:text-primary group-hover:rotate-[8deg] group-hover:scale-110 shadow-lg`}>
           {card.icon}
         </div>
-        
+
         <div className="space-y-4">
           <h2 className="text-4xl font-black font-heading text-white tracking-tighter leading-none mb-2">
             {card.subtitle}
           </h2>
-          <p className="text-white/60 font-bold text-[16px] leading-relaxed max-w-xs group-hover:text-white transition-colors duration-500">
+          <p className="text-white/60 font-bold text-[14px] leading-relaxed max-w-xs group-hover:text-white transition-colors duration-500">
             {card.description}
           </p>
         </div>
 
         <div className="mt-10 flex items-center text-[13px] font-black text-white tracking-[0.3em] uppercase opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-           {card.action} <ChevronRight className="w-5 h-5 ml-1" />
+          {card.action} <ChevronRight className="w-5 h-5 ml-1" />
         </div>
       </div>
     </MotionLink>
@@ -66,7 +68,20 @@ function GalleryCard({ card, index }: { card: any, index: number }) {
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
-  
+  const { currentUser } = useAuth();
+
+  const myTeams = useMemo(() => {
+    if (!currentUser) return [];
+    const allTeams = getTeams();
+    return allTeams.filter(t =>
+      t.leaderName === currentUser.nickname ||
+      t.members?.includes(currentUser.nickname) ||
+      t.memberIds?.includes(currentUser.id)
+    );
+  }, [currentUser]);
+
+  const hasActiveProjects = currentUser && myTeams.length > 0;
+
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
   const heroY = useTransform(scrollYProgress, [0, 0.15], [0, -50]);
 
@@ -74,7 +89,7 @@ export default function HomePage() {
     {
       title: "HACKATHONS",
       subtitle: "해커톤 탐색",
-      description: "당신의 기술을 증명할 무대를 찾으세요.\n글로벌 해커톤의 문이 열립니다.",
+      description: "당신의 기술을 증명할 무대를 찾으세요.",
       icon: <Rocket className="w-7 h-7" />,
       link: "/hackathons",
       action: "지금 탐색하기",
@@ -82,9 +97,9 @@ export default function HomePage() {
       overlay: "from-blue-950 via-blue-900/10 to-transparent"
     },
     {
-      title: "TEAM CAMP",
+      title: "TEAM BUILDING",
       subtitle: "팀 빌딩",
-      description: "완벽한 팀원와 함께라면 불가능은 없습니다.\n팀원을 모집하고 혁신을 시작하세요.",
+      description: "완벽한 팀원와 함께라면 불가능은 없습니다.",
       icon: <Users className="w-7 h-7" />,
       link: "/camp",
       action: "팀 구하러 가기",
@@ -110,22 +125,22 @@ export default function HomePage() {
       <div className="fixed bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-50/40 rounded-full blur-[120px] -z-10" />
 
       {/* SECTION 1: HERO */}
-      <motion.section 
+      <motion.section
         style={{ opacity: heroOpacity, y: heroY }}
         className="min-h-[calc(100vh-120px)] flex flex-col items-center justify-center relative px-6 mt-[-30px]"
       >
         <div className="max-w-4xl text-center relative z-10 w-full pt-10">
           <h1 className="text-6xl md:text-9xl font-black font-heading tracking-tighter text-primary break-keep leading-[1.1] text-shadow-xl mb-12">
-             해커톤 통합 관리의
+            해커톤 통합 관리의
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4F46E5] via-[#9333EA] via-[#EC4899] via-[#FB923C] to-[#4F46E5] animate-gradient pb-8 block drop-shadow-[0_0_25px_rgba(147,51,234,0.3)]">
-               넥스트 레벨
+              <span className="tracking-[0.01em] mr-2">넥스트 </span>레벨
             </span>
           </h1>
-          
+
           <div className="space-y-2">
             <p className="text-xl md:text-2xl text-secondary break-keep leading-relaxed font-bold opacity-70">
-              기획부터 팀 매칭, 결과 제출과 심사 관리까지. 
+              기획부터 팀 매칭, 결과 제출과 심사 관리까지.
             </p>
             <p className="text-xl md:text-2xl text-secondary break-keep leading-relaxed font-bold opacity-70">
               모든 프로세스를 <span className="text-primary">단일 플랫폼</span>에서 제어하세요.
@@ -134,35 +149,119 @@ export default function HomePage() {
         </div>
 
         {/* Vertical Scroll Guide */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
           className="hidden xl:flex absolute right-16 top-1/2 -translate-y-1/2 flex-col items-center gap-6"
         >
           <div className="flex flex-col items-center gap-3">
-             <span className="[writing-mode:vertical-lr] text-[12px] font-black tracking-[0.4em] uppercase text-cta/40">
-                SCROLL DOWN
-             </span>
-             <motion.div 
-               animate={{ y: [0, 8, 0] }}
-               transition={{ repeat: Infinity, duration: 1.5 }}
-             >
-                <MousePointer2 className="w-4 h-4 text-cta/60" />
-             </motion.div>
+            <span className="[writing-mode:vertical-lr] text-[12px] font-black tracking-[0.4em] uppercase text-cta/40">
+              SCROLL DOWN
+            </span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              <MousePointer2 className="w-4 h-4 text-cta/60" />
+            </motion.div>
           </div>
           <div className="w-px h-24 bg-gradient-to-b from-cta/40 to-transparent" />
         </motion.div>
       </motion.section>
 
-      {/* SECTION 2: GALLERY CARDS */}
-      <section className="max-w-7xl mx-auto px-6 pt-10 pb-0 mb-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {cards.map((card, i) => (
-            <GalleryCard key={i} card={card} index={i} />
-          ))}
-        </div>
-      </section>
+      {/* DYNAMIC SECTION: ACTIVE PROJECTS OR GALLERY CARDS */}
+      <AnimatePresence mode="wait">
+        {hasActiveProjects ? (
+          <motion.section
+            key="active-projects"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-7xl mx-auto px-6 mb-24"
+          >
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <span className="text-cta font-black tracking-[0.2em] uppercase text-[11px] mb-2 block opacity-50">Personal Activity</span>
+                <h2 className="text-4xl font-black text-primary tracking-tighter">참여 중인 프로젝트</h2>
+              </div>
+              <Link to="/workspace" className="group flex items-center gap-3 text-[14px] font-black text-cta bg-blue-50 px-6 py-3 rounded-full hover:bg-cta hover:text-white transition-all shadow-lg shadow-blue-100">
+                워크스페이스 입장
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {myTeams.map((team, idx) => (
+                <motion.div
+                  key={team.teamCode}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
+                >
+                  <Link
+                    to="/workspace"
+                    className="block p-10 bg-white border border-gray-100 rounded-[42px] hover:border-cta/30 hover:shadow-2xl hover:shadow-blue-50 transition-all group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-blue-50/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-100/30 transition-colors" />
+
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-8">
+                        <div className="w-14 h-14 bg-cta rounded-[20px] flex items-center justify-center text-white shadow-xl shadow-blue-200 group-hover:rotate-6 transition-transform">
+                          <LayoutIcon className="w-7 h-7" />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 text-secondary text-[11px] font-black rounded-full border border-gray-100 tracking-widest">
+                          진행중
+                          <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                        </div>
+                      </div>
+
+                      <h3 className="font-black text-2xl text-primary leading-tight mb-8 group-hover:text-cta transition-colors">{team.name}</h3>
+
+                      <div className="flex items-center justify-between pt-8 border-t border-gray-50">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-tertiary/50 uppercase tracking-widest mb-2">Team Activity</span>
+                          <div className="flex items-center -space-x-2">
+                            {[1, 2, 3].map(i => (
+                              <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-400">
+                                {i}
+                              </div>
+                            ))}
+                            {team.memberCount > 3 && (
+                              <div className="w-8 h-8 rounded-full border-2 border-white bg-cta flex items-center justify-center text-[10px] font-black text-white">
+                                +{team.memberCount - 3}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-tertiary group-hover:bg-cta group-hover:text-white transition-all shadow-sm">
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        ) : (
+          <motion.section
+            key="gallery-cards"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-7xl mx-auto px-6 pt-10 pb-20"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              {cards.map((card, i) => (
+                <GalleryCard key={i} card={card} index={i} />
+              ))}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

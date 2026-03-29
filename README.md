@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# 🏆 LinkTon (링크톤)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+해커톤 탐색부터 팀 빌딩, 협업, 그리고 최종 제출까지 모든 과정을 하나의 플랫폼에서 관리할 수 있는 **해커톤 통합 관리 서비스**입니다.
 
-Currently, two official plugins are available:
+## ✨ 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. 해커톤 탐색 및 관리
+- **해커톤 목록:** 현재 진행 중인 다양한 해커톤을 카테고리별로 탐색
+- **상세 정보:** 단일 페이지 내 7가지 핵심 섹션(개요, 일정, 평가기준, 팀, 제출, 리더보드) 제공
 
-## React Compiler
+### 2. 팀 빌딩 및 커뮤니티
+- **팀 모집 라운지 (Camp):** 실시간 팀원 모집 및 포지션별 필터링 기능
+- **랭킹 시스템:** 활동 포인트 기반의 명예의 전당 및 사용자 순위 제공
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. 팀 전용 워크스페이스 (Workspace)
+- **아이디어 보드:** 팀원 간 브레인스토밍 및 실시간 아이디어 공유
+- **팀 캘린더:** 해커톤 타임라인에 맞춘 팀 내부 일정 관리
+- **리소스 저장소:** 협업 파일 및 외부 링크 통합 관리
 
-## Expanding the ESLint configuration
+### 4. 마이페이지 (My Page)
+- 개인 활동 통계, 참여 내역, 프로필 관리 및 공개 설정
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠 기술 스택
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Frontend:** React, Vite, TypeScript
+- **Styling:** Tailwind CSS, Framer Motion, Lucide React
+- **Data:** Browser `localStorage` (서버 없이 구동 가능한 독립 아키텍처)
+- **Deployment:** Vercel
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 🚀 시작하기
+
+### 설치
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 개발 서버 실행
+```bash
+npm run dev
 ```
+
+### 빌드
+```bash
+npm run build
+```
+
+---
+
+## 📂 프로젝트 구조
+
+- `src/pages`: 핵심 서비스 페이지 구성
+- `src/components`: 레이아웃 및 재사용 가능한 UI 컴포넌트
+- `src/services`: `localStorage` 기반 데이터 핸들링 서비스
+- `src/contexts`: 인증 및 공통 상태 관리
+- `data/`: 초기 서비스 구동을 위한 샘플 데이터 및 설명 자료

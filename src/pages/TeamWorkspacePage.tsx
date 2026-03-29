@@ -445,14 +445,13 @@ export default function TeamWorkspacePage() {
             <Users className="w-8 h-8" />
           </div>
           <div>
-            <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold font-heading text-primary tracking-tight">{myTeam.name}</h1>
-              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[11px] font-black rounded-lg border border-emerald-100">ONLINE</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 text-secondary text-[10px] font-black rounded-full border border-gray-100 tracking-widest uppercase">
+                진행중
+                <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+              </div>
             </div>
-            <p className="text-secondary font-medium flex items-center gap-2">
-              <span className="text-tertiary">Team Code:</span>
-              <code className="bg-gray-100 px-2 py-0.5 rounded-md text-[13px] font-mono font-bold text-primary">{myTeam.teamCode}</code>
-            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">

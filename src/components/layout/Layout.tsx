@@ -11,7 +11,7 @@ import NotificationsFAB from '../NotificationsFAB';
 const navItems = [
   { name: '홈', path: '/' },
   { name: '해커톤', path: '/hackathons' },
-  { name: '팀 캠프', path: '/camp' },
+  { name: '팀 빌딩', path: '/camp' },
   { name: '랭킹', path: '/rankings' },
 ];
 
@@ -44,14 +44,14 @@ export default function Layout() {
     <div className="min-h-screen bg-neutral-50 font-sans text-primary selection:bg-blue-100 selection:text-cta flex flex-col">
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
-          <Link to="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform">
-              <span className="text-xl font-black italic">H</span>
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform overflow-hidden">
+              <span className="text-xl font-black leading-none">L</span>
             </div>
-            <span className="text-xl font-black tracking-tighter text-primary">HACKATHON HUB</span>
+            <span className="text-xl font-black tracking-tighter text-primary uppercase">LinkTon</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1.5 flex-1 max-w-md justify-center">
+          <div className="hidden md:flex items-center gap-1.5 flex-1 max-w-2xl justify-center">
             {navItems.map((item) => (
               <NavLink 
                 key={item.path} 
@@ -67,6 +67,21 @@ export default function Layout() {
                 {item.name}
               </NavLink>
             ))}
+            {currentUser && (
+              <NavLink 
+                to="/workspace" 
+                className={({ isActive }) => 
+                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
+                    isActive 
+                      ? 'bg-blue-50 text-cta shadow-sm shadow-blue-50' 
+                      : 'text-secondary/70 hover:text-cta hover:bg-blue-50/50'
+                  }`
+                }
+              >
+                워크스페이스
+                <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+              </NavLink>
+            )}
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
@@ -77,18 +92,17 @@ export default function Layout() {
                  <div className="relative" ref={userMenuRef}>
                    <button 
                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                     className="flex items-center gap-2.5 pl-2 pr-4 py-2 bg-white border border-gray-100 rounded-full hover:border-cta/20 hover:shadow-md transition-all group"
+                     className="flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-white border border-gray-100 rounded-full hover:border-cta/20 hover:shadow-md transition-all group"
                    >
-                     <div className="w-9 h-9 rounded-full bg-blue-50 text-cta flex items-center justify-center border border-white shadow-sm overflow-hidden shrink-0">
+                     <div className="w-8 h-8 rounded-full bg-blue-50 text-cta flex items-center justify-center border border-white shadow-sm overflow-hidden shrink-0">
                         {currentUser.profileImage ? (
                           <img src={currentUser.profileImage} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <User className="w-5 h-5" />
+                          <User className="w-4 h-4" />
                         )}
                      </div>
                      <div className="text-left hidden lg:block">
-                        <div className="text-[13px] font-black text-primary leading-tight">{currentUser.nickname}</div>
-                        <div className="text-[10px] font-bold text-tertiary tracking-widest uppercase">Member</div>
+                        <div className="text-[14px] font-black text-primary leading-tight">{currentUser.nickname}</div>
                      </div>
                      <ChevronDown className={`w-4 h-4 text-tertiary transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                    </button>
@@ -108,13 +122,6 @@ export default function Layout() {
                          >
                            마이페이지
                          </Link>
-                         <Link 
-                           to="/workspace" 
-                           onClick={() => setIsUserMenuOpen(false)}
-                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-secondary hover:bg-emerald-50 hover:text-emerald-500 rounded-2xl transition-all"
-                         >
-                           팀 워크스페이스
-                         </Link>
                          <div className="h-px bg-gray-50 my-1 mx-2" />
                          <button 
                            onClick={handleLogout}
@@ -130,7 +137,7 @@ export default function Layout() {
             ) : (
               <button 
                 onClick={() => setIsAuthModalOpen(true)}
-                className="px-8 py-3 bg-cta text-white text-[15px] font-black rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-100 active:scale-95"
+                className="px-6 py-2.5 bg-cta text-white text-[13.5px] font-black rounded-full hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95"
               >
                 시작하기
               </button>
@@ -144,7 +151,7 @@ export default function Layout() {
       </main>
 
       <footer className="w-full py-8 text-center text-sm text-tertiary">
-        &copy; {new Date().getFullYear()} Hackathon Hub. Built for monthly hackathon challenge.
+        &copy; {new Date().getFullYear()} LinkTon. Built for monthly hackathon challenge.
       </footer>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

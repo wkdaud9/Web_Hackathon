@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Trophy, Medal, Star, User, UserPlus, Mail, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, User, UserPlus, Mail, CheckCircle, Search, Users } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
 import EmptyState from '../components/ui/EmptyState';
 import { getUsers, getTeams, addInvite, getInvites } from '../utils/api';
@@ -9,6 +9,69 @@ import { useToast } from '../contexts/ToastContext';
 import UserProfileModal from '../components/layout/UserProfileModal';
 import type { User as UserType } from '../types/models';
 
+function RankUserRow({
+  user,
+  rank,
+  currentUser,
+  myTeam,
+  isAlreadyInvited,
+  onUserClick,
+  onInvite
+}: {
+  user: UserType;
+  rank: number;
+  currentUser: any;
+  myTeam: any;
+  isAlreadyInvited: (name: string) => boolean;
+  onUserClick: (user: UserType) => void;
+  onInvite: (e: React.MouseEvent, user: UserType) => void;
+}) {
+  const isMe = user.id === currentUser?.id;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      onClick={() => onUserClick(user)}
+      className={`flex items-center justify-between p-4 bg-white border border-gray-100 rounded-[20px] hover:border-cta/20 hover:shadow-lg transition-all cursor-pointer mb-3 ${isMe ? 'bg-blue-50/20 border-cta/20 shadow-sm' : ''}`}
+    >
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="w-8 flex justify-center shrink-0">
+          <span className={`text-[14px] font-black ${rank <= 3 ? 'text-cta' : 'text-tertiary/40'}`}>
+            {rank}
+          </span>
+        </div>
+        <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
+          {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4 m-3 text-tertiary" />}
+        </div>
+        <div className="min-w-0">
+          <div className="text-[14px] font-black text-primary truncate group-hover:text-cta transition-colors">
+            {user.nickname}
+          </div>
+          <div className="text-[11px] font-bold text-tertiary uppercase tracking-wider">{user.points.toLocaleString()} pts</div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 ml-4" onClick={e => e.stopPropagation()}>
+        {myTeam && !isMe ? (
+          isAlreadyInvited(user.nickname) ? (
+            <div className="w-8 h-8 flex items-center justify-center bg-emerald-50 text-emerald-500 rounded-full">
+              <CheckCircle className="w-3.5 h-3.5" />
+            </div>
+          ) : (
+            <button onClick={(e) => onInvite(e, user)} className="w-8 h-8 flex items-center justify-center bg-blue-50 text-cta hover:bg-cta hover:text-white rounded-full transition-all border border-blue-50">
+              <UserPlus className="w-3.5 h-3.5" />
+            </button>
+          )
+        ) : null}
+        <button onClick={() => onUserClick(user)} className="w-8 h-8 flex items-center justify-center bg-gray-50 text-tertiary hover:bg-gray-100 rounded-full transition-all">
+          <Mail className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function RankingsPage() {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
@@ -16,13 +79,14 @@ export default function RankingsPage() {
   const [users] = useState<UserType[]>(() => getUsers());
   const [period, setPeriod] = useState<'7d' | '30d' | 'all'>('all');
   const [invites, setInvites] = useState(() => getInvites());
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const handleUpdate = () => setInvites(getInvites());
     window.addEventListener('storage-update', handleUpdate);
     return () => window.removeEventListener('storage-update', handleUpdate);
   }, []);
-  
+
   const myTeam = useMemo(() => {
     const teams = getTeams();
     return teams.find(t => t.leaderName === currentUser?.nickname) || null;
@@ -30,30 +94,28 @@ export default function RankingsPage() {
 
   const isAlreadyInvited = (nickname: string) => {
     if (!myTeam) return false;
-    return invites.some(inv => 
-      inv.teamCode === myTeam.teamCode && 
-      inv.applicantName === nickname && 
+    return invites.some(inv =>
+      inv.teamCode === myTeam.teamCode &&
+      inv.applicantName === nickname &&
       inv.status === 'pending'
     );
   };
 
   const rankedUsers = useMemo(() => {
     let sorted = [...users].sort((a, b) => b.points - a.points);
-    
-    if (period === '7d') {
-      sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.3) })).sort((a, b) => b.points - a.points);
-    } else if (period === '30d') {
-      sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.7) })).sort((a, b) => b.points - a.points);
-    }
+    if (period === '7d') sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.3) }));
+    else if (period === '30d') sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.7) }));
 
-    return sorted.map((user, index) => ({
-      ...user,
-      rank: index + 1
-    }));
-  }, [users, period]);
+    return sorted
+      .sort((a, b) => b.points - a.points)
+      .map((user, index) => ({ ...user, rank: index + 1 }))
+      .filter(u => u.nickname.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [users, period, searchTerm]);
+
+  const top3 = useMemo(() => rankedUsers.slice(0, 3), [rankedUsers]);
 
   const handleUserClick = (user: UserType) => {
-    if (!user.isProfilePublic) {
+    if (!user.isProfilePublic && user.id !== currentUser?.id) {
       showToast('비공개 프로필입니다.', 'error');
       return;
     }
@@ -63,11 +125,7 @@ export default function RankingsPage() {
   const inviteToTeam = (e: React.MouseEvent, targetUser: UserType) => {
     e.stopPropagation();
     if (!myTeam) return;
-
-    if (isAlreadyInvited(targetUser.nickname)) {
-       showToast('이미 초대를 보낸 사용자입니다.', 'info');
-       return;
-    }
+    if (isAlreadyInvited(targetUser.nickname)) return;
 
     addInvite({
       id: Date.now(),
@@ -80,207 +138,147 @@ export default function RankingsPage() {
       type: 'invitation',
       createdAt: new Date().toISOString()
     });
-
     showToast('초대 완료', 'success');
   };
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}}>
-          <h1 className="text-3xl md:text-4xl font-bold font-heading text-primary tracking-tight mb-2 flex items-center gap-3">
-            <Trophy className="w-10 h-10 text-amber-500" />
-            명예의 전당
-          </h1>
-          <p className="text-secondary font-medium mt-2">전체 해커톤에서 획득한 누적 포인트를 기반으로 한 유저 랭킹입니다.</p>
-        </motion.div>
-        
-        <motion.div initial={{opacity:0, y:-10}} animate={{opacity:1, y:0}}>
-          <Dropdown
-            className="w-full md:w-40"
-            value={period}
-            onChange={(val) => setPeriod(val as '7d' | '30d' | 'all')}
-            options={[
-              { label: '전체 기간', value: 'all' },
-              { label: '최근 7일', value: '7d' },
-              { label: '최근 30일', value: '30d' }
-            ]}
-          />
-        </motion.div>
-      </div>
-
-      <div className="space-y-10">
-        {rankedUsers.length === 0 ? (
-          <EmptyState
-            icon={<Trophy className="w-8 h-8" />}
-            title="랭킹 정보 없음"
-            description="표시할 랭킹 데이터가 없습니다."
-          />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            {/* Top 3 Podium */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="lg:col-span-1 border border-gray-100 bg-white rounded-[32px] p-6 lg:p-8 flex flex-col justify-center min-h-[350px] relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-50/50 to-transparent pointer-events-none" />
-              <h3 className="text-xl font-bold text-center text-primary mb-8 font-heading flex items-center justify-center gap-2 relative z-10">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500"/> TOP 3 유저 <Star className="w-5 h-5 text-amber-500 fill-amber-500"/>
-              </h3>
-              <div className="flex items-end justify-center gap-3 h-48 relative z-10">
-                {/* Rank 2 */}
-                {rankedUsers[1] && (
-                  <button 
-                    onClick={() => handleUserClick(rankedUsers[1])}
-                    className="w-1/3 flex flex-col items-center group cursor-pointer hover:-translate-y-1 transition-transform"
-                  >
-                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm group-hover:border-blue-100 transition-colors">
-                      {rankedUsers[1].profileImage ? <img src={rankedUsers[1].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary group-hover:text-cta transition-colors"/>}
-                    </div>
-                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[1].nickname}</div>
-                    <div className="w-full bg-gray-50 h-[60%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
-                      <Medal className="w-6 h-6 text-gray-400" />
-                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[1].points.toLocaleString()}점</span>
-                    </div>
-                  </button>
-                )}
-                {/* Rank 1 */}
-                {rankedUsers[0] && (
-                  <button 
-                    onClick={() => handleUserClick(rankedUsers[0])}
-                    className="w-1/3 flex flex-col items-center z-10 -ml-1 -mr-1 group cursor-pointer hover:-translate-y-1 transition-transform"
-                  >
-                    <div className="w-12 h-12 mb-2 rounded-full bg-amber-50 flex items-center justify-center overflow-hidden border-4 border-white shadow-md group-hover:border-blue-100 transition-colors">
-                      {rankedUsers[0].profileImage ? <img src={rankedUsers[0].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-6 h-6 text-amber-500"/>}
-                    </div>
-                    <div className="text-[15px] text-cta mb-2 w-full text-center px-1 font-extrabold line-clamp-1">{rankedUsers[0].nickname}</div>
-                    <div className="w-[110%] bg-blue-50 h-[85%] rounded-t-xl shadow-md border border-blue-200 border-b-0 flex flex-col items-center justify-start pt-4 relative overflow-hidden group-hover:bg-blue-100/80 transition-colors">
-                      <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
-                      <Trophy className="w-9 h-9 text-amber-500 drop-shadow-sm relative z-10" />
-                      <span className="text-[17px] font-mono font-black mt-2 text-cta relative z-10">{rankedUsers[0].points.toLocaleString()}점</span>
-                    </div>
-                  </button>
-                )}
-                {/* Rank 3 */}
-                {rankedUsers[2] && (
-                  <button 
-                    onClick={() => handleUserClick(rankedUsers[2])}
-                    className="w-1/3 flex flex-col items-center group cursor-pointer hover:-translate-y-1 transition-transform"
-                  >
-                    <div className="w-10 h-10 mb-2 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm group-hover:border-blue-100 transition-colors">
-                      {rankedUsers[2].profileImage ? <img src={rankedUsers[2].profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-5 h-5 text-tertiary group-hover:text-cta transition-colors"/>}
-                    </div>
-                    <div className="text-[14px] text-secondary mb-2 w-full text-center px-1 font-bold line-clamp-1 group-hover:text-primary transition-colors">{rankedUsers[2].nickname}</div>
-                    <div className="w-full bg-gray-50 h-[45%] rounded-t-xl shadow-inner border border-gray-200 border-b-0 flex flex-col items-center justify-start pt-3 group-hover:bg-gray-100 transition-colors">
-                      <Medal className="w-6 h-6 text-orange-400" />
-                      <span className="text-[15px] font-mono font-bold mt-2 text-primary">{rankedUsers[2].points.toLocaleString()}점</span>
-                    </div>
-                  </button>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Table View */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-2 overflow-x-auto bg-white rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-2 md:p-6"
-            >
-              <table className="w-full text-left min-w-[500px]">
-                <thead>
-                  <tr className="border-b border-gray-100 text-tertiary text-[14px] bg-white">
-                    <th className="py-3 px-3 font-bold w-16 text-center">순위</th>
-                    <th className="py-3 px-3 font-bold">유저명</th>
-                    <th className="py-3 px-3 font-bold text-right w-28">누적 점수</th>
-                    <th className="py-3 px-3 font-bold text-center w-20">쪽지</th>
-                    <th className="py-4 px-3 font-bold text-center w-20">초대</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 text-[15px]">
-                  {rankedUsers.map((user) => (
-                    <tr 
-                      key={user.id} 
-                      onClick={() => handleUserClick(user)}
-                      className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
-                    >
-                      <td className="py-3.5 px-3 text-center">
-                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-[13px] font-black ${
-                          user.rank === 1 ? 'bg-amber-100 text-amber-600' :
-                          user.rank === 2 ? 'bg-gray-100 text-gray-500' :
-                          user.rank === 3 ? 'bg-orange-100 text-orange-600' :
-                          'text-tertiary border border-gray-200 bg-white'
-                        }`}>
-                          {user.rank}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden shrink-0">
-                            {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover"/> : <User className="w-4 h-4 text-tertiary"/>}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-bold text-primary group-hover:text-cta tracking-tight text-[15px] transition-colors truncate">
-                              {user.nickname}
-                            </div>
-                            <div className="text-[12px] text-tertiary font-medium">
-                              {user.isProfilePublic ? '공개' : '비공개'}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-3 text-right font-mono font-black text-cta text-[17px] whitespace-nowrap">
-                        {user.points.toLocaleString()} 점
-                      </td>
-                      <td className="py-3.5 px-3 text-center">
-                        {user.id !== currentUser?.id ? (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleUserClick(user); }}
-                            className="bg-gray-50 text-secondary hover:bg-gray-100 p-2 rounded-xl transition-all shadow-sm border border-gray-100 mx-auto block"
-                            title="쪽지 보내기"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <span className="text-tertiary opacity-30 italic text-sm">-</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 text-center">
-                         {myTeam && user.id !== currentUser?.id ? (
-                          isAlreadyInvited(user.nickname) ? (
-                            <div className="bg-emerald-50 text-emerald-500 p-2 rounded-xl border border-emerald-100 mx-auto block w-fit" title="초대 완료">
-                              <CheckCircle className="w-4 h-4" />
-                            </div>
-                          ) : (
-                            <button 
-                              onClick={(e) => inviteToTeam(e, user)}
-                              className="bg-blue-50 text-cta hover:bg-cta hover:text-white p-2 rounded-xl transition-all shadow-sm mx-auto block"
-                              title="팀 초대하기"
-                            >
-                              <UserPlus className="w-4 h-4" />
-                            </button>
-                          )
-                        ) : (
-                          <span className="text-tertiary opacity-30 italic text-sm">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </motion.div>
+    <div className="w-full min-h-screen bg-white">
+      {/* Header */}
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 py-4">
+        <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <h1 className="text-xl font-black text-primary tracking-tighter uppercase">Hall of Fame</h1>
+            <div className="hidden lg:flex bg-gray-100 rounded-full px-4 py-2 gap-2 h-[42px]">
+              <button onClick={() => setPeriod('all')} className={`px-4 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${period === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>전체</button>
+              <button onClick={() => setPeriod('30d')} className={`px-4 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${period === '30d' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>30일</button>
+            </div>
           </div>
-        )}
+
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary" />
+              <input
+                type="text"
+                placeholder="유저 검색"
+                className="bg-gray-50 text-sm font-medium rounded-full py-2.5 pl-11 pr-6 outline-none border border-gray-100 focus:bg-white focus:border-cta transition-all w-full md:w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Dropdown
+              className="w-full md:w-64 h-[42px]"
+              value={period}
+              onChange={(val) => setPeriod(val as any)}
+              options={[{ label: '전체 기간', value: 'all' }, { label: '최근 30일', value: '30d' }, { label: '최근 7일', value: '7d' }]}
+            />
+          </div>
+        </div>
       </div>
 
-      {selectedUser && (
-        <UserProfileModal 
-          isOpen={!!selectedUser} 
-          onClose={() => setSelectedUser(null)} 
-          user={selectedUser} 
-        />
-      )}
+      <div className="max-w-[1920px] mx-auto px-6 py-10 lg:grid lg:grid-cols-12 lg:gap-12">
+        {/* Left Col: Podium Surround */}
+        <div className="lg:col-span-4 mb-10 lg:mb-0">
+          <div className="bg-gray-50/50 border border-gray-100 rounded-[48px] p-8 pb-12 sticky top-28">
+            <h2 className="text-2xl font-black text-primary mb-12 tracking-tight text-center flex items-center justify-center gap-3">
+              <Trophy className="w-8 h-8 text-amber-500" /> TOP 3
+            </h2>
+
+            <div className="flex items-end justify-center gap-6">
+              {/* 2nd Place */}
+              {top3[1] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  onClick={() => handleUserClick(top3[1]!)}
+                  className="flex flex-col items-center group cursor-pointer"
+                >
+                  <div className="relative mb-3">
+                    <div className="w-16 h-16 rounded-full border-4 border-gray-300 shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      {top3[1]!.profileImage ? <img src={top3[1]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-6 h-6" /></div>}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gray-400 border-2 border-white text-white text-[10px] font-black flex items-center justify-center">2</div>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-[13px] font-black text-primary truncate max-w-[80px]">{top3[1]!.nickname}</h3>
+                    <p className="text-cta font-black text-[11px]">{top3[1]!.points.toLocaleString()}P</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* 1st Place */}
+              {top3[0] && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                  onClick={() => handleUserClick(top3[0]!)}
+                  className="flex flex-col items-center group cursor-pointer -translate-y-4"
+                >
+                  <div className="relative mb-3">
+                    <div className="w-20 h-20 rounded-full border-4 border-amber-400 shadow-xl overflow-hidden group-hover:scale-110 transition-transform ring-4 ring-amber-100/50">
+                      {top3[0]!.profileImage ? <img src={top3[0]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-8 h-8" /></div>}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-amber-400 border-2 border-white text-white text-[12px] font-black flex items-center justify-center shadow-lg">1</div>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-[15px] font-black text-primary truncate max-w-[100px]">{top3[0]!.nickname}</h3>
+                    <p className="text-cta font-black text-[13px]">{top3[0]!.points.toLocaleString()}P</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* 3rd Place */}
+              {top3[2] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  onClick={() => handleUserClick(top3[2]!)}
+                  className="flex flex-col items-center group cursor-pointer"
+                >
+                  <div className="relative mb-3">
+                    <div className="w-16 h-16 rounded-full border-4 border-orange-300 shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
+                      {top3[2]!.profileImage ? <img src={top3[2]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-6 h-6" /></div>}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-400 border-2 border-white text-white text-[10px] font-black flex items-center justify-center">3</div>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-[13px] font-black text-primary truncate max-w-[80px]">{top3[2]!.nickname}</h3>
+                    <p className="text-cta font-black text-[11px]">{top3[2]!.points.toLocaleString()}P</p>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+            <div className="mt-12 p-6 bg-white rounded-[32px] border border-gray-100">
+              <p className="text-[12px] font-bold text-tertiary leading-relaxed text-center italic">"진정한 가치는 도전 자체에 있습니다."</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Col: Full List */}
+        <div className="lg:col-span-8">
+          <div className="space-y-4">
+            {rankedUsers.length === 0 ? (
+              <EmptyState icon={<Users className="w-12 h-12" />} title="유저가 없습니다" description="검색 조건을 변경해보세요." />
+            ) : (
+              rankedUsers.map((user) => (
+                <RankUserRow
+                  key={user.id}
+                  user={user}
+                  rank={user.rank}
+                  currentUser={currentUser}
+                  myTeam={myTeam}
+                  isAlreadyInvited={isAlreadyInvited}
+                  onUserClick={handleUserClick}
+                  onInvite={inviteToTeam}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {selectedUser && (
+          <UserProfileModal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} user={selectedUser} />
+        )}
+      </AnimatePresence>
+      <div className="h-40" />
     </div>
   );
 }

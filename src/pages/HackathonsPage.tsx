@@ -9,134 +9,93 @@ import EmptyState from '../components/ui/EmptyState';
 import { getHackathons, getTeams } from '../utils/api';
 import type { Hackathon, Team } from '../types/models';
 
-const STATUS_META: Record<string, { label: string; color: string; overlay: string }> = {
+const STATUS_META: Record<string, { label: string; color: string; dot: string }> = {
   ongoing: { 
     label: '진행 중', 
-    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    overlay: 'from-emerald-950/80 via-emerald-900/40 to-transparent'
+    color: 'bg-emerald-500 text-white',
+    dot: 'bg-emerald-500'
   },
   upcoming: { 
     label: '시작 전', 
-    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    overlay: 'from-blue-950/80 via-blue-900/40 to-transparent'
+    color: 'bg-blue-500 text-white',
+    dot: 'bg-blue-500'
   },
   ended: { 
     label: '종료됨', 
-    color: 'bg-neutral-500/20 text-neutral-400 border-neutral-500/30',
-    overlay: 'from-black via-neutral-900/60 to-transparent'
+    color: 'bg-neutral-600 text-white',
+    dot: 'bg-neutral-400'
   },
 };
 
-const THEME_IMAGES = [
-  '/assets/images/hackathon_explorer.png',
-  '/assets/images/team_building.png',
-  '/assets/images/rankings_tropy.png',
-];
+const THUMBNAIL_MAP: Record<string, string> = {
+  'aimers-8-model-lite': '/thumbnails/aimers8.png',
+  'monthly-vibe-coding-2026-02': '/thumbnails/vibe2026.png',
+  'daker-handover-2026-03': '/thumbnails/handover2026.png',
+  'mystery-hackathon-2026-04': '/thumbnails/mystery2026.png',
+};
 
-function PremiumFeedCard({ 
+function HackathonGridCard({ 
   hackathon, 
   participantCount,
-  index 
 }: { 
   hackathon: Hackathon; 
   participantCount: number;
-  index: number;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [-50, 50]);
   const statusMeta = STATUS_META[hackathon.status] || STATUS_META.ended;
   const deadlineAt = hackathon.period?.submissionDeadlineAt || hackathon.period?.endAt;
-  const cardImage = THEME_IMAGES[Math.abs(hackathon.slug.length) % THEME_IMAGES.length];
+  const thumbnail = THUMBNAIL_MAP[hackathon.slug] || '/assets/images/hackathon_explorer.png';
 
   return (
-    <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      className="group relative w-full h-[480px] rounded-[56px] overflow-hidden border border-white/10 shadow-3xl mb-12"
+    <Link 
+      to={`/hackathons/${hackathon.slug}`}
+      className="group flex flex-col w-full h-full"
     >
-      {/* Background with Parallax */}
-      <div className="absolute inset-0 z-0 bg-neutral-900">
+      {/* Thumbnail Area */}
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-100 mb-4">
         <motion.img 
-          style={{ y }}
-          src={cardImage} 
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
+          src={thumbnail} 
           alt={hackathon.title}
-          className="w-full h-[120%] object-cover opacity-50 group-hover:opacity-100 transition-opacity duration-700"
+          className="w-full h-full object-cover"
         />
-        <div className={`absolute inset-0 bg-gradient-to-r ${statusMeta.overlay} z-10`} />
-      </div>
-
-      {/* Content */}
-      <div className="relative h-full w-full flex flex-col justify-between p-12 md:p-16 z-20">
-        <div className="flex justify-between items-start">
-           <div className={`px-5 py-2 rounded-full text-[12px] font-black border ${statusMeta.color} tracking-[0.3em] uppercase bg-black/40 backdrop-blur-xl shadow-2xl`}>
-             {statusMeta.label}
-           </div>
-           <div className="flex gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 text-white/40 group-hover:text-white transition-colors">
-                {index === 0 ? <Zap className="w-6 h-6" /> : <Award className="w-6 h-6" />}
-              </div>
-           </div>
+        
+        {/* Status Badge Overlays */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider shadow-lg ${statusMeta.color}`}>
+            {statusMeta.label}
+          </div>
         </div>
 
-        <div className="max-w-4xl">
-           <div className="space-y-4 mb-8">
-              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[1] break-keep group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all">
-                {hackathon.title}
-              </h2>
-              <div className="flex flex-wrap gap-3">
-                 {hackathon.tags?.map(tag => (
-                   <span key={tag} className="px-4 py-2 text-[12px] font-black bg-white/5 text-white/50 rounded-xl border border-white/10 backdrop-blur-sm group-hover:text-white group-hover:border-white/30 transition-all uppercase tracking-widest">
-                      #{tag}
-                   </span>
-                 ))}
-              </div>
-           </div>
-
-           <div className="flex flex-col md:flex-row md:items-center gap-10 mb-10">
-              <div className="flex items-center gap-4">
-                 <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                    <Calendar className="w-5 h-5 text-white/50" />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Application Deadline</p>
-                    <p className="text-lg font-black text-white/80">{deadlineAt ? new Date(deadlineAt).toLocaleDateString() : '일정 미정'}</p>
-                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                 <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                    <Users className="w-5 h-5 text-white/50" />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Live Participants</p>
-                    <p className="text-lg font-black text-white/80">{participantCount}명 참여 중</p>
-                 </div>
-              </div>
-           </div>
-
-           <Link 
-             to={`/hackathons/${hackathon.slug}`}
-             className="group/btn inline-flex items-center gap-6 py-6 px-12 bg-white text-black rounded-full font-black text-xl tracking-tight transition-all hover:scale-[1.05] active:scale-[0.98] shadow-2xl shadow-blue-500/20"
-           >
-              <span>상세 보기</span>
-              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center transition-transform group-hover/btn:rotate-45">
-                 <ArrowUpRight className="w-6 h-6" />
-              </div>
-           </Link>
+        {/* Info Overlays (Like Duration) */}
+        <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 bg-black/80 backdrop-blur-md rounded-md border border-white/10">
+           <Users className="w-3 h-3 text-white/60" />
+           <span className="text-[10px] font-bold text-white tracking-tight">{participantCount}</span>
         </div>
       </div>
 
-      {/* Interactive Light Beam */}
-      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-         <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent rotate-45 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+      {/* Content Area */}
+      <div className="px-1">
+        <div className="flex flex-col min-w-0">
+          <div className="min-h-[2.8rem]">
+            <h3 className="text-[15px] font-bold text-primary leading-snug line-clamp-2 mb-1 group-hover:text-cta transition-colors">
+              {hackathon.title}
+            </h3>
+          </div>
+          
+          <div className="flex flex-wrap gap-x-2 gap-y-1 mb-2">
+            {hackathon.tags?.slice(0, 2).map(tag => (
+              <span key={tag} className="text-[12px] text-tertiary hover:text-secondary">#{tag}</span>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-[12px] text-tertiary font-medium">
+             <div className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot} opacity-60`} />
+             <span className="truncate">마감: {deadlineAt ? new Date(deadlineAt).toLocaleDateString() : '일정 미정'}</span>
+          </div>
+        </div>
       </div>
-    </motion.div>
+    </Link>
   );
 }
 
@@ -193,93 +152,58 @@ export default function HackathonsPage() {
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   
   return (
-    <div className="w-full min-h-screen pb-40">
-      {/* Background Decor */}
-      <div className="fixed inset-0 pointer-events-none -z-10">
-        <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-blue-500/5 rounded-full blur-[150px]" />
-        <div className="absolute bottom-0 left-0 w-[60%] h-[60%] bg-purple-500/5 rounded-full blur-[150px]" />
-      </div>
-
-      {/* Hero Header */}
-      <div className="px-6 mb-32">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-16">
-          <div className="space-y-8">
-            <motion.div 
-               initial={{ opacity: 0, x: -20 }}
-               animate={{ opacity: 1, x: 0 }}
-               className="flex items-center gap-4 text-cta font-black tracking-[0.5em] uppercase text-sm"
-            >
-               <div className="w-12 h-px bg-cta/40" />
-               Explore Magazine
-            </motion.div>
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-8xl md:text-[140px] font-black font-heading tracking-tighter text-primary leading-[0.8] mb-12"
-            >
-               HACKATHON<br />LIST
-            </motion.h1>
-            <p className="text-2xl text-secondary/40 font-bold max-w-2xl break-keep leading-relaxed">
-              프리미엄 해커톤 항목을 매거진 스타일로 탐색하세요. <br />
-              스크롤할 때 느껴지는 패럴랙스 효과가 탐색의 몰입감을 더해줍니다.
-            </p>
+    <div className="w-full min-h-screen bg-white">
+      {/* Header with Search */}
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 py-4">
+        <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+             <h1 className="text-xl font-black text-primary tracking-tighter">HACKATHONS</h1>
+             <div className="flex bg-gray-100 rounded-full px-4 py-2 gap-2 h-10 overflow-x-auto scrollbar-hide">
+                <button onClick={() => setFilterStatus('all')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>전체</button>
+                <button onClick={() => setFilterStatus('ongoing')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ongoing' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>진행 중</button>
+                <button onClick={() => setFilterStatus('upcoming')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'upcoming' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>시작 전</button>
+                <button onClick={() => setFilterStatus('ended')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ended' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>종료됨</button>
+             </div>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-wrap items-center gap-5 bg-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-6 rounded-[48px] border border-gray-100"
-          >
-            <div className="relative group">
-               <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary group-focus-within:text-cta transition-colors" />
+          <div className="flex items-center gap-3">
+            <div className="relative group flex-1 md:flex-none">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary" />
                <input 
                  type="text"
-                 placeholder="검색어"
-                 className="bg-neutral-50/80 text-primary font-bold rounded-2xl py-4 pl-14 pr-6 outline-none border border-transparent focus:bg-white focus:border-cta/20 transition-all w-72 text-lg"
+                 placeholder="해커톤 검색"
+                 className="bg-gray-50 text-sm font-medium rounded-full py-2.5 pl-10 pr-6 outline-none border border-gray-200 focus:bg-white focus:border-cta focus:ring-4 focus:ring-cta/5 transition-all w-full md:w-64"
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                />
             </div>
             <Dropdown
-              className="min-w-[160px] h-[60px]"
-              value={filterStatus}
-              onChange={(val) => setFilterStatus(val)}
-              options={[
-                { label: '상태 전체', value: 'all' },
-                { label: '진행 중', value: 'ongoing' },
-                { label: '시작 전', value: 'upcoming' },
-                { label: '종료됨', value: 'ended' },
-              ]}
-            />
-            <Dropdown
-              className="min-w-[160px] h-[60px]"
+              className="hidden lg:flex min-w-[140px] h-[42px]"
               value={filterTag}
               onChange={(val) => setFilterTag(val)}
               options={[
-                { label: '태그 전체', value: 'all' },
+                { label: '모든 태그', value: 'all' },
                 ...allTags.map(t => ({ label: t, value: t }))
               ]}
             />
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Premium Card Feed */}
-      <div className="px-6 space-y-24">
+      {/* Main Grid */}
+      <main className="max-w-[1920px] mx-auto px-6 py-10">
         {filtered.length > 0 ? (
-          <div className="space-y-16">
-            {filtered.map((hackathon, idx) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
+            {filtered.map((hackathon) => {
               const participantCount = teams
                 .filter((t) => t.hackathonSlug === hackathon.slug)
                 .reduce((sum, team) => sum + (team.memberCount || 0), 0);
 
               return (
-                <PremiumFeedCard
+                <HackathonGridCard
                   key={hackathon.slug}
                   hackathon={hackathon}
                   participantCount={participantCount}
-                  index={idx}
                 />
               );
             })}
@@ -289,18 +213,13 @@ export default function HackathonsPage() {
             icon={<Target className="w-16 h-16" />}
             title="조건과 일치하는 항목이 없습니다"
             description="다른 필터나 키워드로 다시 시도해 보세요."
-            className="py-48 bg-neutral-50 rounded-[56px] border border-neutral-100"
+            className="py-48"
           />
         )}
-      </div>
+      </main>
 
-      {/* Footer Stat */}
-      <div className="mt-32 px-6">
-         <div className="flex flex-col items-center gap-6">
-            <div className="w-px h-24 bg-gradient-to-b from-transparent via-cta/20 to-transparent" />
-            <span className="text-cta font-black tracking-[0.6em] uppercase text-[12px] opacity-40">End of Catalogue</span>
-         </div>
-      </div>
+      {/* Footer Buffer */}
+      <div className="h-40" />
     </div>
   );
 }
