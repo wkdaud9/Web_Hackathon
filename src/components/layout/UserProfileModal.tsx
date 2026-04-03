@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { getTeams, getHackathons, addInvite } from '../../utils/api';
-import { UserPlus, X, User as UserIcon, Send } from 'lucide-react';
-import type { User, Team, Hackathon } from '../../types/models';
+import { useTheme } from '../../contexts/ThemeContext';
+import { getTeams, addInvite } from '../../utils/api';
+import { UserPlus, X, User as UserIcon, Send, Mail, Trophy, Star, Users } from 'lucide-react';
+import type { User, Team } from '../../types/models';
 import ChatModal from './ChatModal';
 
 interface Props {
@@ -16,9 +17,8 @@ interface Props {
 
 export default function UserProfileModal({ isOpen, onClose, user }: Props) {
   const { currentUser } = useAuth();
+  const { theme } = useTheme();
   const { showToast } = useToast();
-  const [userTeams, setUserTeams] = useState<Team[]>([]);
-  const [userHackathons, setUserHackathons] = useState<Hackathon[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [myTeam, setMyTeam] = useState<Team | null>(null);
 
@@ -27,19 +27,6 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
     const leading = teams.find(t => t.leaderName === currentUser?.nickname);
     setMyTeam(leading || null);
   }, [currentUser]);
-
-  useEffect(() => {
-    if (isOpen && user) {
-      const allTeams = getTeams();
-      const teams = allTeams.filter(t => t.leaderName === user.nickname || t.members?.includes(user.nickname));
-      setUserTeams(teams);
-      
-      const allHackathons = getHackathons();
-      const userHackathonSlugs = new Set(teams.map(t => t.hackathonSlug).filter(Boolean));
-      const hackathons = allHackathons.filter(h => userHackathonSlugs.has(h.slug));
-      setUserHackathons(hackathons);
-    }
-  }, [isOpen, user]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,7 +48,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
 
   const handleInvite = () => {
     if (!myTeam || !user) return;
-    
+
     addInvite({
       id: Date.now(),
       hackathonSlug: myTeam.hackathonSlug || 'common',
@@ -73,7 +60,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
       type: 'invitation',
       createdAt: new Date().toISOString()
     });
-    
+
     showToast('초대 완료', 'success');
   };
 
@@ -91,7 +78,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
               onClick={onClose}
               className="absolute inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm transition-colors"
             />
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -106,40 +93,51 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
                 <X className="w-6 h-6" />
               </button>
 
-              <div className="p-6 md:p-8 overflow-y-auto">
+              <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar">
                 {/* Profile Header */}
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 mt-2">
-                  <div className="w-24 h-24 rounded-full bg-blue-50 dark:bg-cta/20 flex items-center justify-center overflow-hidden border-4 border-white dark:border-neutral-800 shadow-md shrink-0 transition-colors">
-                    {user.profileImage ? (
-                      <img src={user.profileImage} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <UserIcon className="w-10 h-10 text-cta" />
-                    )}
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-2xl font-bold font-heading text-primary dark:text-white mb-1 transition-colors">{user.nickname}</h2>
-                    <p className="text-secondary dark:text-neutral-400 text-[15px] mb-3 transition-colors">{user.email || '이메일 미공개'}</p>
-                    <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                      <div className="bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-500/20 transition-colors">
-                        <span className="text-[13px] font-bold mr-1">획득 포인트:</span>
-                        <span className="font-mono font-black text-[15px]">{user.points.toLocaleString()}점</span>
-                      </div>
+                <div className="flex flex-col md:flex-row items-center md:items-stretch gap-8 mb-10 mt-2">
+                  <div className="relative group/avatar shrink-0">
+                    <div className="w-28 h-28 rounded-[36px] bg-blue-50 dark:bg-cta/10 text-cta flex items-center justify-center text-4xl font-black border-4 border-white dark:border-neutral-800 shadow-xl dark:shadow-none overflow-hidden transition-all group-hover/avatar:scale-105">
+                      {user.profileImage ? (
+                        <img src={user.profileImage} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <UserIcon className="w-12 h-12 text-cta transition-colors" />
+                      )}
                     </div>
+                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-neutral-700 rounded-2xl shadow-lg border border-gray-100 dark:border-neutral-600 flex items-center justify-center text-cta transition-colors">
+                      <Star className="w-5 h-5 fill-current" />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex flex-col justify-center text-center md:text-left h-28">
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2.5">
+                      <h2 className="text-3xl font-black text-primary dark:text-white tracking-tight leading-none transition-colors">{user.nickname}</h2>
+                      <span className="px-3 py-1 bg-blue-50 dark:bg-cta/10 text-cta text-[11px] font-black rounded-lg border border-blue-100 dark:border-cta/20 uppercase tracking-widest transition-colors shadow-sm">Lv.4</span>
+                    </div>
+
+                    <div className="flex items-center justify-center md:justify-start gap-3 text-secondary dark:text-neutral-400 font-bold text-[14px] mb-4">
+                      <div className="flex items-center gap-1.5 transition-colors text-cta"><Mail className="w-4 h-4" /> {user.email || 'Email Private'}</div>
+                      <div className="w-1 h-1 bg-gray-200 dark:bg-neutral-700 rounded-full" />
+                      <div className="flex items-center gap-1.5 transition-colors"><Star className="w-4 h-4 text-cta" /> {user.points.toLocaleString()}점</div>
+                    </div>
+
                     {user.id !== currentUser?.id && (
-                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                        <button 
-                          onClick={handleSendMessage}
-                          className="inline-flex items-center justify-center gap-2 bg-cta hover:bg-blue-600 text-white px-5 py-2.5 rounded-[14px] font-bold text-[14px] transition-all shadow-[0_8px_20px_rgba(49,130,246,0.3)] dark:shadow-none hover:shadow-none bg-gradient-to-r from-blue-500 to-blue-600"
-                        >
-                          <Send className="w-4 h-4" />
-                          쪽지 보내기
-                        </button>
-                        {myTeam && (
-                          <button 
-                            onClick={handleInvite}
-                            className="inline-flex items-center justify-center gap-2 bg-white dark:bg-neutral-800 text-secondary dark:text-neutral-300 border border-gray-200 dark:border-neutral-700 px-5 py-2.5 rounded-[14px] font-bold text-[14px] hover:bg-gray-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                        {currentUser?.role !== 'operator' && (
+                          <button
+                            onClick={handleSendMessage}
+                            className="px-6 py-2.5 bg-cta text-white rounded-[16px] font-black text-[13px] transition-all shadow-[0_8px_25px_rgba(49,130,246,0.3)] dark:shadow-none hover:translate-y-[-2px] active:scale-95 flex items-center gap-2"
                           >
-                            <UserPlus className="w-4 h-4" />
+                            <Send className="w-3.5 h-3.5" />
+                            쪽지 보내기
+                          </button>
+                        )}
+                        {myTeam && (
+                          <button
+                            onClick={handleInvite}
+                            className="px-6 py-2.5 bg-white dark:bg-neutral-800 text-secondary dark:text-neutral-300 border border-gray-100 dark:border-neutral-700 rounded-[16px] font-black text-[13px] hover:bg-gray-50 dark:hover:bg-neutral-700 transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2"
+                          >
+                            <UserPlus className="w-3.5 h-3.5" />
                             팀 초대하기
                           </button>
                         )}
@@ -148,50 +146,48 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
                   </div>
                 </div>
 
-                <div className="h-px bg-gray-100 dark:bg-neutral-800 w-full mb-8 transition-colors" />
+                <div className="h-px bg-gray-100 dark:bg-neutral-800 w-full mb-10 transition-colors" />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Hackathons */}
-                  <div className="bg-gray-50/50 dark:bg-neutral-900/50 rounded-2xl p-5 border border-gray-100 dark:border-neutral-800 transition-colors">
-                    <h3 className="font-bold text-primary dark:text-white mb-4 flex items-center gap-2 transition-colors">
-                      📂 참여 중인 해커톤
-                    </h3>
-                    {userHackathons.length === 0 ? (
-                      <p className="text-tertiary dark:text-neutral-500 text-[14px] transition-colors">참여 중인 해커톤이 없습니다.</p>
-                    ) : (
-                      <ul className="space-y-3">
-                        {userHackathons.map(h => (
-                          <li key={h.slug} className="bg-white dark:bg-neutral-800 p-3.5 rounded-xl shadow-sm border border-gray-100 dark:border-neutral-700 transition-colors">
-                            <h4 className="font-bold text-primary dark:text-white text-[14px] mb-1 leading-tight transition-colors">{h.title}</h4>
-                            <span className="text-[12px] font-medium text-tertiary dark:text-neutral-400 transition-colors">{h.status === 'ongoing' ? '진행 중' : h.status === 'upcoming' ? '예정됨' : '종료됨'}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                {/* Activity Stats (MyPage Style) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <div className="p-6 bg-blue-50/30 dark:bg-cta/5 flex items-center justify-between rounded-[28px] border border-blue-50 dark:border-cta/10 group hover:shadow-inner transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-xl flex items-center justify-center border border-blue-100 dark:border-cta/20 shadow-sm transition-colors"><Trophy className="w-5 h-5 text-cta transition-colors" /></div>
+                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors">참여 대회</div>
+                    </div>
+                    <div className="text-2xl font-black text-cta font-heading tracking-tighter transition-colors">2</div>
                   </div>
+                  <div className="p-6 bg-blue-50/30 dark:bg-cta/5 flex items-center justify-between rounded-[28px] border border-blue-50 dark:border-cta/10 group hover:shadow-inner transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-xl flex items-center justify-center border border-blue-100 dark:border-cta/20 shadow-sm transition-colors"><Users className="w-5 h-5 text-cta transition-colors" /></div>
+                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors">활동 중인 팀</div>
+                    </div>
+                    <div className="text-2xl font-black text-cta font-heading tracking-tighter transition-colors">1</div>
+                  </div>
+                </div>
 
-                  {/* Teams */}
-                  <div className="bg-gray-50/50 dark:bg-neutral-900/50 rounded-2xl p-5 border border-gray-100 dark:border-neutral-800 transition-colors">
-                    <h3 className="font-bold text-primary dark:text-white mb-4 flex items-center gap-2 transition-colors">
-                      🛡️ 소속 팀 정보
+                {/* Grass Board (MyPage Style) */}
+                <div className="bg-white dark:bg-neutral-800 rounded-[40px] p-8 border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors mb-10">
+                  <div className="flex items-center justify-between mb-8 px-2">
+                    <h3 className="text-lg font-black text-primary dark:text-white flex items-center gap-3">
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-cta" ><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
+                      GitHub Contributions
                     </h3>
-                    {userTeams.length === 0 ? (
-                      <p className="text-tertiary dark:text-neutral-500 text-[14px] transition-colors">소속된 팀 정보가 없습니다.</p>
-                    ) : (
-                      <ul className="space-y-3">
-                        {userTeams.map(t => (
-                          <li key={t.teamCode} className="bg-white dark:bg-neutral-800 p-3.5 rounded-xl shadow-sm border border-gray-100 dark:border-neutral-700 relative overflow-hidden flex flex-col gap-1.5 transition-colors">
-                            <div className={`absolute top-0 left-0 bottom-0 w-1 ${t.isOpen ? 'bg-emerald-400' : 'bg-red-400'}`}></div>
-                            <h4 className="font-bold text-primary dark:text-white text-[14px] ml-2 leading-tight transition-colors">{t.name}</h4>
-                            <div className="text-[12px] text-secondary dark:text-neutral-400 ml-2 flex flex-wrap items-center gap-2 transition-colors">
-                              <span className="font-semibold text-primary dark:text-white transition-colors">{t.leaderName === user.nickname ? '👑 팀장' : '팀원'}</span>
-                              <span className="w-1 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full shrink-0 transition-colors"></span>
-                              <span className="truncate flex-1">{t.intro}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-6 bg-blue-50/20 dark:bg-cta/5 rounded-[32px] border border-blue-100/30 dark:border-cta/10">
+                    <div className="grid grid-rows-7 gap-[4px] auto-cols-max grid-flow-col w-max mx-auto">
+                      {Array.from({ length: 42 }).map((_, i) => {
+                        const level = Math.floor(Math.random() * 5);
+                        const bgDark = ['bg-neutral-800', 'bg-blue-900/40', 'bg-blue-700/60', 'bg-blue-500', 'bg-blue-400'];
+                        const bgLight = ['bg-blue-50', 'bg-blue-100', 'bg-blue-300', 'bg-blue-500', 'bg-blue-600'];
+                        return (
+                          <div key={i} className={`w-[14px] h-[14px] rounded-[2px] ${theme === 'dark' ? bgDark[level] : bgLight[level]} transition-colors hover:scale-125 cursor-pointer`} />
+                        );
+                      })}
+                    </div>
+                    <div className="mt-5 flex items-center justify-center gap-2 text-[10px] font-black text-tertiary dark:text-neutral-500 uppercase tracking-widest w-full border-t border-blue-100/50 dark:border-cta/10 pt-4">
+                      활동 적음 <div className="flex gap-1.5"><div className="w-3 h-3 bg-blue-50 dark:bg-neutral-800 rounded-sm" /><div className="w-3 h-3 bg-blue-300 dark:bg-blue-700/60 rounded-sm" /><div className="w-3 h-3 bg-blue-600 dark:bg-blue-400 rounded-sm" /></div> 활동 많음
+                    </div>
                   </div>
                 </div>
               </div>
@@ -200,11 +196,11 @@ export default function UserProfileModal({ isOpen, onClose, user }: Props) {
         )}
       </AnimatePresence>
 
-      <ChatModal 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-        otherUserId={user.id} 
-        otherUserNickname={user.nickname} 
+      <ChatModal
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        otherUserId={user.id}
+        otherUserNickname={user.nickname}
       />
     </>,
     document.body

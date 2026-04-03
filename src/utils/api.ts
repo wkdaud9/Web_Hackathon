@@ -87,15 +87,15 @@ export function leaveTeam(teamCode: string, userNickname: string, userId?: strin
   const team = allTeams[teamIndex];
   const updatedMembers = team.members?.filter(m => m !== userNickname) || [];
   const updatedMemberIds = userId ? (team.memberIds?.filter(id => id !== userId) || []) : (team.memberIds || []);
-  
-  const updatedTeam = { 
-    ...team, 
-    members: updatedMembers, 
+
+  const updatedTeam = {
+    ...team,
+    members: updatedMembers,
     memberIds: updatedMemberIds,
-    memberCount: Math.max(1, updatedMembers.length + (team.leaderName ? 1 : 0)) 
+    memberCount: Math.max(1, updatedMembers.length + (team.leaderName ? 1 : 0))
     // Usually memberCount should be actual count. leaderName + members.length
   };
-  
+
   // Correction: If memberCount is used, it should be derived or updated.
   updatedTeam.memberCount = updatedMembers.length + (team.leaderName ? 1 : 0);
 
@@ -135,7 +135,7 @@ export function getAllLeaderboards() {
 export function addLeaderboardEntry(hackathonSlug: string, entry: LeaderboardEntry) {
   const parsed = readFromStorage<Leaderboard[]>('leaderboards', []);
   const boardIndex = parsed.findIndex(l => l.hackathonSlug === hackathonSlug);
-  
+
   if (boardIndex >= 0) {
     parsed[boardIndex].entries.push(entry);
     parsed[boardIndex].entries.sort((a, b) => b.score - a.score);
@@ -148,7 +148,7 @@ export function addLeaderboardEntry(hackathonSlug: string, entry: LeaderboardEnt
       entries: [{ ...entry, rank: 1 }]
     });
   }
-  
+
   writeToStorage('leaderboards', parsed);
 }
 
@@ -209,7 +209,7 @@ export function deleteSubmission(id: number, hackathonSlug: string, teamName: st
   const boardIndex = boards.findIndex(b => b.hackathonSlug === hackathonSlug);
   if (boardIndex >= 0) {
     boards[boardIndex].entries = boards[boardIndex].entries.filter(e => e.teamName !== teamName);
-    boards[boardIndex].entries.sort((a,b) => b.score - a.score);
+    boards[boardIndex].entries.sort((a, b) => b.score - a.score);
     boards[boardIndex].entries.forEach((e, idx) => { e.rank = idx + 1; });
     writeToStorage('leaderboards', boards);
   }
@@ -217,7 +217,25 @@ export function deleteSubmission(id: number, hackathonSlug: string, teamName: st
 }
 
 export function getUsers() {
-  return readFromStorage<User[]>('users', []);
+  const users = readFromStorage<User[]>('users', []);
+  const hasAdmin = users.some(u => u.loginId === 'admin');
+  if (!hasAdmin) {
+    const adminUser: User = {
+      id: 'usr_admin',
+      loginId: 'admin',
+      password: '123',
+      nickname: '관리자',
+      email: 'admin@linkton.com',
+      points: 999999,
+      createdAt: new Date().toISOString(),
+      isProfilePublic: true,
+      role: 'operator',
+      managingHackathonSlug: 'monthly-hackathon-24-04'
+    };
+    users.push(adminUser);
+    writeToStorage('users', users);
+  }
+  return users;
 }
 
 export function getMessages(userId: string) {
@@ -230,8 +248,8 @@ export function getMessages(userId: string) {
 export function getChatHistory(userId: string, otherUserId: string) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
   return allMsgs
-    .filter((m) => 
-      (m.senderId === userId && m.receiverId === otherUserId) || 
+    .filter((m) =>
+      (m.senderId === userId && m.receiverId === otherUserId) ||
       (m.senderId === otherUserId && m.receiverId === userId)
     )
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -253,7 +271,7 @@ export function markMessageAsRead(msgId: string) {
 
 export function markAllAsRead(receiverId: string, senderId: string) {
   const allMsgs = readFromStorage<Message[]>('messages', []);
-  const updated = allMsgs.map((m) => 
+  const updated = allMsgs.map((m) =>
     (m.receiverId === receiverId && m.senderId === senderId) ? { ...m, isRead: true } : m
   );
   writeToStorage('messages', updated);
@@ -267,7 +285,7 @@ export function getUnreadCount(userId: string): number {
 
 export function getTeamIdeas(teamCode: string) {
   const all = readFromStorage<TeamIdea[]>('team_ideas', []);
-  return all.filter((i) => i.teamCode === teamCode).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return all.filter((i) => i.teamCode === teamCode).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export function addTeamIdea(idea: TeamIdea) {
@@ -293,7 +311,7 @@ export function deleteTeamIdea(id: string) {
 
 export function getTeamSchedules(teamCode: string) {
   const all = readFromStorage<TeamSchedule[]>('team_schedules', []);
-  return all.filter((s) => s.teamCode === teamCode).sort((a,b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+  return all.filter((s) => s.teamCode === teamCode).sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
 }
 
 export function addTeamSchedule(schedule: TeamSchedule) {
@@ -319,7 +337,7 @@ export function deleteTeamSchedule(id: string) {
 
 export function getTeamResources(teamCode: string) {
   const all = readFromStorage<TeamResource[]>('team_resources', []);
-  return all.filter((r) => r.teamCode === teamCode).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return all.filter((r) => r.teamCode === teamCode).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export function addTeamResource(resource: TeamResource) {

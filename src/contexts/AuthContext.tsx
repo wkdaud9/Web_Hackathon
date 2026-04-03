@@ -6,7 +6,11 @@ import { getUsers, addUser, updateUser as apiUpdateUser } from '../utils/api';
 interface AuthContextType {
   currentUser: User | null;
   login: (loginId: string, password: string) => Promise<boolean>;
-  register: (loginId: string, password: string, nickname: string) => Promise<boolean>;
+  register: (
+    loginId: string,
+    password: string,
+    nickname: string
+  ) => Promise<boolean>;
   logout: () => void;
   updateUser: (user: User) => void;
   isLoading: boolean;
@@ -33,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (loginId: string, password: string) => {
     const users = getUsers();
     const user = users.find((u: User) => u.loginId === loginId && u.password === password);
-    
+
     if (user) {
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
@@ -42,14 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const register = async (loginId: string, password: string, nickname: string) => {
+  const register = async (
+    loginId: string,
+    password: string,
+    nickname: string
+  ) => {
     const users = getUsers();
-    
+
     // Check if user already exists
     if (users.some((u: User) => u.loginId === loginId || u.nickname === nickname)) {
       return false;
     }
-    
+
     const newUser: User = {
       id: `usr_${Date.now()}`,
       loginId,
@@ -58,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: `${loginId}@example.com`,
       points: 0,
       createdAt: new Date().toISOString(),
-      isProfilePublic: true
+      isProfilePublic: true,
+      role: 'user'
     };
-    
+
     addUser(newUser);
     setCurrentUser(newUser);
     localStorage.setItem('currentUser', JSON.stringify(newUser));

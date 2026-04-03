@@ -55,14 +55,13 @@ export default function Layout() {
 
           <div className="hidden md:flex items-center gap-1.5 flex-1 max-w-2xl justify-center">
             {navItems.map((item) => (
-              <NavLink 
-                key={item.path} 
-                to={item.path} 
-                className={({ isActive }) => 
-                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 ${
-                    isActive 
-                      ? 'bg-blue-50 dark:bg-cta/10 text-cta shadow-sm shadow-blue-50 dark:shadow-none' 
-                      : 'text-tertiary dark:text-neutral-400 hover:text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 ${isActive
+                    ? 'bg-blue-50 dark:bg-cta/10 text-cta shadow-sm shadow-blue-50 dark:shadow-none'
+                    : 'text-tertiary dark:text-neutral-400 hover:text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
                   }`
                 }
               >
@@ -70,18 +69,17 @@ export default function Layout() {
               </NavLink>
             ))}
             {currentUser && (
-              <NavLink 
-                to="/workspace" 
-                className={({ isActive }) => 
-                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${
-                    isActive 
-                      ? 'bg-blue-50 dark:bg-cta/10 text-cta shadow-sm shadow-blue-50 dark:shadow-none' 
-                      : 'text-secondary/70 dark:text-neutral-400 hover:text-cta dark:hover:text-cta hover:bg-blue-50/50 dark:hover:bg-neutral-800'
+              <NavLink
+                to={currentUser.role === 'operator' ? '/admin' : '/workspace'}
+                className={({ isActive }) =>
+                  `px-6 py-2.5 rounded-2xl text-[15px] font-bold transition-all duration-300 flex items-center gap-2 ${isActive
+                    ? 'bg-blue-50 dark:bg-cta/10 text-cta shadow-sm shadow-blue-50 dark:shadow-none'
+                    : 'text-tertiary dark:text-neutral-400 hover:text-primary dark:hover:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
                   }`
                 }
               >
-                워크스페이스
-                <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                {currentUser.role === 'operator' ? '해커톤 관리' : '워크스페이스'}
+                {currentUser.role !== 'operator' && <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />}
               </NavLink>
             )}
           </div>
@@ -97,55 +95,67 @@ export default function Layout() {
 
             {currentUser ? (
               <div className="flex items-center gap-4">
-                 <MessageDropdown />
-                 
-                 <div className="relative" ref={userMenuRef}>
-                   <button 
-                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                     className="flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-full hover:border-cta/20 dark:hover:border-cta/40 hover:shadow-md transition-all group"
-                   >
-                     <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-cta/20 text-cta flex items-center justify-center border border-white dark:border-neutral-800 shadow-sm overflow-hidden shrink-0">
-                        {currentUser.profileImage ? (
-                          <img src={currentUser.profileImage} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <User className="w-4 h-4" />
-                        )}
-                     </div>
-                     <div className="text-left hidden lg:block">
-                        <div className="text-[14px] font-black text-primary dark:text-white leading-tight">{currentUser.nickname}</div>
-                     </div>
-                     <ChevronDown className={`w-4 h-4 text-tertiary dark:text-neutral-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
-                   </button>
+                <MessageDropdown />
 
-                   <AnimatePresence>
-                     {isUserMenuOpen && (
-                       <motion.div 
-                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                         className="absolute right-0 mt-3 w-52 bg-white dark:bg-neutral-800 rounded-3xl shadow-xl dark:shadow-2xl border border-gray-100 dark:border-neutral-700 p-2 z-[60]"
-                       >
-                         <Link 
-                           to="/mypage" 
-                           onClick={() => setIsUserMenuOpen(false)}
-                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-secondary dark:text-neutral-300 hover:bg-blue-50 dark:hover:bg-neutral-700 hover:text-cta dark:hover:text-white rounded-2xl transition-all"
-                         >
-                           마이페이지
-                         </Link>
-                         <div className="h-px bg-gray-50 dark:bg-neutral-700 my-1 mx-2" />
-                         <button 
-                           onClick={handleLogout}
-                           className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
-                         >
-                           로그아웃
-                         </button>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
-                 </div>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-full hover:border-cta/20 dark:hover:border-cta/40 hover:shadow-md transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-cta/20 text-cta flex items-center justify-center border border-white dark:border-neutral-800 shadow-sm overflow-hidden shrink-0">
+                      {currentUser.profileImage ? (
+                        <img src={currentUser.profileImage} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="text-left hidden lg:block">
+                      <div className="text-[14px] font-black text-primary dark:text-white leading-tight">
+                        {currentUser.role === 'operator' ? '관리자' : currentUser.nickname}
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-tertiary dark:text-neutral-400 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isUserMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        className="absolute right-0 mt-3 w-52 bg-white dark:bg-neutral-800 rounded-3xl shadow-xl dark:shadow-2xl border border-gray-100 dark:border-neutral-700 p-2 z-[60]"
+                      >
+                        {currentUser.role === 'operator' ? (
+                          <Link
+                            to="/admin"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-cta hover:bg-blue-50 dark:hover:bg-neutral-700 rounded-2xl transition-all"
+                          >
+                            해커톤 관리
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/mypage"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-secondary dark:text-neutral-300 hover:bg-blue-50 dark:hover:bg-neutral-700 hover:text-cta dark:hover:text-white rounded-2xl transition-all"
+                          >
+                            마이페이지
+                          </Link>
+                        )}
+                        <div className="h-px bg-gray-50 dark:bg-neutral-700 my-1 mx-2" />
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 w-full px-4 py-3 text-[14px] font-bold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-2xl transition-all"
+                        >
+                          로그아웃
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={() => setIsAuthModalOpen(true)}
                 className="px-6 py-2.5 bg-cta text-white text-[13.5px] font-black rounded-full hover:bg-blue-600 hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95"
               >

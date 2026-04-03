@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, User, UserPlus, Mail, CheckCircle, Search, Users } from 'lucide-react';
+import { Trophy, User, UserPlus, CheckCircle, Search, Users } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
 import EmptyState from '../components/ui/EmptyState';
 import { getUsers, getTeams, addInvite, getInvites } from '../utils/api';
@@ -42,7 +42,7 @@ function RankUserRow({
           </span>
         </div>
         <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-neutral-700 border border-gray-100 dark:border-neutral-600 overflow-hidden shrink-0">
-          {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4 m-3 text-tertiary" />}
+          {user.profileImage ? <img src={user.profileImage} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4 m-3 text-primary dark:text-white transition-colors" />}
         </div>
         <div className="min-w-0">
           <div className="text-[14px] font-black text-primary dark:text-white truncate group-hover:text-cta transition-colors">
@@ -64,9 +64,6 @@ function RankUserRow({
             </button>
           )
         ) : null}
-        <button onClick={() => onUserClick(user)} className="w-8 h-8 flex items-center justify-center bg-gray-50 dark:bg-neutral-700 text-tertiary dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded-full transition-all">
-          <Mail className="w-3.5 h-3.5" />
-        </button>
       </div>
     </motion.div>
   );
@@ -156,7 +153,7 @@ export default function RankingsPage() {
 
           <div className="flex items-center gap-3">
             <div className="relative group flex-1 md:flex-none h-11">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary dark:text-neutral-500" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary dark:text-white transition-colors" />
               <input
                 type="text"
                 placeholder="유저 검색"
@@ -180,7 +177,7 @@ export default function RankingsPage() {
         <div className="lg:col-span-4 mb-10 lg:mb-0">
           <div className="bg-gray-50/50 dark:bg-neutral-800/50 border border-gray-100 dark:border-neutral-700/50 rounded-[48px] p-8 pb-12 sticky top-28 transition-colors">
             <h2 className="text-2xl font-black text-primary dark:text-white mb-12 tracking-tight text-center flex items-center justify-center gap-3 transition-colors">
-              <Trophy className="w-8 h-8 text-amber-500" /> TOP 3
+              <Trophy className="w-8 h-8 text-primary dark:text-white transition-colors" /> TOP 3
             </h2>
 
             <div className="flex items-end justify-center gap-6">
@@ -192,10 +189,10 @@ export default function RankingsPage() {
                   className="flex flex-col items-center group cursor-pointer"
                 >
                   <div className="relative mb-3">
-                    <div className="w-16 h-16 rounded-full border-4 border-gray-300 shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
-                      {top3[1]!.profileImage ? <img src={top3[1]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-6 h-6" /></div>}
+                    <div className="w-16 h-16 rounded-full border-4 border-slate-300 dark:border-neutral-500 shadow-lg overflow-hidden group-hover:scale-105 transition-transform bg-white dark:bg-neutral-800 ring-4 ring-slate-100/50 dark:ring-neutral-700/30">
+                      {top3[1]!.profileImage ? <img src={top3[1]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-primary dark:text-white transition-colors"><User className="w-6 h-6" /></div>}
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gray-400 border-2 border-white text-white text-[10px] font-black flex items-center justify-center">2</div>
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 dark:bg-neutral-500 border-2 border-white dark:border-neutral-800 text-white text-[10px] font-black flex items-center justify-center shadow-md">2</div>
                   </div>
                   <div className="text-center">
                     <h3 className="text-[13px] font-black text-primary dark:text-white truncate max-w-[80px]">{top3[1]!.nickname}</h3>
@@ -212,8 +209,8 @@ export default function RankingsPage() {
                   className="flex flex-col items-center group cursor-pointer -translate-y-4"
                 >
                   <div className="relative mb-3">
-                    <div className="w-20 h-20 rounded-full border-4 border-amber-400 shadow-xl overflow-hidden group-hover:scale-110 transition-transform ring-4 ring-amber-100/50">
-                      {top3[0]!.profileImage ? <img src={top3[0]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-8 h-8" /></div>}
+                    <div className="w-20 h-20 rounded-full border-4 border-amber-400 shadow-xl overflow-hidden group-hover:scale-110 transition-transform ring-4 ring-amber-100/50 bg-white dark:bg-neutral-800">
+                      {top3[0]!.profileImage ? <img src={top3[0]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-primary dark:text-white transition-colors"><User className="w-8 h-8" /></div>}
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-amber-400 border-2 border-white text-white text-[12px] font-black flex items-center justify-center shadow-lg">1</div>
                   </div>
@@ -232,8 +229,8 @@ export default function RankingsPage() {
                   className="flex flex-col items-center group cursor-pointer"
                 >
                   <div className="relative mb-3">
-                    <div className="w-16 h-16 rounded-full border-4 border-orange-300 shadow-lg overflow-hidden group-hover:scale-105 transition-transform">
-                      {top3[2]!.profileImage ? <img src={top3[2]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-white text-tertiary"><User className="w-6 h-6" /></div>}
+                    <div className="w-16 h-16 rounded-full border-4 border-orange-300 shadow-lg overflow-hidden group-hover:scale-105 transition-transform bg-white dark:bg-neutral-800">
+                      {top3[2]!.profileImage ? <img src={top3[2]!.profileImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-primary dark:text-white transition-colors"><User className="w-6 h-6" /></div>}
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-400 border-2 border-white text-white text-[10px] font-black flex items-center justify-center">3</div>
                   </div>
@@ -254,7 +251,7 @@ export default function RankingsPage() {
         <div className="lg:col-span-8">
           <div className="space-y-4">
             {rankedUsers.length === 0 ? (
-              <EmptyState icon={<Users className="w-12 h-12" />} title="유저가 없습니다" description="검색 조건을 변경해보세요." />
+              <EmptyState icon={<Users className="w-12 h-12 text-primary dark:text-white transition-colors" />} title="유저가 없습니다" description="검색 조건을 변경해보세요." />
             ) : (
               rankedUsers.map((user) => (
                 <RankUserRow

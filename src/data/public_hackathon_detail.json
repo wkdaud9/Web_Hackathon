@@ -122,6 +122,22 @@
             }
           ]
         },
+        "prize": {
+          "items": [
+            {
+              "place": "1st",
+              "amountKRW": 2000000
+            },
+            {
+              "place": "2nd",
+              "amountKRW": 1000000
+            },
+            {
+              "place": "3rd",
+              "amountKRW": 500000
+            }
+          ]
+        },
         "teams": {
           "campEnabled": true,
           "listUrl": "/camp?hackathon=monthly-vibe-coding-2026-02"
@@ -220,6 +236,22 @@
             {
               "name": "최종 결과 발표",
               "at": "2026-04-27T10:00:00+09:00"
+            }
+          ]
+        },
+        "prize": {
+          "items": [
+            {
+              "place": "1st",
+              "amountKRW": 1500000
+            },
+            {
+              "place": "2nd",
+              "amountKRW": 800000
+            },
+            {
+              "place": "3rd",
+              "amountKRW": 400000
             }
           ]
         },

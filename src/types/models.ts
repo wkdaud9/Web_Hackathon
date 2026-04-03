@@ -75,6 +75,9 @@ export interface User {
   createdAt: string;
   // Options for privacy handling:
   isProfilePublic: boolean;
+  githubId?: string;
+  role: 'user' | 'operator';
+  managingHackathonSlug?: string;
 }
 
 export interface TeamChat {
