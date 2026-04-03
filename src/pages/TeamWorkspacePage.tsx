@@ -413,16 +413,16 @@ export default function TeamWorkspacePage() {
 
   if (!myTeam) {
     return (
-      <div className="max-w-2xl mx-auto py-20 text-center bg-white rounded-[32px] border border-gray-100 shadow-sm p-10">
-        <div className="w-20 h-20 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="max-w-2xl mx-auto py-20 text-center bg-white dark:bg-neutral-800 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm p-10 transition-colors">
+        <div className="w-20 h-20 bg-gray-50 dark:bg-neutral-700/50 text-gray-400 dark:text-neutral-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-colors">
           <Users className="w-10 h-10" />
         </div>
-        <h2 className="text-2xl font-bold text-primary mb-4">소속된 팀이 없습니다</h2>
-        <p className="text-secondary font-medium mb-10 leading-relaxed">
+        <h2 className="text-2xl font-bold text-primary dark:text-white mb-4 transition-colors">소속된 팀이 없습니다</h2>
+        <p className="text-secondary dark:text-neutral-400 font-medium mb-10 leading-relaxed transition-colors">
           팀 워크스페이스는 팀에 소속된 유저만 이용할 수 있습니다.<br/>
           팀 모집 라운지에서 새로운 팀을 찾거나 직접 모집해보세요!
         </p>
-        <Link to="/camp" className="px-8 py-4 bg-cta text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200">
+        <Link to="/camp" className="px-8 py-4 bg-cta text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 dark:shadow-none">
           팀 모집 라운지로 이동
         </Link>
       </div>
@@ -441,13 +441,13 @@ export default function TeamWorkspacePage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 bg-blue-50 text-cta rounded-[22px] flex items-center justify-center shadow-sm">
+          <div className="w-16 h-16 bg-blue-50 dark:bg-cta/20 text-cta rounded-[22px] flex items-center justify-center shadow-sm transition-colors">
             <Users className="w-8 h-8" />
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold font-heading text-primary tracking-tight">{myTeam.name}</h1>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 text-secondary text-[10px] font-black rounded-full border border-gray-100 tracking-widest uppercase">
+              <h1 className="text-3xl font-bold font-heading text-primary dark:text-white tracking-tight transition-colors">{myTeam.name}</h1>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 dark:bg-neutral-800 text-secondary dark:text-neutral-400 text-[10px] font-black rounded-full border border-gray-100 dark:border-neutral-700 tracking-widest uppercase transition-colors">
                 진행중
                 <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
               </div>
@@ -470,13 +470,13 @@ export default function TeamWorkspacePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1.5 bg-gray-100/50 rounded-[22px] w-fit mb-10 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-2 p-1.5 bg-gray-100/50 dark:bg-neutral-800/50 rounded-[22px] w-fit mb-10 overflow-x-auto scrollbar-hide transition-colors">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2.5 px-6 py-3 rounded-[16px] text-[15px] font-bold transition-all whitespace-nowrap ${
-              activeTab === tab.id ? 'bg-white text-cta shadow-sm ring-1 ring-black/5' : 'text-tertiary hover:text-primary'
+              activeTab === tab.id ? 'bg-white dark:bg-neutral-700 text-cta shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-tertiary dark:text-neutral-500 hover:text-primary dark:hover:text-white'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -498,46 +498,46 @@ export default function TeamWorkspacePage() {
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-8">
-                  <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
-                    <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
+                    <h3 className="text-xl font-bold text-primary dark:text-white mb-6 flex items-center gap-2 transition-colors">
                       <div className="w-1.5 h-5 bg-cta rounded-full" />
                       팀 소개 및 현황
                     </h3>
-                    <p className="text-secondary font-medium leading-relaxed mb-8">{myTeam.intro}</p>
+                    <p className="text-secondary dark:text-neutral-400 font-medium leading-relaxed mb-8 transition-colors">{myTeam.intro}</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      <div className="bg-gray-50 p-5 rounded-2xl">
-                        <div className="text-tertiary text-[12px] font-bold mb-1 uppercase tracking-wider">멤버 수</div>
-                        <div className="text-2xl font-black text-primary">{myTeam.members?.length || 1}명</div>
+                      <div className="bg-gray-50 dark:bg-neutral-700/50 p-5 rounded-2xl transition-colors">
+                        <div className="text-tertiary dark:text-neutral-500 text-[12px] font-bold mb-1 uppercase tracking-wider transition-colors">멤버 수</div>
+                        <div className="text-2xl font-black text-primary dark:text-white transition-colors">{myTeam.members?.length || 1}명</div>
                       </div>
-                      <div className="bg-gray-50 p-5 rounded-2xl">
-                        <div className="text-tertiary text-[12px] font-bold mb-1 uppercase tracking-wider">포지션 정보</div>
+                      <div className="bg-gray-50 dark:bg-neutral-700/50 p-5 rounded-2xl transition-colors">
+                        <div className="text-tertiary dark:text-neutral-500 text-[12px] font-bold mb-1 uppercase tracking-wider transition-colors">포지션 정보</div>
                         <div className="text-[14px] font-bold text-cta truncate">{myTeam.lookingFor.join(', ')}</div>
                       </div>
-                      <div className="bg-gray-50 p-5 rounded-2xl">
-                        <div className="text-tertiary text-[12px] font-bold mb-1 uppercase tracking-wider">생성일</div>
-                        <div className="text-[14px] font-bold text-primary">{new Date(myTeam.createdAt).toLocaleDateString()}</div>
+                      <div className="bg-gray-50 dark:bg-neutral-700/50 p-5 rounded-2xl transition-colors">
+                        <div className="text-tertiary dark:text-neutral-500 text-[12px] font-bold mb-1 uppercase tracking-wider transition-colors">생성일</div>
+                        <div className="text-[14px] font-bold text-primary dark:text-white transition-colors">{new Date(myTeam.createdAt).toLocaleDateString()}</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
-                    <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
+                    <h3 className="text-xl font-bold text-primary dark:text-white mb-6 flex items-center gap-2 transition-colors">
                       <div className="w-1.5 h-5 bg-cta rounded-full" />
                       팀 멤버 ({myTeam.members?.length || 1})
                     </h3>
                     <div className="space-y-4">
                       {myTeam.members?.sort((a) => a === myTeam.leaderName ? -1 : 1).map((member, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl group transition-colors hover:bg-white border border-transparent hover:border-gray-100">
+                        <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700/50 rounded-2xl group transition-colors hover:bg-white dark:hover:bg-neutral-700 border border-transparent hover:border-gray-100 dark:hover:border-neutral-600">
                           <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center border border-gray-200 shadow-sm overflow-hidden text-tertiary font-bold text-[14px]">
+                            <div className="w-11 h-11 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center border border-gray-200 dark:border-neutral-600 shadow-sm overflow-hidden text-tertiary dark:text-neutral-400 font-bold text-[14px]">
                               {member[0]}
                             </div>
                             <div>
-                              <div className="font-bold text-primary flex items-center gap-2">
+                              <div className="font-bold text-primary dark:text-white flex items-center gap-2 transition-colors">
                                 {member}
-                                {member === myTeam.leaderName && <span className="text-[10px] font-black bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-md">LEADER</span>}
+                                {member === myTeam.leaderName && <span className="text-[10px] font-black bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-md">LEADER</span>}
                               </div>
-                              <div className="text-[12px] text-tertiary font-medium">{member === myTeam.leaderName ? '기획 및 총괄' : '개발 및 디자인'}</div>
+                              <div className="text-[12px] text-tertiary dark:text-neutral-500 font-medium transition-colors">{member === myTeam.leaderName ? '기획 및 총괄' : '개발 및 디자인'}</div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -554,30 +554,30 @@ export default function TeamWorkspacePage() {
                 </div>
 
                 <div className="space-y-8">
-                  <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-fit">
-                    <h4 className="text-lg font-black text-primary mb-6 flex items-center gap-2">
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-none h-fit transition-colors">
+                    <h4 className="text-lg font-black text-primary dark:text-white mb-6 flex items-center gap-2 transition-colors">
                       <Clock className="w-5 h-5 text-cta" /> 다가오는 일정
                     </h4>
                     {schedules.length === 0 ? (
-                      <p className="text-tertiary text-[14px] font-medium leading-relaxed mb-6 italic">아직 등록된 일정이 없습니다.</p>
+                      <p className="text-tertiary dark:text-neutral-500 text-[14px] font-medium leading-relaxed mb-6 italic transition-colors">아직 등록된 일정이 없습니다.</p>
                     ) : (
                       <div className="space-y-4 mb-6">
                         {schedules.slice(0, 3).map((s) => (
-                          <div key={s.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-cta/20 transition-all">
+                          <div key={s.id} className="p-4 bg-gray-50 dark:bg-neutral-700/50 rounded-2xl border border-gray-100 dark:border-neutral-600 hover:border-cta/20 transition-all">
                             <div className="text-[10px] font-black text-cta uppercase mb-1">{new Date(s.startAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
-                            <div className="font-bold text-primary text-[14px] mb-1">{s.title}</div>
-                            <div className="text-[11px] text-tertiary">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div className="font-bold text-primary dark:text-white text-[14px] mb-1 transition-colors">{s.title}</div>
+                            <div className="text-[11px] text-tertiary dark:text-neutral-400">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                           </div>
                         ))}
                       </div>
                     )}
-                    <button onClick={() => setActiveTab('calendar')} className="w-full py-3 bg-white border border-gray-200 text-cta font-bold rounded-2xl hover:bg-gray-50 transition-colors shadow-sm text-[14px]">
+                    <button onClick={() => setActiveTab('calendar')} className="w-full py-3 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600 text-cta font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors shadow-sm text-[14px]">
                       캘린더 보기
                     </button>
                   </div>
 
-                  <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
-                    <h4 className="font-bold text-primary mb-4 flex items-center justify-between">
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
+                    <h4 className="font-bold text-primary dark:text-white mb-4 flex items-center justify-between transition-colors">
                       <span className="flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /> 최근 아이디어</span>
                       <span className="text-[12px] text-tertiary">{ideas.length}</span>
                     </h4>
@@ -590,7 +590,7 @@ export default function TeamWorkspacePage() {
                       ))}
                       {ideas.length === 0 && <p className="text-[13px] text-tertiary py-4 text-center">아이디어를 제안해보세요!</p>}
                     </div>
-                    <button onClick={() => setActiveTab('brainstorm')} className="w-full mt-6 py-3 border border-gray-100 text-tertiary font-bold rounded-2xl hover:text-cta hover:border-cta/30 transition-all text-[14px]">
+                    <button onClick={() => setActiveTab('brainstorm')} className="w-full mt-6 py-3 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600 text-cta font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors shadow-sm text-[14px]">
                       아이디어 보드 전체보기
                     </button>
                   </div>
@@ -600,8 +600,8 @@ export default function TeamWorkspacePage() {
 
             {activeTab === 'brainstorm' && (
               <div className="max-w-4xl mx-auto space-y-8">
-                <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
-                  <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
+                  <h3 className="text-xl font-bold text-primary dark:text-white mb-6 flex items-center gap-2 transition-colors">
                     <Lightbulb className="w-6 h-6 text-amber-500" />
                     아이디어 브레인스토밍
                   </h3>
@@ -610,13 +610,13 @@ export default function TeamWorkspacePage() {
                       value={newIdea}
                       onChange={(e) => setNewIdea(e.target.value)}
                       placeholder={editingIdea ? "아이디어 수정을 진행합니다..." : "자유롭게 아이디어를 남겨주세요! 팀원들과 실시간으로 공유됩니다."}
-                      className={`w-full bg-gray-50 border rounded-[28px] px-8 py-6 text-primary font-medium outline-none focus:ring-4 focus:ring-blue-100 transition-all h-32 resize-none placeholder:text-tertiary leading-relaxed ${editingIdea ? 'border-cta' : 'border-gray-100'}`}
+                      className={`w-full bg-gray-50 dark:bg-neutral-800 border rounded-[28px] px-8 py-6 text-primary dark:text-white font-medium outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-500/20 transition-all h-32 resize-none placeholder:text-tertiary dark:placeholder:text-neutral-500 leading-relaxed ${editingIdea ? 'border-cta' : 'border-gray-100 dark:border-neutral-700'}`}
                     />
                     <div className="absolute bottom-4 right-4 flex items-center gap-2">
                         {editingIdea && (
-                           <button type="button" onClick={() => {setEditingIdea(null); setNewIdea('');}} className="bg-gray-200 text-gray-700 px-4 py-3 rounded-2xl font-bold hover:bg-gray-300">취소</button>
+                           <button type="button" onClick={() => {setEditingIdea(null); setNewIdea('');}} className="bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-neutral-300 px-4 py-3 rounded-2xl font-bold hover:bg-gray-300 dark:hover:bg-neutral-600 transition-colors">취소</button>
                         )}
-                        <button type="submit" className="bg-cta text-white p-3 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200">
+                        <button type="submit" className="bg-cta text-white p-3 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200 dark:shadow-none">
                           {editingIdea ? <CheckCircle2 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
                         </button>
                     </div>
@@ -624,27 +624,27 @@ export default function TeamWorkspacePage() {
 
                   <div className="space-y-6">
                     {ideas.map((idea, idx) => (
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} key={idea.id} className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm group hover:border-cta/30 transition-all">
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} key={idea.id} className="bg-white dark:bg-neutral-800 p-6 rounded-[24px] border border-gray-100 dark:border-neutral-700 shadow-sm group hover:border-cta/30 dark:hover:border-cta/50 transition-all">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-blue-50 text-cta flex items-center justify-center font-bold text-[14px]">
+                            <div className="w-9 h-9 rounded-full bg-blue-50 dark:bg-cta/10 text-cta flex items-center justify-center font-bold text-[14px]">
                               {idea.author[0]}
                             </div>
                             <div>
-                              <div className="font-bold text-primary text-[15px]">{idea.author}</div>
-                              <div className="text-[11px] text-tertiary">{new Date(idea.createdAt).toLocaleString()}</div>
+                              <div className="font-bold text-primary dark:text-white text-[15px] transition-colors">{idea.author}</div>
+                              <div className="text-[11px] text-tertiary dark:text-neutral-500">{new Date(idea.createdAt).toLocaleString()}</div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             {idea.author === currentUser?.nickname && (
                                <>
-                                 <button onClick={() => startEditIdea(idea)} className="p-2 text-tertiary hover:text-cta bg-gray-50 rounded-lg"><Pencil className="w-4 h-4"/></button>
-                                 <button onClick={() => handleDeleteIdea(idea.id)} className="p-2 text-tertiary hover:text-red-500 bg-gray-50 rounded-lg"><Trash2 className="w-4 h-4"/></button>
+                                 <button onClick={() => startEditIdea(idea)} className="p-2 text-tertiary hover:text-cta bg-gray-50 dark:bg-neutral-700 rounded-lg"><Pencil className="w-4 h-4"/></button>
+                                 <button onClick={() => handleDeleteIdea(idea.id)} className="p-2 text-tertiary hover:text-red-500 bg-gray-50 dark:bg-neutral-700 rounded-lg"><Trash2 className="w-4 h-4"/></button>
                                </>
                             )}
                           </div>
                         </div>
-                        <p className="text-secondary font-medium leading-[1.7] whitespace-pre-wrap">{idea.content}</p>
+                        <p className="text-secondary dark:text-neutral-300 font-medium leading-[1.7] whitespace-pre-wrap transition-colors">{idea.content}</p>
                       </motion.div>
                     ))}
                   </div>
@@ -655,17 +655,17 @@ export default function TeamWorkspacePage() {
             {activeTab === 'calendar' && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div className="md:col-span-1 space-y-6">
-                  <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-fit sticky top-24">
-                    <h3 className="text-lg font-black text-primary mb-6 flex items-center gap-2">
+                  <div className="bg-white dark:bg-neutral-800 p-6 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-none h-fit sticky top-24 transition-colors">
+                    <h3 className="text-lg font-black text-primary dark:text-white mb-6 flex items-center gap-2 transition-colors">
                       <Clock className="w-5 h-5 text-cta" /> 다가오는 일정
                     </h3>
-                    <div className="space-y-6 relative ml-2 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                    <div className="space-y-6 relative ml-2 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100 dark:before:bg-neutral-700">
                       {schedules.slice(0, 5).map((s, idx) => (
                         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} key={s.id} className="relative pl-6">
-                          <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-cta shadow-[0_0_8px_rgba(59,130,246,0.5)] ring-4 ring-white" />
+                          <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-cta shadow-[0_0_8px_rgba(59,130,246,0.5)] ring-4 ring-white dark:ring-neutral-800 transition-colors" />
                           <div className="text-[11px] font-black text-cta uppercase mb-1">{new Date(s.startAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
-                          <div className="font-bold text-primary text-[14px] leading-tight mb-1">{s.title}</div>
-                          <div className="text-[12px] text-tertiary font-medium">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                          <div className="font-bold text-primary dark:text-white text-[14px] leading-tight mb-1 transition-colors">{s.title}</div>
+                          <div className="text-[12px] text-tertiary dark:text-neutral-400 font-medium transition-colors">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                         </motion.div>
                       ))}
                     </div>
@@ -673,29 +673,29 @@ export default function TeamWorkspacePage() {
                 </div>
 
                 <div className="md:col-span-3">
-                  <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none transition-colors">
                     <div className="flex items-center justify-between mb-8">
                       <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-black text-primary font-heading tracking-tight">{currentMonth.toLocaleDateString([], { year: 'numeric', month: 'long' })}</h2>
-                        <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl">
-                          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1.5 hover:bg-white rounded-lg transition-colors text-tertiary hover:text-primary"><ChevronLeft className="w-5 h-5" /></button>
-                          <button onClick={() => setCurrentMonth(new Date())} className="px-3 py-1 text-[11px] font-black text-primary bg-white rounded-lg shadow-sm">TODAY</button>
-                          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-1.5 hover:bg-white rounded-lg transition-colors text-tertiary hover:text-primary"><ChevronRight className="w-5 h-5" /></button>
+                        <h2 className="text-2xl font-black text-primary dark:text-white font-heading tracking-tight transition-colors">{currentMonth.toLocaleDateString([], { year: 'numeric', month: 'long' })}</h2>
+                        <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-neutral-700/50 p-1 rounded-xl transition-colors">
+                          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))} className="p-1.5 hover:bg-white dark:hover:bg-neutral-600 rounded-lg transition-colors text-tertiary  dark:text-neutral-400 hover:text-primary dark:hover:text-white"><ChevronLeft className="w-5 h-5" /></button>
+                          <button onClick={() => setCurrentMonth(new Date())} className="px-3 py-1 text-[11px] font-black text-primary dark:text-white bg-white dark:bg-neutral-600 rounded-lg shadow-sm transition-colors">TODAY</button>
+                          <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))} className="p-1.5 hover:bg-white dark:hover:bg-neutral-600 rounded-lg transition-colors text-tertiary dark:text-neutral-400 hover:text-primary dark:hover:text-white"><ChevronRight className="w-5 h-5" /></button>
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-2xl overflow-hidden border border-gray-100">
-                      {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (<div key={day} className="bg-white py-3 text-center text-[10px] font-black text-tertiary tracking-widest">{day}</div>))}
+                    <div className="grid grid-cols-7 gap-px bg-gray-100 dark:bg-neutral-700 rounded-2xl overflow-hidden border border-gray-100 dark:border-neutral-700 transition-colors">
+                      {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (<div key={day} className="bg-white dark:bg-neutral-800 py-3 text-center text-[10px] font-black text-tertiary dark:text-neutral-500 tracking-widest">{day}</div>))}
                       {calendarDays.map((day, idx) => {
-                        if (!day) return <div key={`empty-${idx}`} className="bg-gray-50/50 min-h-[100px]" />;
+                        if (!day) return <div key={`empty-${idx}`} className="bg-gray-50/50 dark:bg-neutral-800/80 min-h-[100px]" />;
                         const daySchedules = getSchedulesForDate(day);
                         const isToday = day.toDateString() === new Date().toDateString();
                         return (
-                          <div key={day.toISOString()} onClick={() => { setSelectedDate(day); setIsDayModalOpen(true); }} className="bg-white min-h-[110px] p-2 hover:bg-blue-50/30 transition-all cursor-pointer group flex flex-col items-start gap-1">
-                            <span className={`w-8 h-8 flex items-center justify-center text-[14px] font-black rounded-full transition-colors ${isToday ? 'bg-cta text-white shadow-md' : 'text-primary group-hover:text-cta'}`}>{day.getDate()}</span>
+                          <div key={day.toISOString()} onClick={() => { setSelectedDate(day); setIsDayModalOpen(true); }} className="bg-white dark:bg-neutral-800 min-h-[110px] p-2 hover:bg-blue-50/30 dark:hover:bg-neutral-700 transition-all cursor-pointer group flex flex-col items-start gap-1">
+                            <span className={`w-8 h-8 flex items-center justify-center text-[14px] font-black rounded-full transition-colors ${isToday ? 'bg-cta text-white shadow-md' : 'text-primary dark:text-white group-hover:text-cta'}`}>{day.getDate()}</span>
                             <div className="flex flex-col gap-1 w-full mt-1">
-                              {daySchedules.slice(0, 2).map(s => (<div key={s.id} className="text-[10px] font-bold text-cta bg-blue-50 px-1.5 py-0.5 rounded-md truncate border border-blue-100/50">{s.title}</div>))}
-                              {daySchedules.length > 2 && (<div className="text-[9px] font-bold text-tertiary pl-1">+{daySchedules.length - 2} more</div>)}
+                              {daySchedules.slice(0, 2).map(s => (<div key={s.id} className="text-[10px] font-bold text-cta bg-blue-50 dark:bg-cta/10 px-1.5 py-0.5 rounded-md truncate border border-blue-100/50 dark:border-cta/20">{s.title}</div>))}
+                              {daySchedules.length > 2 && (<div className="text-[9px] font-bold text-tertiary dark:text-neutral-500 pl-1">+{daySchedules.length - 2} more</div>)}
                             </div>
                           </div>
                         );
@@ -708,12 +708,12 @@ export default function TeamWorkspacePage() {
 
             {activeTab === 'resources' && (
               <div className="space-y-10">
-                <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm">
+                <div className="bg-white dark:bg-neutral-800 p-8 rounded-[32px] border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
                   <div className="flex items-center justify-between mb-10">
-                    <h3 className="text-xl font-bold text-primary flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-primary dark:text-white flex items-center gap-2 transition-colors">
                        <FileText className="w-6 h-6 text-cta" /> 리소스 저장소
                     </h3>
-                    <button onClick={() => { setEditingResource(null); setResourceForm({title:'', description:'', url:'', type:'link'}); setIsResourceModalOpen(true); }} className="flex items-center gap-2 px-6 py-3 bg-cta text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200">
+                    <button onClick={() => { setEditingResource(null); setResourceForm({title:'', description:'', url:'', type:'link'}); setIsResourceModalOpen(true); }} className="flex items-center gap-2 px-6 py-3 bg-cta text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 dark:shadow-none">
                       <Plus className="w-5 h-5"/>
                       리소스 추가
                     </button>
@@ -721,9 +721,9 @@ export default function TeamWorkspacePage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     {[
-                      { id: 'file', label: '파일 보관함', icon: FileUp, color: 'blue' },
-                      { id: 'link', label: '링크 보관함', icon: LinkIcon, color: 'emerald' },
-                      { id: 'other', label: '기타 리소스', icon: Share2, color: 'purple' }
+                      { id: 'file', label: '파일 보관함', icon: FileUp },
+                      { id: 'link', label: '링크 보관함', icon: LinkIcon },
+                      { id: 'other', label: '기타 리소스', icon: Share2 }
                     ].map(basket => {
                       const basketResources = resources.filter(r => {
                         if (basket.id === 'file') return r.type === 'file';
@@ -732,28 +732,28 @@ export default function TeamWorkspacePage() {
                       });
 
                       return (
-                        <div key={basket.id} className="bg-gray-50/50 p-6 rounded-[32px] border border-gray-100 min-h-[400px]">
+                        <div key={basket.id} className="bg-gray-50/50 dark:bg-neutral-700/50 p-6 rounded-[32px] border border-gray-100 dark:border-neutral-600/50 min-h-[400px] transition-colors">
                           <div className="flex items-center gap-3 mb-6 px-2">
-                            <div className={`w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-${basket.color}-50 text-${basket.color}-500`}>
+                            <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-2xl flex items-center justify-center shadow-sm border border-gray-100 dark:border-neutral-700 text-primary dark:text-white transition-colors">
                               <basket.icon className="w-5 h-5" />
                             </div>
-                            <h4 className="font-black text-primary text-lg">{basket.label}</h4>
-                            <span className={`ml-auto bg-${basket.color}-100 text-${basket.color}-600 px-2.5 py-0.5 rounded-full text-[11px] font-black`}>{basketResources.length}</span>
+                            <h4 className="font-black text-primary dark:text-white text-lg transition-colors">{basket.label}</h4>
+                            <span className="ml-auto bg-blue-100 dark:bg-cta/20 text-blue-600 dark:text-cta px-2.5 py-0.5 rounded-full text-[11px] font-black transition-colors">{basketResources.length}</span>
                           </div>
-                          <div className="space-y-1 bg-white/50 rounded-2xl p-2 border border-black/5 overflow-hidden">
+                          <div className="space-y-1 bg-white/50 dark:bg-neutral-800/50 rounded-2xl p-2 border border-black/5 dark:border-white/5 overflow-hidden transition-colors">
                             {basketResources.map((res) => (
                                <button 
                                  key={res.id} 
                                  onClick={() => { setSelectedResource(res); setIsDetailModalOpen(true); }}
-                                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-white hover:shadow-sm rounded-xl transition-all group"
+                                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-white dark:hover:bg-neutral-700 hover:shadow-sm rounded-xl transition-all group dark:hover:shadow-none"
                                >
                                  <div className="flex items-center gap-3 min-w-0">
-                                   <div className={`w-1.5 h-1.5 rounded-full bg-${basket.color}-400 group-hover:scale-125 transition-transform`} />
-                                   <span className="font-bold text-primary text-[14px] truncate">{res.title}</span>
+                                   <div className="w-1.5 h-1.5 rounded-full bg-primary dark:bg-white group-hover:scale-125 transition-all" />
+                                   <span className="font-bold text-primary dark:text-white text-[14px] truncate transition-colors">{res.title}</span>
                                  </div>
                                  <div className="flex items-center gap-2 shrink-0">
-                                   <span className="text-[11px] font-bold text-tertiary group-hover:text-secondary">{res.sharedBy}</span>
-                                   <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-cta group-hover:translate-x-0.5 transition-all" />
+                                   <span className="text-[11px] font-bold text-tertiary dark:text-neutral-500 group-hover:text-secondary dark:group-hover:text-neutral-300 transition-colors">{res.sharedBy}</span>
+                                   <ChevronRight className="w-4 h-4 text-gray-300 dark:text-neutral-600 group-hover:text-cta group-hover:translate-x-0.5 transition-all" />
                                  </div>
                                </button>
                             ))}
@@ -775,65 +775,65 @@ export default function TeamWorkspacePage() {
         {isDetailModalOpen && selectedResource && (
            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
              <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsDetailModalOpen(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
-             <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-lg bg-white rounded-[40px] shadow-2xl p-10 overflow-hidden" onClick={e => e.stopPropagation()}>
+             <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-lg bg-white dark:bg-neutral-900 rounded-[40px] shadow-2xl p-10 overflow-hidden transition-colors" onClick={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 bg-blue-50 text-cta rounded-2xl flex items-center justify-center border border-blue-100 shadow-sm shrink-0">
+                      <div className="w-12 h-12 bg-blue-50 dark:bg-cta/20 text-cta rounded-2xl flex items-center justify-center border border-blue-100 dark:border-cta/30 shadow-sm shrink-0 transition-colors">
                         {selectedResource.type === 'file' ? <FileUp className="w-6 h-6" /> : selectedResource.type === 'link' ? <LinkIcon className="w-6 h-6" /> : <Share2 className="w-6 h-6" />}
                       </div>
                       <div className="min-w-0">
-                         <h3 className="text-2xl font-black text-primary truncate leading-tight">{selectedResource.title}</h3>
-                         <p className="text-[12px] font-bold text-tertiary uppercase tracking-wider">{selectedResource.type} Resource</p>
+                         <h3 className="text-2xl font-black text-primary dark:text-white truncate leading-tight transition-colors">{selectedResource.title}</h3>
+                         <p className="text-[12px] font-bold text-tertiary dark:text-neutral-500 uppercase tracking-wider transition-colors">{selectedResource.type} Resource</p>
                       </div>
                    </div>
                    <div className="flex items-center gap-2">
                        {selectedResource.sharedBy === currentUser?.nickname && (
                          <>
-                           <button onClick={() => startEditResource(selectedResource)} className="w-10 h-10 bg-gray-50 text-tertiary rounded-xl flex items-center justify-center hover:bg-blue-50 hover:text-cta transition-all"><Pencil className="w-5 h-5" /></button>
-                           <button onClick={() => handleDeleteResource(selectedResource.id)} className="w-10 h-10 bg-gray-50 text-tertiary rounded-xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all"><Trash2 className="w-5 h-5" /></button>
+                           <button onClick={() => startEditResource(selectedResource)} className="w-10 h-10 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-cta/20 hover:text-cta transition-all"><Pencil className="w-5 h-5" /></button>
+                           <button onClick={() => handleDeleteResource(selectedResource.id)} className="w-10 h-10 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-xl flex items-center justify-center hover:bg-red-50 dark:hover:bg-red-500/20 hover:text-red-500 transition-all"><Trash2 className="w-5 h-5" /></button>
                          </>
                        )}
-                       <button onClick={() => setIsDetailModalOpen(false)} className="w-11 h-11 bg-gray-50 text-tertiary rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-all"><X className="w-6 h-6" /></button>
+                       <button onClick={() => setIsDetailModalOpen(false)} className="w-11 h-11 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-2xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all"><X className="w-6 h-6" /></button>
                    </div>
                 </div>
 
                 <div className="space-y-8">
                    <div>
                       <h4 className="text-[11px] font-black text-cta uppercase mb-2 tracking-widest ml-1">상세 내용</h4>
-                      <div className="bg-gray-50 p-6 rounded-[28px] border border-gray-100 text-secondary font-medium leading-[1.8] whitespace-pre-wrap">
+                      <div className="bg-gray-50 dark:bg-neutral-800 p-6 rounded-[28px] border border-gray-100 dark:border-neutral-700 text-secondary dark:text-neutral-300 font-medium leading-[1.8] whitespace-pre-wrap transition-colors">
                         {selectedResource.description || '상세 내용이 작성되지 않았습니다.'}
                       </div>
                    </div>
 
                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                         <div className="text-[10px] font-black text-tertiary uppercase mb-1">작성자</div>
-                         <div className="font-bold text-primary flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-[8px]">{selectedResource.sharedBy[0]}</div>
+                      <div className="bg-gray-50 dark:bg-neutral-800 p-5 rounded-2xl border border-gray-100 dark:border-neutral-700 transition-colors">
+                         <div className="text-[10px] font-black text-tertiary dark:text-neutral-500 uppercase mb-1 transition-colors">작성자</div>
+                         <div className="font-bold text-primary dark:text-white flex items-center gap-2 transition-colors">
+                            <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-cta/30 flex items-center justify-center text-[8px] transition-colors">{selectedResource.sharedBy[0]}</div>
                             {selectedResource.sharedBy}
                          </div>
                       </div>
-                      <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                         <div className="text-[10px] font-black text-tertiary uppercase mb-1">공유 날짜</div>
-                         <div className="font-bold text-primary">{new Date(selectedResource.createdAt).toLocaleDateString()}</div>
+                      <div className="bg-gray-50 dark:bg-neutral-800 p-5 rounded-2xl border border-gray-100 dark:border-neutral-700 transition-colors">
+                         <div className="text-[10px] font-black text-tertiary dark:text-neutral-500 uppercase mb-1 transition-colors">공유 날짜</div>
+                         <div className="font-bold text-primary dark:text-white transition-colors">{new Date(selectedResource.createdAt).toLocaleDateString()}</div>
                       </div>
                    </div>
 
                    <div className="pt-2">
                       <h4 className="text-[11px] font-black text-cta uppercase mb-2 tracking-widest ml-1">첨부 파일 / 링크</h4>
-                      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center gap-3 group">
-                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-cta border border-blue-50">
+                      <div className="bg-gray-50 dark:bg-neutral-800 p-4 rounded-2xl border border-gray-100 dark:border-neutral-700 flex items-center gap-3 group transition-colors">
+                         <div className="w-10 h-10 bg-white dark:bg-neutral-900 rounded-xl flex items-center justify-center shadow-sm text-cta border border-blue-50 dark:border-neutral-700 transition-colors">
                             {selectedResource.type === 'file' ? <FileCode className="w-5 h-5" /> : <LinkIcon className="w-5 h-5" />}
                          </div>
                          <div className="flex-1 min-w-0">
                             {selectedResource.url === '#' ? (
-                              <span className="text-[13px] font-bold text-gray-400">연결된 경로 없음</span>
+                              <span className="text-[13px] font-bold text-gray-400 dark:text-neutral-500">연결된 경로 없음</span>
                             ) : (
                               <a 
                                 href={selectedResource.url} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="text-[13px] font-black text-primary hover:text-cta transition-colors flex items-center gap-2 group-hover:underline decoration-cta decoration-2 underline-offset-4 truncate"
+                                className="text-[13px] font-black text-primary dark:text-white hover:text-cta transition-colors flex items-center gap-2 group-hover:underline decoration-cta decoration-2 underline-offset-4 truncate"
                               >
                                 {selectedResource.url.length > 50 ? selectedResource.url.substring(0, 50) + '...' : selectedResource.url}
                                 <ExternalLink className="w-3.5 h-3.5" />
@@ -853,15 +853,15 @@ export default function TeamWorkspacePage() {
         {confirmState.isOpen && (
            <div className="fixed inset-0 z-[210] flex items-center justify-center p-4">
              <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setConfirmState(p => ({...p, isOpen:false}))} className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" />
-             <motion.div initial={{opacity:0, scale:0.9, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.9, y:20}} className="relative bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${confirmState.type === 'danger' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-cta'}`}>
+             <motion.div initial={{opacity:0, scale:0.9, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.9, y:20}} className="relative bg-white dark:bg-neutral-900 rounded-[32px] p-8 max-w-sm w-full shadow-2xl overflow-hidden transition-colors" onClick={e => e.stopPropagation()}>
+               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors ${confirmState.type === 'danger' ? 'bg-red-50 dark:bg-red-500/10 text-red-500' : 'bg-blue-50 dark:bg-cta/20 text-cta'}`}>
                   {confirmState.type === 'danger' ? <AlertCircle className="w-8 h-8" /> : <Share2 className="w-8 h-8" />}
                </div>
-               <h3 className="text-xl font-black text-primary mb-2 tracking-tight">{confirmState.title}</h3>
-               <p className="text-secondary text-[14px] font-medium leading-relaxed mb-8">{confirmState.message}</p>
+               <h3 className="text-xl font-black text-primary dark:text-white mb-2 tracking-tight transition-colors">{confirmState.title}</h3>
+               <p className="text-secondary dark:text-neutral-400 text-[14px] font-medium leading-relaxed mb-8 transition-colors">{confirmState.message}</p>
                <div className="flex items-center gap-3">
-                 <button onClick={() => setConfirmState(p => ({...p, isOpen:false}))} className="flex-1 py-3.5 bg-gray-100 text-tertiary font-bold rounded-2xl hover:bg-gray-200 transition-colors">취소</button>
-                 <button onClick={confirmState.onConfirm} className={`flex-1 py-3.5 text-white font-bold rounded-2xl transition-all shadow-lg ${confirmState.type === 'danger' ? 'bg-red-500 hover:bg-red-600 shadow-red-100' : 'bg-cta hover:bg-blue-600 shadow-blue-100'}`}>확인</button>
+                 <button onClick={() => setConfirmState(p => ({...p, isOpen:false}))} className="flex-1 py-3.5 bg-gray-100 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors">취소</button>
+                 <button onClick={confirmState.onConfirm} className={`flex-1 py-3.5 text-white font-bold rounded-2xl transition-all shadow-lg dark:shadow-none ${confirmState.type === 'danger' ? 'bg-red-500 hover:bg-red-600 shadow-red-100' : 'bg-cta hover:bg-blue-600 shadow-blue-100'}`}>확인</button>
                </div>
              </motion.div>
            </div>
@@ -873,32 +873,32 @@ export default function TeamWorkspacePage() {
         {isResourceModalOpen && (
            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
              <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsResourceModalOpen(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
-             <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-lg bg-white rounded-[40px] shadow-2xl p-10 overflow-hidden" onClick={e => e.stopPropagation()}>
+             <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-lg bg-white dark:bg-neutral-900 rounded-[40px] shadow-2xl p-10 overflow-hidden transition-colors" onClick={e => e.stopPropagation()}>
                <div className="flex items-center justify-between mb-8">
-                 <h3 className="text-2xl font-black text-primary">{editingResource ? '리소스 수정' : '리소스 추가'}</h3>
-                 <button onClick={() => setIsResourceModalOpen(false)} className="w-11 h-11 bg-gray-50 text-tertiary rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-all"><X className="w-6 h-6" /></button>
+                 <h3 className="text-2xl font-black text-primary dark:text-white transition-colors">{editingResource ? '리소스 수정' : '리소스 추가'}</h3>
+                 <button onClick={() => setIsResourceModalOpen(false)} className="w-11 h-11 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-2xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all"><X className="w-6 h-6" /></button>
                </div>
                <form onSubmit={handleSaveResource} className="space-y-6">
                  <div>
-                   <label className="block text-[13px] font-black text-tertiary mb-2 ml-1">제목</label>
-                   <input required type="text" value={resourceForm.title} onChange={e => setResourceForm({...resourceForm, title: e.target.value})} placeholder="리소스의 제목을 입력하세요." className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-primary font-bold focus:outline-none focus:border-cta focus:ring-4 focus:ring-blue-50 transition-all" />
+                   <label className="block text-[13px] font-black text-tertiary dark:text-neutral-500 mb-2 ml-1 transition-colors">제목</label>
+                   <input required type="text" value={resourceForm.title} onChange={e => setResourceForm({...resourceForm, title: e.target.value})} placeholder="리소스의 제목을 입력하세요." className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl px-6 py-4 text-primary dark:text-white font-bold focus:outline-none focus:border-cta dark:focus:border-cta focus:ring-4 focus:ring-blue-50 dark:focus:ring-blue-500/20 transition-all" />
                  </div>
                  <div>
-                   <label className="block text-[13px] font-black text-tertiary mb-2 ml-1">설명</label>
-                   <textarea value={resourceForm.description} onChange={e => setResourceForm({...resourceForm, description: e.target.value})} placeholder="리소스에 대한 간략한 설명을 입력하세요." className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-primary font-bold h-32 resize-none focus:outline-none focus:border-cta transition-all" />
+                   <label className="block text-[13px] font-black text-tertiary dark:text-neutral-500 mb-2 ml-1 transition-colors">설명</label>
+                   <textarea value={resourceForm.description} onChange={e => setResourceForm({...resourceForm, description: e.target.value})} placeholder="리소스에 대한 간략한 설명을 입력하세요." className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl px-6 py-4 text-primary dark:text-white font-bold h-32 resize-none focus:outline-none focus:border-cta dark:focus:border-cta transition-all" />
                  </div>
                  <div>
-                    <label className="block text-[13px] font-black text-tertiary mb-2 ml-1">유형 및 경로</label>
+                    <label className="block text-[13px] font-black text-tertiary dark:text-neutral-500 mb-2 ml-1 transition-colors">유형 및 경로</label>
                     <div className="flex gap-2">
-                      <select value={resourceForm.type} onChange={e => setResourceForm({...resourceForm, type: e.target.value as any})} className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 font-bold text-[14px] outline-none">
+                      <select value={resourceForm.type} onChange={e => setResourceForm({...resourceForm, type: e.target.value as any})} className="bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl px-4 py-4 font-bold text-primary dark:text-white text-[14px] outline-none transition-colors">
                         <option value="link">링크</option>
                         <option value="github">GitHub</option>
                         <option value="file">파일</option>
                       </select>
-                      <input type="text" value={resourceForm.url} onChange={e => setResourceForm({...resourceForm, url: e.target.value})} placeholder="링크 URL 또는 파일 경로" className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-primary font-bold outline-none" />
+                      <input type="text" value={resourceForm.url} onChange={e => setResourceForm({...resourceForm, url: e.target.value})} placeholder="링크 URL 또는 파일 경로" className="flex-1 bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-2xl px-6 py-4 text-primary dark:text-white font-bold outline-none transition-colors" />
                     </div>
                  </div>
-                 <button type="submit" className="w-full py-5 bg-cta text-white font-black rounded-3xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-200 mt-4 text-lg">{editingResource ? '수정 사항 저장' : '리소스 업로드'}</button>
+                 <button type="submit" className="w-full py-5 bg-cta text-white font-black rounded-3xl hover:bg-blue-600 transition-all shadow-xl shadow-blue-200 dark:shadow-none mt-4 text-lg">{editingResource ? '수정 사항 저장' : '리소스 업로드'}</button>
                </form>
              </motion.div>
            </div>
@@ -909,17 +909,17 @@ export default function TeamWorkspacePage() {
         {isResourceSuccessModalOpen && lastSavedResource && (
            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
              <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsResourceSuccessModalOpen(false)} className="absolute inset-0 bg-gray-900/80 backdrop-blur-md" />
-             <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} exit={{opacity:0, scale:0.95}} className="relative bg-white rounded-[40px] p-10 max-w-md w-full text-center shadow-2xl" onClick={e => e.stopPropagation()}>
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+             <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} exit={{opacity:0, scale:0.95}} className="relative bg-white dark:bg-neutral-900 rounded-[40px] p-10 max-w-md w-full text-center shadow-2xl transition-colors" onClick={e => e.stopPropagation()}>
+                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-colors">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-black text-primary mb-2">저장 완료!</h3>
-                <p className="text-secondary font-medium mb-8">리소스가 안전하게 보관되었습니다.</p>
-                <div className="bg-gray-50 p-6 rounded-3xl text-left mb-8 border border-gray-100">
+                <h3 className="text-2xl font-black text-primary dark:text-white mb-2 transition-colors">저장 완료!</h3>
+                <p className="text-secondary dark:text-neutral-400 font-medium mb-8 transition-colors">리소스가 안전하게 보관되었습니다.</p>
+                <div className="bg-gray-50 dark:bg-neutral-800 p-6 rounded-3xl text-left mb-8 border border-gray-100 dark:border-neutral-700 transition-colors">
                    <div className="text-[10px] font-black text-cta uppercase mb-1">제목</div>
-                   <div className="font-bold text-primary mb-4">{lastSavedResource.title}</div>
+                   <div className="font-bold text-primary dark:text-white mb-4 transition-colors">{lastSavedResource.title}</div>
                    <div className="text-[10px] font-black text-cta uppercase mb-1">내용</div>
-                   <div className="text-[14px] text-secondary font-medium leading-relaxed">{lastSavedResource.description || '상세 내용 없음'}</div>
+                   <div className="text-[14px] text-secondary dark:text-neutral-400 font-medium leading-relaxed transition-colors">{lastSavedResource.description || '상세 내용 없음'}</div>
                 </div>
                 <button onClick={() => setIsResourceSuccessModalOpen(false)} className="w-full py-4 bg-primary text-white font-black rounded-2xl hover:bg-gray-800 transition-colors">닫기</button>
              </motion.div>
@@ -932,30 +932,30 @@ export default function TeamWorkspacePage() {
         {isDayModalOpen && selectedDate && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsDayModalOpen(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
-            <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-md bg-white rounded-[32px] overflow-hidden shadow-2xl z-10" onClick={e => e.stopPropagation()}>
+            <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-md bg-white dark:bg-neutral-900 rounded-[32px] overflow-hidden shadow-2xl z-10 transition-colors" onClick={e => e.stopPropagation()}>
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h3 className="text-2xl font-black text-primary font-heading tracking-tight mb-1">{selectedDate.toLocaleDateString([], { month: 'long', day: 'numeric' })}</h3>
-                    <p className="text-[12px] font-black text-tertiary uppercase tracking-widest">Team Schedules</p>
+                    <h3 className="text-2xl font-black text-primary dark:text-white font-heading tracking-tight mb-1 transition-colors">{selectedDate.toLocaleDateString([], { month: 'long', day: 'numeric' })}</h3>
+                    <p className="text-[12px] font-black text-tertiary dark:text-neutral-500 uppercase tracking-widest transition-colors">팀 일정 (Team Schedules)</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openAddModal(selectedDate)} className="w-11 h-11 bg-cta text-white rounded-2xl flex items-center justify-center hover:bg-blue-600 transition-all shadow-lg shadow-blue-200"><Plus className="w-6 h-6" /></button>
-                    <button onClick={() => setIsDayModalOpen(false)} className="w-11 h-11 bg-gray-50 text-tertiary rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-all"><X className="w-6 h-6" /></button>
+                    <button onClick={() => openAddModal(selectedDate)} className="w-11 h-11 bg-cta text-white rounded-2xl flex items-center justify-center hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 dark:shadow-none"><Plus className="w-6 h-6" /></button>
+                    <button onClick={() => setIsDayModalOpen(false)} className="w-11 h-11 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-2xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all"><X className="w-6 h-6" /></button>
                   </div>
                 </div>
                 <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                   {getSchedulesForDate(selectedDate).map(s => (
-                    <div key={s.id} className="p-5 bg-white rounded-[24px] border border-gray-100 hover:border-cta/20 transition-all group relative">
+                    <div key={s.id} className="p-5 bg-white dark:bg-neutral-800 rounded-[24px] border border-gray-100 dark:border-neutral-700 hover:border-cta/20 transition-all group relative">
                        <div className="flex items-start justify-between mb-3">
-                         <div className="px-2.5 py-1 bg-gray-50 text-cta text-[10px] font-black rounded-lg border border-gray-100">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                         <div className="px-2.5 py-1 bg-gray-50 dark:bg-neutral-700/50 text-cta text-[10px] font-black rounded-lg border border-gray-100 dark:border-neutral-600/50 transition-colors">{new Date(s.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                          <div className="flex items-center gap-2">
-                           <button onClick={() => openEditModal(s)} className="p-1.5 text-tertiary hover:text-cta bg-gray-50 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"><Pencil className="w-3.5 h-3.5" /></button>
-                           <button onClick={() => handleDeleteSchedule(s.id)} className="p-1.5 text-tertiary hover:text-red-500 bg-gray-50 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3.5 h-3.5" /></button>
+                           <button onClick={() => openEditModal(s)} className="p-1.5 text-tertiary dark:text-neutral-500 hover:text-cta bg-gray-50 dark:bg-neutral-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+                           <button onClick={() => handleDeleteSchedule(s.id)} className="p-1.5 text-tertiary dark:text-neutral-500 hover:text-red-500 bg-gray-50 dark:bg-neutral-700 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                          </div>
                        </div>
-                       <h4 className="font-extrabold text-primary text-[16px] mb-2">{s.title}</h4>
-                       {s.description && ( <p className="text-[13px] text-secondary font-medium leading-relaxed mb-3">{s.description}</p> )}
+                       <h4 className="font-extrabold text-primary dark:text-white text-[16px] mb-2 transition-colors">{s.title}</h4>
+                       {s.description && ( <p className="text-[13px] text-secondary dark:text-neutral-400 font-medium leading-relaxed mb-3 transition-colors">{s.description}</p> )}
                     </div>
                   ))}
                 </div>
@@ -970,17 +970,17 @@ export default function TeamWorkspacePage() {
         {isAddModalOpen && selectedDate && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
             <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={() => setIsAddModalOpen(false)} className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" />
-            <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-md bg-white rounded-[32px] overflow-hidden shadow-2xl z-20" onClick={e => e.stopPropagation()}>
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <div><h3 className="text-xl font-black text-primary font-heading tracking-tight">{editingSchedule ? '일정 수정' : '새 일정 추가'}</h3><p className="text-[11px] font-bold text-tertiary mt-1">{selectedDate.toLocaleDateString()}</p></div>
-                  <button onClick={() => setIsAddModalOpen(false)} className="w-10 h-10 bg-gray-50 text-tertiary rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
+            <motion.div initial={{opacity:0, scale:0.95, y:20}} animate={{opacity:1, scale:1, y:0}} exit={{opacity:0, scale:0.95, y:20}} className="relative w-full max-w-[380px] bg-white dark:bg-neutral-900 rounded-[24px] overflow-hidden shadow-2xl z-20 transition-colors" onClick={e => e.stopPropagation()}>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div><h3 className="text-xl font-black text-primary dark:text-white font-heading tracking-tight transition-colors">{editingSchedule ? '일정 수정' : '새 일정 추가'}</h3><p className="text-[11px] font-bold text-tertiary dark:text-neutral-500 mt-0.5 transition-colors">{selectedDate.toLocaleDateString()}</p></div>
+                  <button onClick={() => setIsAddModalOpen(false)} className="w-8 h-8 bg-gray-50 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-700 transition-all"><X className="w-4 h-4" /></button>
                 </div>
-                <form onSubmit={handleSaveSchedule} className="space-y-6">
-                  <div><label className="block text-[13px] font-black text-tertiary mb-2 ml-1">일정 제목</label><input required type="text" value={timeForm.title} onChange={e => setTimeForm({...timeForm, title: e.target.value})} placeholder="회의 주제, 마감 기한 등" className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-primary font-bold text-[15px] focus:outline-none focus:border-cta focus:ring-4 focus:ring-blue-50 transition-all" /></div>
-                  <div><label className="block text-[13px] font-black text-tertiary mb-2 ml-1">상세 레이어</label><textarea value={timeForm.description} onChange={e => setTimeForm({...timeForm, description: e.target.value})} placeholder="상세 내용을 적어주세요." className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-primary font-bold h-24 resize-none focus:outline-none focus:border-cta focus:ring-4 focus:ring-blue-50 transition-all"></textarea></div>
-                  <div><label className="block text-[13px] font-black text-tertiary mb-3 ml-1">시간 설정</label><div className="flex items-center gap-2"><div className="flex-1"><select value={timeForm.period} onChange={e => setTimeForm({...timeForm, period: e.target.value as any})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-primary font-black text-[15px] appearance-none focus:outline-none focus:border-cta hover:bg-white transition-all text-center"><option value="AM">오전</option><option value="PM">오후</option></select></div><div className="flex-1 relative"><select value={timeForm.hour} onChange={e => setTimeForm({...timeForm, hour: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-primary font-black text-[15px] appearance-none focus:outline-none focus:border-cta hover:bg-white transition-all text-center">{Array.from({length: 12}, (_, i) => String(i === 0 ? 12 : i).padStart(2, '0')).map(h => (<option key={h} value={h}>{h}시</option>))}</select></div><div className="flex-1"><select value={timeForm.minute} onChange={e => setTimeForm({...timeForm, minute: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-primary font-black text-[15px] appearance-none focus:outline-none focus:border-cta hover:bg-white transition-all text-center text-center">{Array.from({length: 12}, (_, i) => String(i * 5).padStart(2, '0')).map(m => (<option key={m} value={m}>{m}분</option>))}</select></div></div></div>
-                  <button type="submit" className="w-full py-4 bg-cta text-white font-black rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 mt-4 text-lg">{editingSchedule ? '수정 내용 저장' : '일정 생성하기'}</button>
+                <form onSubmit={handleSaveSchedule} className="space-y-4">
+                  <div><label className="block text-[12px] font-black text-tertiary dark:text-neutral-500 mb-1.5 ml-1 transition-colors">일정 제목</label><input required type="text" value={timeForm.title} onChange={e => setTimeForm({...timeForm, title: e.target.value})} placeholder="회의 주제, 마감 기한 등" className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-xl px-4 py-3 text-primary dark:text-white font-bold text-[15px] focus:outline-none focus:border-cta dark:focus:border-cta focus:ring-4 focus:ring-blue-50/50 dark:focus:ring-blue-500/20 transition-all" /></div>
+                  <div><label className="block text-[12px] font-black text-tertiary dark:text-neutral-500 mb-1.5 ml-1 transition-colors">상세 레이어</label><textarea value={timeForm.description} onChange={e => setTimeForm({...timeForm, description: e.target.value})} placeholder="상세 내용을 적어주세요." className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-xl px-4 py-3 text-primary dark:text-white font-bold h-20 resize-none focus:outline-none focus:border-cta dark:focus:border-cta focus:ring-4 focus:ring-blue-50/50 dark:focus:ring-blue-500/20 transition-all"></textarea></div>
+                  <div><label className="block text-[12px] font-black text-tertiary dark:text-neutral-500 mb-2 ml-1 transition-colors">시간 설정</label><div className="flex items-center gap-2"><div className="flex-1"><select value={timeForm.period} onChange={e => setTimeForm({...timeForm, period: e.target.value as any})} className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-xl px-3 py-3 text-primary dark:text-white font-black text-[14px] appearance-none focus:outline-none focus:border-cta hover:bg-white dark:hover:bg-neutral-700 transition-all text-center"><option value="AM">오전</option><option value="PM">오후</option></select></div><div className="flex-1 relative"><select value={timeForm.hour} onChange={e => setTimeForm({...timeForm, hour: e.target.value})} className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-xl px-3 py-3 text-primary dark:text-white font-black text-[14px] appearance-none focus:outline-none focus:border-cta hover:bg-white dark:hover:bg-neutral-700 transition-all text-center">{Array.from({length: 12}, (_, i) => String(i === 0 ? 12 : i).padStart(2, '0')).map(h => (<option key={h} value={h}>{h}시</option>))}</select></div><div className="flex-1"><select value={timeForm.minute} onChange={e => setTimeForm({...timeForm, minute: e.target.value})} className="w-full bg-gray-50 dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-xl px-3 py-3 text-primary dark:text-white font-black text-[14px] appearance-none focus:outline-none focus:border-cta hover:bg-white dark:hover:bg-neutral-700 transition-all text-center text-center">{Array.from({length: 12}, (_, i) => String(i * 5).padStart(2, '0')).map(m => (<option key={m} value={m}>{m}분</option>))}</select></div></div></div>
+                  <button type="submit" className="w-full py-3.5 bg-cta text-white font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-blue-200 dark:shadow-none mt-2 text-[16px]">{editingSchedule ? '수정 내용 저장' : '일정 생성하기'}</button>
                 </form>
               </div>
             </motion.div>

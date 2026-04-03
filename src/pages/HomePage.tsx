@@ -119,10 +119,10 @@ export default function HomePage() {
   ];
 
   return (
-    <div ref={containerRef} className="w-full relative bg-white overflow-x-hidden">
+    <div ref={containerRef} className="w-full relative bg-white dark:bg-transparent overflow-x-hidden transition-colors duration-300">
       {/* Background Decor */}
-      <div className="fixed top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-50/40 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-50/40 rounded-full blur-[120px] -z-10" />
+      <div className="fixed top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-50/40 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10 transition-colors duration-300" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-purple-50/40 dark:bg-purple-900/10 rounded-full blur-[120px] -z-10 transition-colors duration-300" />
 
       {/* SECTION 1: HERO */}
       <motion.section
@@ -130,20 +130,20 @@ export default function HomePage() {
         className="min-h-[calc(100vh-120px)] flex flex-col items-center justify-center relative px-6 mt-[-30px]"
       >
         <div className="max-w-4xl text-center relative z-10 w-full pt-10">
-          <h1 className="text-6xl md:text-9xl font-black font-heading tracking-tighter text-primary break-keep leading-[1.1] text-shadow-xl mb-12">
+          <h1 className="text-6xl md:text-9xl font-black font-heading tracking-tighter text-primary dark:text-white break-keep leading-[1.1] text-shadow-xl mb-12 transition-colors">
             해커톤 통합 관리의
             <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4F46E5] via-[#9333EA] via-[#EC4899] via-[#FB923C] to-[#4F46E5] animate-gradient pb-8 block drop-shadow-[0_0_25px_rgba(147,51,234,0.3)]">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4F46E5] via-[#9333EA] via-[#EC4899] via-[#FB923C] to-[#4F46E5] animate-gradient pb-8 block drop-shadow-[0_0_25px_rgba(147,51,234,0.3)] dark:drop-shadow-[0_0_25px_rgba(147,51,234,0.6)]">
               <span className="tracking-[0.01em] mr-2">넥스트 </span>레벨
             </span>
           </h1>
 
           <div className="space-y-2">
-            <p className="text-xl md:text-2xl text-secondary break-keep leading-relaxed font-bold opacity-70">
+            <p className="text-xl md:text-2xl text-secondary dark:text-neutral-300 break-keep leading-relaxed font-bold opacity-70 transition-colors">
               기획부터 팀 매칭, 결과 제출과 심사 관리까지.
             </p>
-            <p className="text-xl md:text-2xl text-secondary break-keep leading-relaxed font-bold opacity-70">
-              모든 프로세스를 <span className="text-primary">단일 플랫폼</span>에서 제어하세요.
+            <p className="text-xl md:text-2xl text-secondary dark:text-neutral-300 break-keep leading-relaxed font-bold opacity-70 transition-colors">
+              모든 프로세스를 <span className="text-primary dark:text-white">단일 플랫폼</span>에서 제어하세요.
             </p>
           </div>
         </div>
@@ -183,10 +183,10 @@ export default function HomePage() {
           >
             <div className="flex items-end justify-between mb-10">
               <div>
-                <span className="text-cta font-black tracking-[0.2em] uppercase text-[11px] mb-2 block opacity-50">Personal Activity</span>
-                <h2 className="text-4xl font-black text-primary tracking-tighter">참여 중인 프로젝트</h2>
+                <span className="text-cta font-black tracking-[0.2em] uppercase text-[11px] mb-2 block opacity-50 dark:opacity-80">Personal Project</span>
+                <h2 className="text-4xl font-black text-primary dark:text-white tracking-tighter transition-colors">참여 중인 프로젝트</h2>
               </div>
-              <Link to="/workspace" className="group flex items-center gap-3 text-[14px] font-black text-cta bg-blue-50 px-6 py-3 rounded-full hover:bg-cta hover:text-white transition-all shadow-lg shadow-blue-100">
+              <Link to="/workspace" className="group flex items-center gap-3 text-[14px] font-black text-cta dark:text-cta bg-blue-50 dark:bg-cta/10 px-6 py-3 rounded-full hover:bg-cta dark:hover:bg-cta hover:text-white dark:hover:text-white transition-all shadow-lg shadow-blue-100 dark:shadow-none">
                 워크스페이스 입장
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -202,40 +202,40 @@ export default function HomePage() {
                 >
                   <Link
                     to="/workspace"
-                    className="block p-10 bg-white border border-gray-100 rounded-[42px] hover:border-cta/30 hover:shadow-2xl hover:shadow-blue-50 transition-all group relative overflow-hidden"
+                    className="block p-10 bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 rounded-[42px] hover:border-cta/30 dark:hover:border-cta/50 hover:shadow-2xl hover:shadow-blue-50 dark:hover:shadow-[0_0_40px_rgba(49,130,246,0.1)] transition-all group relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-blue-50/20 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-100/30 transition-colors" />
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-blue-50/20 dark:bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-blue-100/30 dark:group-hover:bg-blue-500/20 transition-colors" />
 
                     <div className="relative z-10">
                       <div className="flex items-start justify-between mb-8">
-                        <div className="w-14 h-14 bg-cta rounded-[20px] flex items-center justify-center text-white shadow-xl shadow-blue-200 group-hover:rotate-6 transition-transform">
+                        <div className="w-14 h-14 bg-cta rounded-[20px] flex items-center justify-center text-white shadow-xl shadow-blue-200 dark:shadow-none group-hover:rotate-6 transition-transform">
                           <LayoutIcon className="w-7 h-7" />
                         </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 text-secondary text-[11px] font-black rounded-full border border-gray-100 tracking-widest">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 dark:bg-neutral-700 text-secondary dark:text-neutral-300 text-[11px] font-black rounded-full border border-gray-100 dark:border-neutral-600 tracking-widest transition-colors">
                           진행중
                           <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />
                         </div>
                       </div>
 
-                      <h3 className="font-black text-2xl text-primary leading-tight mb-8 group-hover:text-cta transition-colors">{team.name}</h3>
+                      <h3 className="font-black text-2xl text-primary dark:text-white leading-tight mb-8 group-hover:text-cta transition-colors">{team.name}</h3>
 
-                      <div className="flex items-center justify-between pt-8 border-t border-gray-50">
+                      <div className="flex items-center justify-between pt-8 border-t border-gray-50 dark:border-neutral-700/50 transition-colors">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-tertiary/50 uppercase tracking-widest mb-2">Team Activity</span>
+                          <span className="text-[10px] font-black text-tertiary/50 dark:text-neutral-500 uppercase tracking-widest mb-2 transition-colors">팀 멤버 구성</span>
                           <div className="flex items-center -space-x-2">
-                            {[1, 2, 3].map(i => (
-                              <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[11px] font-bold text-gray-400">
-                                {i}
+                            {(team.members || [team.leaderName]).slice(0, 3).map((name, i) => (
+                              <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-neutral-800 bg-blue-50 dark:bg-cta/20 flex items-center justify-center text-[10px] font-bold text-cta dark:text-cta transition-colors">
+                                {name?.[0]}
                               </div>
                             ))}
-                            {team.memberCount > 3 && (
-                              <div className="w-8 h-8 rounded-full border-2 border-white bg-cta flex items-center justify-center text-[10px] font-black text-white">
-                                +{team.memberCount - 3}
+                            {(team.memberCount || 1) > 3 && (
+                              <div className="w-8 h-8 rounded-full border-2 border-white dark:border-neutral-800 bg-cta flex items-center justify-center text-[10px] font-black text-white transition-colors">
+                                +{(team.memberCount || 1) - 3}
                               </div>
                             )}
                           </div>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-tertiary group-hover:bg-cta group-hover:text-white transition-all shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-neutral-700 flex items-center justify-center text-tertiary dark:text-neutral-400 group-hover:bg-cta group-hover:text-white transition-all shadow-sm dark:shadow-none">
                           <ChevronRight className="w-5 h-5" />
                         </div>
                       </div>

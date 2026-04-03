@@ -110,38 +110,38 @@ export default function MyPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-4">
-           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm">
+           <div className="w-12 h-12 bg-white dark:bg-neutral-800 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-neutral-700 shadow-sm transition-colors">
               <LayoutGrid className="w-6 h-6 text-cta" />
            </div>
            <div>
-              <h1 className="text-3xl font-bold font-heading text-primary tracking-tight">마이페이지</h1>
-              <p className="text-tertiary font-medium text-[14px]">활동 정보와 보상을 관리하세요.</p>
+              <h1 className="text-3xl font-bold font-heading text-primary dark:text-white tracking-tight transition-colors">마이페이지</h1>
+              <p className="text-tertiary dark:text-neutral-400 font-medium text-[14px] transition-colors">활동 정보와 보상을 관리하세요.</p>
            </div>
         </div>
       </div>
 
       <div className="space-y-8">
         {/* User Card */}
-        <div className="bg-white rounded-[40px] p-8 md:p-12 border border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.03)] relative overflow-hidden group">
+        <div className="bg-white dark:bg-neutral-800 rounded-[40px] p-8 md:p-12 border border-gray-100 dark:border-neutral-700 shadow-[0_8px_40px_rgba(0,0,0,0.03)] dark:shadow-none relative overflow-hidden group transition-colors">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
             <div className="flex items-center gap-8">
               <div className="relative group/avatar shrink-0">
-                <div className="w-28 h-28 rounded-[36px] bg-blue-50 text-cta flex items-center justify-center text-4xl font-black border-4 border-white shadow-xl overflow-hidden transition-all group-hover/avatar:scale-105">
+                <div className="w-28 h-28 rounded-[36px] bg-blue-50 dark:bg-cta/20 text-cta flex items-center justify-center text-4xl font-black border-4 border-white dark:border-neutral-800 shadow-xl dark:shadow-none overflow-hidden transition-all group-hover/avatar:scale-105">
                   {currentUser.profileImage ? (
                     <img src={currentUser.profileImage} alt="" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-12 h-12" />
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center text-cta">
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-neutral-700 rounded-2xl shadow-lg border border-gray-100 dark:border-neutral-600 flex items-center justify-center text-cta transition-colors">
                   <Star className="w-5 h-5 fill-current" />
                 </div>
               </div>
               
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-3xl font-black text-primary tracking-tight">{currentUser.nickname}</h2>
-                  <span className="px-3 py-1 bg-white text-tertiary text-[11px] font-black rounded-lg border border-gray-100 uppercase tracking-widest">Lv.4</span>
+                  <h2 className="text-3xl font-black text-primary dark:text-white tracking-tight transition-colors">{currentUser.nickname}</h2>
+                  <span className="px-3 py-1 bg-white dark:bg-neutral-700 text-tertiary dark:text-neutral-300 text-[11px] font-black rounded-lg border border-gray-100 dark:border-neutral-600 uppercase tracking-widest transition-colors">Lv.4</span>
                 </div>
                 <div className="flex items-center gap-3 text-secondary font-medium mb-4 text-[14px]">
                    <div className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-tertiary" /> {currentUser.email}</div>
@@ -151,7 +151,7 @@ export default function MyPage() {
                 <div className="flex items-center gap-3">
                    <button 
                      onClick={() => setIsProfileModalOpen(true)}
-                     className="px-6 py-3 bg-primary text-white text-[14px] font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200"
+                     className="px-6 py-3 bg-primary dark:bg-cta text-white text-[14px] font-bold rounded-2xl hover:bg-gray-800 dark:hover:bg-blue-600 transition-all shadow-lg shadow-gray-200 dark:shadow-none"
                    >
                      프로필 관리
                    </button>
@@ -159,11 +159,11 @@ export default function MyPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50/50 p-6 rounded-[32px] border border-gray-100 flex flex-col gap-4 min-w-[280px]">
+            <div className="bg-gray-50/50 dark:bg-neutral-700/30 p-6 rounded-[32px] border border-gray-100 dark:border-neutral-600/50 flex flex-col gap-4 min-w-[280px] transition-colors">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-[14px] font-black text-primary mb-0.5 tracking-tight">프로필 공개 설정</div>
-                  <div className="text-[11px] text-tertiary font-bold">참여 현황 공개 여부</div>
+                  <div className="text-[14px] font-black text-primary dark:text-white mb-0.5 tracking-tight transition-colors">프로필 공개 설정</div>
+                  <div className="text-[11px] text-tertiary dark:text-neutral-400 font-bold transition-colors">참여 현황 공개 여부</div>
                 </div>
                 <button 
                   onClick={toggleProfilePublic}
@@ -186,13 +186,13 @@ export default function MyPage() {
         {/* Rows Matching */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch font-heading">
            <div className="lg:col-span-2">
-              <div className="bg-white p-8 md:p-10 rounded-[40px] border border-gray-100 shadow-sm h-full flex flex-col">
+              <div className="bg-white dark:bg-neutral-800 p-8 md:p-10 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none h-full flex flex-col transition-colors">
                 <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-xl font-black text-primary flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-gray-200 rounded-full" />
+                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors">
+                    <div className="w-1.5 h-6 bg-gray-200 dark:bg-neutral-600 rounded-full transition-colors" />
                     내 해커톤 참여기록
                   </h3>
-                  <Link to="/hackathons" className="text-[13px] font-bold text-cta hover:text-blue-700">대회 리스트</Link>
+                  <Link to="/hackathons" className="text-[13px] font-bold text-cta dark:text-cta hover:text-blue-700">대회 리스트</Link>
                 </div>
                 
                 {myHackathons.length === 0 ? (
@@ -203,17 +203,17 @@ export default function MyPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                     {myHackathons.map(h => (
-                      <Link to={`/hackathons/${h.slug}`} key={h.slug} className="group flex items-center gap-4 p-5 bg-white rounded-[24px] border border-gray-100 hover:border-cta/20 hover:shadow-md transition-all h-fit">
-                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 group-hover:bg-blue-50 transition-colors">
+                      <Link to={`/hackathons/${h.slug}`} key={h.slug} className="group flex items-center gap-4 p-5 bg-white dark:bg-neutral-700/50 rounded-[24px] border border-gray-100 dark:border-neutral-600 hover:border-cta/20 dark:hover:border-cta/50 hover:shadow-md dark:hover:shadow-none transition-all h-fit">
+                        <div className="w-14 h-14 bg-gray-50 dark:bg-neutral-800 rounded-2xl flex items-center justify-center shrink-0 border border-gray-100 dark:border-neutral-700 group-hover:bg-blue-50 dark:group-hover:bg-cta/20 transition-colors">
                            <Trophy className="w-6 h-6 text-amber-500 group-hover:scale-110 transition-transform" />
                         </div>
                         <div className="flex-1 min-w-0">
-                           <h4 className="font-bold text-primary truncate leading-tight mb-1">{h.title}</h4>
+                           <h4 className="font-bold text-primary dark:text-white truncate leading-tight mb-1 transition-colors">{h.title}</h4>
                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-tertiary bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                              <span className="text-[10px] font-bold text-tertiary dark:text-neutral-400 bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 px-1.5 py-0.5 rounded uppercase tracking-tighter transition-colors">
                                 {h.status === 'upcoming' ? '참가 예정' : h.status === 'ongoing' ? '진행중' : h.status === 'ended' ? '종료됨' : h.status}
                               </span>
-                              <span className="text-[11px] text-tertiary font-bold">{h.period?.submissionDeadlineAt ? new Date(h.period.submissionDeadlineAt).toLocaleDateString() : '일정 확인 중'}</span>
+                              <span className="text-[11px] text-tertiary dark:text-neutral-500 font-bold transition-colors">{h.period?.submissionDeadlineAt ? new Date(h.period.submissionDeadlineAt).toLocaleDateString() : '일정 확인 중'}</span>
                            </div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-cta transition-colors" />
@@ -225,8 +225,8 @@ export default function MyPage() {
            </div>
 
            <div>
-              <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm overflow-hidden h-full flex flex-col">
-                <h3 className="text-lg font-black text-primary mb-8 flex items-center gap-3">
+              <div className="bg-white dark:bg-neutral-800 p-8 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none overflow-hidden h-full flex flex-col transition-colors">
+                <h3 className="text-lg font-black text-primary dark:text-white mb-8 flex items-center gap-3 transition-colors">
                   <Clock className="w-5 h-5 text-cta" /> 최근 제출 기록
                 </h3>
                 
@@ -236,16 +236,16 @@ export default function MyPage() {
                      <p className="text-[13px] text-tertiary font-bold">제출된 내역 없음</p>
                   </div>
                 ) : (
-                  <div className="flex-1 space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-gray-100 overflow-y-auto pr-2 scrollbar-hide">
+                  <div className="flex-1 space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-gray-100 dark:before:bg-neutral-700 overflow-y-auto pr-2 scrollbar-hide">
                     {mySubmissions.slice(0, 4).map(s => (
                       <div key={s.id} className="relative pl-8 group">
-                        <div className="absolute left-0 top-1.5 w-[23px] h-[23px] rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm z-10">
+                        <div className="absolute left-0 top-1.5 w-[23px] h-[23px] rounded-full bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-600 flex items-center justify-center shadow-sm z-10 transition-colors">
                            <div className="w-1.5 h-1.5 rounded-full bg-cta" />
                         </div>
-                        <div className="text-[10px] font-black text-tertiary uppercase tracking-wider mb-1">{new Date(s.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
-                        <h5 className="font-bold text-primary text-[15px] leading-tight mb-2 truncate group-hover:text-cta transition-colors">{s.teamName}</h5>
-                        <div className="flex items-center gap-2 text-[12px] text-tertiary font-medium bg-gray-50/50 p-2 rounded-lg border border-gray-100">
-                           <ExternalLink className="w-3.5 h-3.5 text-tertiary/60" />
+                        <div className="text-[10px] font-black text-tertiary dark:text-neutral-500 uppercase tracking-wider mb-1 transition-colors">{new Date(s.submittedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}</div>
+                        <h5 className="font-bold text-primary dark:text-white text-[15px] leading-tight mb-2 truncate group-hover:text-cta transition-colors">{s.teamName}</h5>
+                        <div className="flex items-center gap-2 text-[12px] text-tertiary dark:text-neutral-400 font-medium bg-gray-50/50 dark:bg-neutral-700/50 p-2 rounded-lg border border-gray-100 dark:border-neutral-600 transition-colors">
+                           <ExternalLink className="w-3.5 h-3.5 text-tertiary/60 dark:text-neutral-500" />
                            <span className="truncate">{s.fileName || 'Resource.zip'}</span>
                         </div>
                       </div>
@@ -259,10 +259,10 @@ export default function MyPage() {
         {/* Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch pt-2">
            <div className="lg:col-span-2">
-              <div className="bg-white p-8 md:p-10 rounded-[40px] border border-gray-100 shadow-sm h-full flex flex-col">
+              <div className="bg-white dark:bg-neutral-800 p-8 md:p-10 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none h-full flex flex-col transition-colors">
                 <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-xl font-black text-primary flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-gray-200 rounded-full" />
+                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors">
+                    <div className="w-1.5 h-6 bg-gray-200 dark:bg-neutral-600 rounded-full transition-colors" />
                     내 소속 팀 관리
                   </h3>
                 </div>
@@ -271,28 +271,28 @@ export default function MyPage() {
                   <div className="flex-1 bg-white border-2 border-dashed border-gray-100 rounded-[32px] flex flex-col items-center justify-center py-10 scale-95 opacity-80">
                     <Users className="w-12 h-12 text-gray-200 mb-4" />
                     <p className="text-tertiary font-bold text-lg mb-6">소속된 팀이 없습니다.</p>
-                    <Link to="/camp" className="px-6 py-3 bg-cta text-white font-black rounded-2xl shadow-lg shadow-blue-100">팀 찾기</Link>
+                    <Link to="/camp" className="px-6 py-3 bg-cta text-white font-black rounded-2xl shadow-lg shadow-blue-100 dark:shadow-none">팀 찾기</Link>
                   </div>
                 ) : (
                   <div className="space-y-4 flex-1">
                     {myTeams.map(t => (
-                      <Link to="/workspace" key={t.teamCode} className="flex items-center justify-between p-6 bg-white rounded-[32px] border border-gray-100 hover:border-cta/20 hover:shadow-md transition-all group relative h-fit shadow-sm">
+                      <Link to="/workspace" key={t.teamCode} className="flex items-center justify-between p-6 bg-white dark:bg-neutral-700/50 rounded-[32px] border border-gray-100 dark:border-neutral-600 hover:border-cta/20 dark:hover:border-cta/40 hover:shadow-md transition-all group relative h-fit shadow-sm">
                         <div className="flex-1 min-w-0 mr-8">
                            <div className="flex items-center gap-3 mb-2">
-                             <h4 className="font-extrabold text-primary text-xl truncate tracking-tight leading-tight group-hover:text-cta transition-colors">{t.name}</h4>
+                             <h4 className="font-extrabold text-primary dark:text-white text-xl truncate tracking-tight leading-tight group-hover:text-cta transition-colors">{t.name}</h4>
                              {t.leaderName === currentUser?.nickname && (
-                               <span className="px-2 py-0.5 bg-gray-50 text-tertiary text-[10px] font-black rounded border border-gray-200 tracking-tighter">LEADER</span>
+                               <span className="px-2 py-0.5 bg-gray-50 dark:bg-neutral-700 text-tertiary dark:text-neutral-400 text-[10px] font-black rounded border border-gray-200 dark:border-neutral-600 tracking-tighter transition-colors">LEADER</span>
                              )}
                            </div>
-                           <p className="text-[14px] text-tertiary truncate max-w-lg font-medium">{t.intro}</p>
+                           <p className="text-[14px] text-tertiary dark:text-neutral-400 truncate max-w-lg font-medium transition-colors">{t.intro}</p>
                         </div>
                         <div className="flex items-center gap-6 shrink-0">
                            <div className="text-right">
-                              <div className="text-lg font-black text-primary tracking-tighter">{t.members?.length || 1}명</div>
-                              <div className="text-[10px] text-tertiary font-black uppercase tracking-widest leading-none">MEMBERS</div>
+                              <div className="text-lg font-black text-primary dark:text-white tracking-tighter transition-colors">{t.members?.length || 1}명</div>
+                              <div className="text-[10px] text-tertiary dark:text-neutral-500 font-black uppercase tracking-widest leading-none transition-colors">MEMBERS</div>
                            </div>
-                           <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center group-hover:bg-cta transition-colors">
-                              <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+                           <div className="w-10 h-10 bg-gray-50 dark:bg-neutral-800 rounded-xl flex items-center justify-center group-hover:bg-cta transition-colors">
+                              <ChevronRight className="w-5 h-5 text-gray-300 dark:text-neutral-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
                            </div>
                         </div>
                       </Link>
@@ -349,35 +349,35 @@ export default function MyPage() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden relative"
+              className="bg-white dark:bg-neutral-800 w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden relative transition-colors"
             >
               <div className="p-10">
                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-cta border border-gray-100 shadow-sm">
+                    <div className="w-10 h-10 bg-gray-50 dark:bg-neutral-700/50 rounded-xl flex items-center justify-center text-cta border border-gray-100 dark:border-neutral-600 shadow-sm transition-colors">
                        <Edit3 className="w-5 h-5" />
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black text-primary tracking-tight">프로필 변경</h3>
-                       <p className="text-[11px] text-tertiary font-bold uppercase tracking-widest">Update your identity</p>
+                       <h3 className="text-2xl font-black text-primary dark:text-white tracking-tight transition-colors">프로필 변경</h3>
+                       <p className="text-[11px] text-tertiary dark:text-neutral-400 font-bold uppercase tracking-widest transition-colors">Update your identity</p>
                     </div>
                  </div>
 
                  <div className="space-y-6">
                     <div>
-                       <label className="block text-[13px] font-black text-primary mb-2.5 ml-1">닉네임</label>
+                       <label className="block text-[13px] font-black text-primary dark:text-white mb-2.5 ml-1 transition-colors">닉네임</label>
                        <input 
                          type="text" 
                          value={newNickname}
                          onChange={(e) => setNewNickname(e.target.value)}
                          placeholder="새로운 닉네임을 입력하세요"
-                         className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-[22px] text-[15px] font-bold text-primary focus:outline-none focus:border-cta/30 transition-all"
+                         className="w-full px-6 py-4 bg-gray-50/50 dark:bg-neutral-700/50 border border-gray-100 dark:border-neutral-600 rounded-[22px] text-[15px] font-bold text-primary dark:text-white focus:outline-none focus:border-cta/30 transition-colors"
                        />
                     </div>
                     
                     <div className="pt-4 flex gap-3">
                        <button 
                          onClick={handleSaveNickname}
-                         className="flex-1 py-4 bg-primary text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-lg shadow-gray-200"
+                         className="flex-1 py-4 bg-primary dark:bg-cta text-white font-black rounded-2xl hover:bg-gray-800 dark:hover:bg-blue-600 transition-all shadow-lg shadow-gray-200 dark:shadow-none"
                        >
                          저장하기
                        </button>

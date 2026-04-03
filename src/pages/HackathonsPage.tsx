@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Target, Search, Filter, ChevronRight, Award, Trophy, Zap, ArrowUpRight } from 'lucide-react';
+import { Users, Target, Search } from 'lucide-react';
 import Dropdown from '../components/Dropdown';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
@@ -51,7 +51,7 @@ function HackathonGridCard({
       className="group flex flex-col w-full h-full"
     >
       {/* Thumbnail Area */}
-      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-100 mb-4">
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 mb-4 transition-colors">
         <motion.img 
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.4, ease: [0.33, 1, 0.68, 1] }}
@@ -78,7 +78,7 @@ function HackathonGridCard({
       <div className="px-1">
         <div className="flex flex-col min-w-0">
           <div className="min-h-[2.8rem]">
-            <h3 className="text-[15px] font-bold text-primary leading-snug line-clamp-2 mb-1 group-hover:text-cta transition-colors">
+            <h3 className="text-[15px] font-bold text-primary dark:text-white leading-snug line-clamp-2 mb-1 group-hover:text-cta transition-colors">
               {hackathon.title}
             </h3>
           </div>
@@ -89,7 +89,7 @@ function HackathonGridCard({
             ))}
           </div>
 
-          <div className="flex items-center gap-2 text-[12px] text-tertiary font-medium">
+          <div className="flex items-center gap-2 text-[12px] text-tertiary dark:text-neutral-400 font-medium transition-colors">
              <div className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot} opacity-60`} />
              <span className="truncate">마감: {deadlineAt ? new Date(deadlineAt).toLocaleDateString() : '일정 미정'}</span>
           </div>
@@ -152,33 +152,33 @@ export default function HackathonsPage() {
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   
   return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen bg-white dark:bg-transparent transition-colors duration-300">
       {/* Header with Search */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 py-4">
+      <div className="sticky top-0 z-30 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-neutral-800 px-6 py-4 transition-colors duration-300">
         <div className="max-w-[1920px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-6">
-             <h1 className="text-xl font-black text-primary tracking-tighter">HACKATHONS</h1>
-             <div className="flex bg-gray-100 rounded-full px-4 py-2 gap-2 h-10 overflow-x-auto scrollbar-hide">
-                <button onClick={() => setFilterStatus('all')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>전체</button>
-                <button onClick={() => setFilterStatus('ongoing')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ongoing' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>진행 중</button>
-                <button onClick={() => setFilterStatus('upcoming')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'upcoming' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>시작 전</button>
-                <button onClick={() => setFilterStatus('ended')} className={`px-3 py-0.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ended' ? 'bg-primary text-white' : 'hover:bg-gray-200 text-secondary'}`}>종료됨</button>
+             <h1 className="text-xl font-black text-primary dark:text-white tracking-tighter transition-colors">HACKATHONS</h1>
+             <div className="flex bg-gray-100 dark:bg-neutral-800 rounded-full px-4 py-1.5 gap-2 h-11 overflow-x-auto scrollbar-hide items-center transition-colors">
+                <button onClick={() => setFilterStatus('all')} className={`px-4 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'all' ? 'bg-primary dark:bg-cta text-white shadow-md shadow-gray-200 dark:shadow-none' : 'hover:bg-gray-200 dark:hover:bg-neutral-700 text-secondary dark:text-neutral-400'}`}>전체</button>
+                <button onClick={() => setFilterStatus('ongoing')} className={`px-4 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ongoing' ? 'bg-primary dark:bg-cta text-white shadow-md shadow-gray-200 dark:shadow-none' : 'hover:bg-gray-200 dark:hover:bg-neutral-700 text-secondary dark:text-neutral-400'}`}>진행 중</button>
+                <button onClick={() => setFilterStatus('upcoming')} className={`px-4 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'upcoming' ? 'bg-primary dark:bg-cta text-white shadow-md shadow-gray-200 dark:shadow-none' : 'hover:bg-gray-200 dark:hover:bg-neutral-700 text-secondary dark:text-neutral-400'}`}>시작 전</button>
+                <button onClick={() => setFilterStatus('ended')} className={`px-4 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all ${filterStatus === 'ended' ? 'bg-primary dark:bg-cta text-white shadow-md shadow-gray-200 dark:shadow-none' : 'hover:bg-gray-200 dark:hover:bg-neutral-700 text-secondary dark:text-neutral-400'}`}>종료됨</button>
              </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative group flex-1 md:flex-none">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary" />
+             <div className="relative group flex-1 md:flex-none h-11">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary dark:text-neutral-500" />
                <input 
                  type="text"
                  placeholder="해커톤 검색"
-                 className="bg-gray-50 text-sm font-medium rounded-full py-2.5 pl-10 pr-6 outline-none border border-gray-200 focus:bg-white focus:border-cta focus:ring-4 focus:ring-cta/5 transition-all w-full md:w-64"
+                 className="bg-gray-50 dark:bg-neutral-800 text-sm font-medium rounded-full w-full md:w-64 h-full pl-10 pr-6 outline-none border border-gray-200 dark:border-neutral-700 text-primary dark:text-white focus:bg-white dark:focus:bg-neutral-800 focus:border-cta dark:focus:border-cta focus:ring-4 focus:ring-cta/5 transition-all block"
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                />
             </div>
             <Dropdown
-              className="hidden lg:flex min-w-[140px] h-[42px]"
+              className="hidden lg:flex min-w-[140px] h-11"
               value={filterTag}
               onChange={(val) => setFilterTag(val)}
               options={[

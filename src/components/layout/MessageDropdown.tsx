@@ -84,49 +84,49 @@ export default function MessageDropdown() {
     <div className="relative flex items-center h-full" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className="relative p-2 text-secondary hover:text-cta transition-colors rounded-full hover:bg-gray-100"
+        className="relative p-2 text-secondary dark:text-neutral-400 hover:text-cta dark:hover:text-cta transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800"
       >
         <Mail className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white dark:border-neutral-800 transition-colors">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-[0_4px_24px_rgb(0,0,0,0.12)] border border-gray-100 overflow-hidden z-[100] flex flex-col max-h-[400px]">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-            <h3 className="font-bold text-primary">쪽지함</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-neutral-900 rounded-xl shadow-[0_4px_24px_rgb(0,0,0,0.12)] dark:shadow-none border border-gray-100 dark:border-neutral-800 overflow-hidden z-[100] flex flex-col max-h-[400px] transition-colors">
+          <div className="p-4 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between bg-gray-50/50 dark:bg-neutral-900/50 transition-colors">
+            <h3 className="font-bold text-primary dark:text-white transition-colors">쪽지함</h3>
           </div>
           
           <div className="overflow-y-auto flex-1 p-2 space-y-2">
             {conversations.length === 0 ? (
               <div className="text-center py-10 flex flex-col items-center gap-2">
-                <MessageSquare className="w-8 h-8 text-gray-200" />
-                <p className="text-tertiary text-[13px] font-medium">대화 중인 상대가 없습니다.</p>
+                <MessageSquare className="w-8 h-8 text-gray-200 dark:text-neutral-700 transition-colors" />
+                <p className="text-tertiary dark:text-neutral-500 text-[13px] font-medium transition-colors">대화 중인 상대가 없습니다.</p>
               </div>
             ) : (
               conversations.map(conv => (
                 <div 
                   key={conv.partnerId} 
                   onClick={() => handleOpenChat(conv.partnerId, conv.partnerNickname)}
-                  className={`p-3.5 rounded-xl border cursor-pointer hover:shadow-md transition-all ${conv.unreadCount > 0 ? 'bg-blue-50/50 border-blue-100 hover:border-blue-200' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                  className={`p-3.5 rounded-xl border cursor-pointer hover:shadow-md transition-all ${conv.unreadCount > 0 ? 'bg-blue-50/50 dark:bg-cta/10 border-blue-100 dark:border-cta/20 hover:border-blue-200 dark:hover:border-cta/30' : 'bg-white dark:bg-neutral-800 border-gray-100 dark:border-neutral-700 hover:border-gray-200 dark:hover:border-neutral-600'}`}
                 >
                   <div className="flex justify-between items-start mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[14px] text-primary">{conv.partnerNickname}</span>
+                      <span className="font-bold text-[14px] text-primary dark:text-white transition-colors">{conv.partnerNickname}</span>
                       {conv.unreadCount > 0 && (
                         <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] text-center">
                           {conv.unreadCount}
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-tertiary font-medium">
+                    <span className="text-[10px] text-tertiary dark:text-neutral-500 font-medium transition-colors">
                       {new Date(conv.lastMsg.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-[13px] text-secondary font-medium truncate leading-relaxed">
+                  <p className="text-[13px] text-secondary dark:text-neutral-400 font-medium truncate leading-relaxed transition-colors">
                     {conv.lastMsg.content}
                   </p>
                 </div>
