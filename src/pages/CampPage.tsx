@@ -38,38 +38,38 @@ function TeamListCard({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative py-7 px-10 rounded-[32px] border transition-all group cursor-pointer overflow-hidden ${team.isOpen
+      className={`relative py-6 md:py-7 px-6 md:px-10 rounded-[32px] border transition-all group cursor-pointer overflow-hidden ${team.isOpen
         ? 'bg-white dark:bg-neutral-800/40 border-gray-100 dark:border-neutral-700/50 hover:border-primary/20 shadow-[0_2px_15px_rgb(0,0,0,0.01)]'
         : 'bg-gray-50/50 dark:bg-neutral-900/30 border-gray-100 dark:border-neutral-800 opacity-60'
         }`}
       onClick={() => onSelect(team)}
     >
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Left: Primary Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             {team.isOpen && (
-              <span className="relative flex h-2.5 w-2.5">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></span>
               </span>
             )}
-            <span className={`text-[12px] font-black uppercase tracking-[0.1em] ${team.isOpen ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-400'}`}>
+            <span className={`text-[12px] font-black uppercase tracking-[0.1em] shrink-0 ${team.isOpen ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-400'}`}>
               {team.isOpen ? '현재 모집 중' : '모집 마감'}
             </span>
-            <span className="w-1 h-1 rounded-full bg-neutral-200 dark:bg-neutral-700"></span>
+            <span className="w-1 h-1 rounded-full bg-neutral-200 dark:bg-neutral-700 shrink-0 mx-0.5"></span>
             {targetHackathon && (
-              <span className="text-[12px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-tight">
+              <span className="text-[12px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-tight truncate break-keep">
                 {targetHackathon.title}
               </span>
             )}
           </div>
 
-          <h3 className="font-black text-[22px] text-primary dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2.5 break-words">
+          <h3 className="font-black text-[20px] md:text-[22px] text-primary dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2.5 leading-snug break-keep">
             {team.name}
           </h3>
 
-          <p className="text-neutral-500 dark:text-neutral-400 text-[15px] font-medium leading-relaxed mb-5 line-clamp-2">
+          <p className="text-neutral-500 dark:text-neutral-400 text-[14px] md:text-[15px] font-medium leading-relaxed mb-5 line-clamp-2 break-keep">
             {team.intro}
           </p>
 
@@ -86,15 +86,15 @@ function TeamListCard({
         </div>
 
         {/* Right: Meta & Actions */}
-        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-6 md:w-56 shrink-0 md:border-l border-neutral-100 dark:border-neutral-700/50 md:pl-8 pt-6 md:pt-0 border-t md:border-t-0">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col items-end">
-              <span className="text-[15px] font-black text-primary dark:text-white leading-none mb-1.5">{team.leaderName}</span>
-              <div className="flex items-center gap-1.5 text-[13px] font-bold text-neutral-400 dark:text-neutral-500">
-                <Users className="w-3.5 h-3.5" /> {team.memberCount}명 참여 중
+        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:gap-6 md:w-56 shrink-0 md:border-l border-neutral-100 dark:border-neutral-700/50 md:pl-8 pt-5 md:pt-0 border-t md:border-t-0">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex flex-col items-start md:items-end">
+              <span className="text-[14px] md:text-[15px] font-black text-primary dark:text-white leading-none mb-1.5 break-keep">{team.leaderName}</span>
+              <div className="flex items-center gap-1.5 text-[12px] md:text-[13px] font-bold text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
+                <Users className="w-3.5 h-3.5 shrink-0" /> {team.memberCount}명 참여 중
               </div>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center text-[14px] font-black text-primary dark:text-white shadow-sm transition-colors">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center text-[13px] md:text-[14px] font-black text-primary dark:text-white shadow-sm transition-colors shrink-0">
               {team.leaderName?.[0]}
             </div>
           </div>

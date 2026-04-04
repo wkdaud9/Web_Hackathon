@@ -49,10 +49,10 @@ function GalleryCard({ card, index }: { card: any, index: number }) {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-4xl font-black font-heading text-white tracking-tighter leading-none mb-2">
+          <h2 className="text-4xl font-black font-heading text-white tracking-tighter leading-none mb-2 break-keep">
             {card.subtitle}
           </h2>
-          <p className="text-white/60 font-bold text-[14px] leading-relaxed max-w-xs group-hover:text-white transition-colors duration-500">
+          <p className="text-white/60 font-bold text-[14px] leading-relaxed max-w-xs group-hover:text-white transition-colors duration-500 break-keep">
             {card.description}
           </p>
         </div>
@@ -183,8 +183,8 @@ export default function HomePage() {
           >
             <div className="flex items-end justify-between mb-10">
               <div>
-                <span className="text-cta font-black tracking-[0.2em] uppercase text-[11px] mb-2 block opacity-50 dark:opacity-80">Personal Project</span>
-                <h2 className="text-4xl font-black text-primary dark:text-white tracking-tighter transition-colors">참여 중인 프로젝트</h2>
+                <span className="text-cta font-black tracking-[0.2em] uppercase text-[11px] mb-2 block opacity-50 dark:opacity-80 whitespace-nowrap">Personal Project</span>
+                <h2 className="text-3xl md:text-4xl font-black text-primary dark:text-white tracking-tighter transition-colors break-keep">참여 중인 프로젝트</h2>
               </div>
               <Link to="/workspace" className="group flex items-center gap-3 text-[14px] font-black text-cta dark:text-cta bg-blue-50 dark:bg-cta/10 px-6 py-3 rounded-full hover:bg-cta dark:hover:bg-cta hover:text-white dark:hover:text-white transition-all shadow-lg shadow-blue-100 dark:shadow-none">
                 워크스페이스 입장
@@ -217,11 +217,11 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <h3 className="font-black text-2xl text-primary dark:text-white leading-tight mb-8 group-hover:text-cta transition-colors">{team.name}</h3>
+                      <h3 className="font-black text-2xl text-primary dark:text-white leading-tight mb-8 group-hover:text-cta transition-colors break-keep leading-snug">{team.name}</h3>
 
                       <div className="flex items-center justify-between pt-8 border-t border-gray-50 dark:border-neutral-700/50 transition-colors">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-tertiary/50 dark:text-neutral-500 uppercase tracking-widest mb-2 transition-colors">팀 멤버 구성</span>
+                          <span className="text-[10px] font-black text-tertiary/50 dark:text-neutral-500 uppercase tracking-widest mb-2 transition-colors whitespace-nowrap">팀 멤버 구성</span>
                           <div className="flex items-center -space-x-2">
                             {(team.members || [team.leaderName]).slice(0, 3).map((name, i) => (
                               <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-neutral-800 bg-blue-50 dark:bg-cta/20 flex items-center justify-center text-[10px] font-bold text-cta dark:text-cta transition-colors">

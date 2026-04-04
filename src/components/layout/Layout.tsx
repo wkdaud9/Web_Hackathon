@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Moon, Sun } from 'lucide-react';
+import { User, ChevronDown, Moon, Sun, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -22,6 +22,7 @@ export default function Layout() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
 
@@ -38,6 +39,7 @@ export default function Layout() {
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
+    setIsMobileMenuOpen(false);
     showToast('로그아웃 되었습니다.', 'info');
     navigate('/');
   };
@@ -162,8 +164,62 @@ export default function Layout() {
                 시작하기
               </button>
             )}
+
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2.5 text-tertiary dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-xl transition-all"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </nav>
+
+        {/* Mobile Navigation Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden border-t border-gray-100 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md overflow-hidden"
+            >
+              <div className="flex flex-col p-4 gap-2">
+                {navItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `px-5 py-3.5 rounded-2xl text-[15px] font-bold transition-all ${isActive
+                        ? 'bg-blue-50 dark:bg-cta/10 text-cta'
+                        : 'text-tertiary dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                      }`
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+                ))}
+                {currentUser && (
+                  <NavLink
+                    to={currentUser.role === 'operator' ? '/admin' : '/workspace'}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `px-5 py-3.5 rounded-2xl text-[15px] font-bold transition-all flex items-center gap-2 ${isActive
+                        ? 'bg-blue-50 dark:bg-cta/10 text-cta'
+                        : 'text-tertiary dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                      }`
+                    }
+                  >
+                    {currentUser.role === 'operator' ? '해커톤 관리' : '워크스페이스'}
+                    {currentUser.role !== 'operator' && <div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" />}
+                  </NavLink>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

@@ -174,10 +174,10 @@ export default function MyPage() {
                     <h2 className="text-3xl font-black text-primary dark:text-white tracking-tight transition-colors">{currentUser.nickname}</h2>
                     <span className="px-3 py-1 bg-blue-50 dark:bg-cta/10 text-cta text-[11px] font-black rounded-lg border border-blue-100 dark:border-cta/20 uppercase tracking-widest transition-colors">Lv.4</span>
                   </div>
-                  <div className="flex items-center gap-3 text-secondary dark:text-neutral-300 font-medium mb-4 text-[14px]">
-                    <div className="flex items-center gap-1.5"><Mail className="w-4 h-4 text-cta transition-colors" /> {currentUser.email}</div>
-                    <div className="w-1 h-1 bg-gray-200 dark:bg-neutral-700 rounded-full" />
-                    <div className="flex items-center gap-1.5"><Star className="w-4 h-4 text-cta" /> {currentUser.points.toLocaleString()}점</div>
+                  <div className="flex flex-wrap items-center gap-y-2 gap-x-3 text-secondary dark:text-neutral-300 font-medium mb-5 text-[13px] sm:text-[14px]">
+                    <div className="flex items-center gap-1.5 min-w-0"><Mail className="w-4 h-4 text-cta transition-colors shrink-0" /> <span className="truncate">{currentUser.email}</span></div>
+                    <div className="hidden sm:block w-1 h-1 bg-gray-200 dark:bg-neutral-700 rounded-full" />
+                    <div className="flex items-center gap-1.5 shrink-0"><Star className="w-4 h-4 text-cta shrink-0" /> {currentUser.points.toLocaleString()}점</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
@@ -193,8 +193,8 @@ export default function MyPage() {
               <div className="bg-gray-50/50 dark:bg-neutral-700/30 p-6 rounded-[32px] border border-gray-100 dark:border-neutral-600/50 flex flex-col gap-4 min-w-[280px] transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-[14px] font-black text-primary dark:text-white mb-0.5 tracking-tight transition-colors">프로필 공개 설정</div>
-                    <div className="text-[11px] text-tertiary dark:text-neutral-400 font-bold transition-colors">참여 현황 공개 여부</div>
+                    <div className="text-[14px] font-black text-primary dark:text-white mb-0.5 tracking-tight transition-colors break-keep">프로필 공개 설정</div>
+                    <div className="text-[11px] text-tertiary dark:text-neutral-400 font-bold transition-colors break-keep">참여 현황 공개 여부</div>
                   </div>
                   <button
                     onClick={toggleProfilePublic}
@@ -219,7 +219,7 @@ export default function MyPage() {
 
             {!currentUser?.githubId ? (
               <div className="py-10 flex flex-col justify-center items-center opacity-80 border-2 border-dashed border-gray-100 dark:border-neutral-700 rounded-[32px] scale-95">
-                <p className="text-tertiary dark:text-neutral-500 font-bold mb-5">프로필에서 GitHub 아이디를 연동해주세요.</p>
+                <p className="text-tertiary dark:text-neutral-500 font-bold mb-5 break-keep">프로필에서 GitHub 아이디를 연동해주세요.</p>
                 <button onClick={() => setIsProfileModalOpen(true)} className="px-6 py-2.5 bg-blue-50 dark:bg-cta/10 text-cta font-extrabold rounded-xl hover:bg-blue-100 dark:hover:bg-cta/20 transition-colors shadow-sm">GitHub 연동하기</button>
               </div>
             ) : githubLoading ? (
@@ -258,7 +258,7 @@ export default function MyPage() {
 
                 {/* Recent Events */}
                 <div className="lg:w-80 shrink-0 border-l lg:pl-10 border-blue-100/50 dark:border-cta/10">
-                  <h4 className="text-[12px] font-black text-cta uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <h4 className="text-[12px] font-black text-cta uppercase tracking-widest mb-6 flex items-center gap-2 break-keep">
                     <div className="w-1.5 h-1.5 rounded-full bg-cta" /> 최근 활동 내역
                   </h4>
                   {githubEvents.length === 0 ? (
@@ -293,11 +293,11 @@ export default function MyPage() {
             <div className="lg:col-span-2">
               <div className="bg-white dark:bg-neutral-800 p-8 md:p-10 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none h-full flex flex-col transition-colors">
                 <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors">
+                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors break-keep">
                     <div className="w-1.5 h-6 bg-cta rounded-full transition-colors" />
                     내 해커톤 참여기록
                   </h3>
-                  <Link to="/hackathons" className="text-[13px] font-bold text-cta hover:text-blue-700">대회 리스트</Link>
+                  <Link to="/hackathons" className="text-[13px] font-bold text-cta hover:text-blue-700 whitespace-nowrap">대회 리스트</Link>
                 </div>
 
                 {myHackathons.length === 0 ? (
@@ -331,7 +331,7 @@ export default function MyPage() {
 
             <div>
               <div className="bg-white dark:bg-neutral-800 p-8 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none overflow-hidden h-full flex flex-col transition-colors">
-                <h3 className="text-lg font-black text-primary dark:text-white mb-8 flex items-center gap-3 transition-colors">
+                <h3 className="text-lg font-black text-primary dark:text-white mb-8 flex items-center gap-3 transition-colors break-keep">
                   <Clock className="w-5 h-5 text-cta" /> 최근 제출 기록
                 </h3>
 
@@ -366,7 +366,7 @@ export default function MyPage() {
             <div className="lg:col-span-2">
               <div className="bg-white dark:bg-neutral-800 p-8 md:p-10 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none h-full flex flex-col transition-colors">
                 <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors">
+                  <h3 className="text-xl font-black text-primary dark:text-white flex items-center gap-3 transition-colors break-keep">
                     <div className="w-1.5 h-6 bg-cta rounded-full transition-colors" />
                     내 소속 팀 관리
                   </h3>
@@ -409,21 +409,21 @@ export default function MyPage() {
 
             <div>
               <div className="bg-white dark:bg-neutral-800 p-8 rounded-[40px] border border-gray-100 dark:border-neutral-700 shadow-sm dark:shadow-none overflow-hidden h-full flex flex-col transition-colors">
-                <h3 className="text-lg font-black text-primary dark:text-white mb-10 flex items-center gap-3 uppercase tracking-tight transition-colors">
+                <h3 className="text-lg font-black text-primary dark:text-white mb-10 flex items-center gap-3 uppercase tracking-tight transition-colors break-keep">
                   <Bell className="w-5 h-5 text-cta" /> 활동 통계
                 </h3>
                 <div className="space-y-4 flex-1">
                   <div className="p-6 bg-blue-50/30 dark:bg-cta/5 flex items-center justify-between rounded-[28px] border border-blue-50 dark:border-cta/10 group hover:shadow-inner transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-xl flex items-center justify-center border border-blue-100 dark:border-cta/20 shadow-sm transition-colors"><Trophy className="w-5 h-5 text-cta transition-colors" /></div>
-                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors">참여 대회</div>
+                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors break-keep">참여 대회</div>
                     </div>
                     <div className="text-2xl font-black text-cta font-heading tracking-tighter transition-colors">{myHackathons.length}</div>
                   </div>
                   <div className="p-6 bg-blue-50/30 dark:bg-cta/5 flex items-center justify-between rounded-[28px] border border-blue-50 dark:border-cta/10 group hover:shadow-inner transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-white dark:bg-neutral-800 rounded-xl flex items-center justify-center border border-blue-100 dark:border-cta/20 shadow-sm transition-colors"><Users className="w-5 h-5 text-cta transition-colors" /></div>
-                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors">활동 중인 팀</div>
+                      <div className="text-[14px] font-bold text-secondary dark:text-neutral-300 transition-colors break-keep">활동 중인 팀</div>
                     </div>
                     <div className="text-2xl font-black text-cta font-heading tracking-tighter transition-colors">{myTeams.length}</div>
                   </div>
