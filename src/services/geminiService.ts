@@ -51,7 +51,7 @@ function ruleBasedRecommendation(userSkills: string, teams: Team[]): AIMatchResu
 
         // 점수 정규화 (0~100) 및 사유 생성
         const finalScore = Math.min(Math.max(score, 10), 95); // 룰 기반이므로 100점은 주지 않음
-        
+
         let reason = '';
         if (matchedCategories.length > 0) {
             reason = `사용자가 언급한 "${matchedCategories.join(', ')}" 관련 역량이 팀의 모집 분야와 잘 매치됩니다. 특히 ${team.lookingFor.join(', ')} 포지션에서 시너지를 낼 수 있을 것 같아요!`;

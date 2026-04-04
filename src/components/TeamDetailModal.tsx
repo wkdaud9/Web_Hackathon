@@ -1,14 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trophy, ExternalLink, Mail, User, Shield } from 'lucide-react';
+import { X, Trophy, ExternalLink, Mail, User, Shield, Send, PlusCircle } from 'lucide-react';
 import type { Team } from '../types/models';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   team: Team | null;
+  onJoin?: (team: Team) => void;
+  onMessage?: (team: Team) => void;
+  currentUser?: any;
 }
 
-export default function TeamDetailModal({ isOpen, onClose, team }: Props) {
+export default function TeamDetailModal({ isOpen, onClose, team, onJoin, onMessage, currentUser }: Props) {
   if (!team) return null;
 
   const isUrl = (text: string) => {
@@ -125,31 +128,53 @@ export default function TeamDetailModal({ isOpen, onClose, team }: Props) {
                 </div>
               </div>
 
-              {/* Contact Section */}
-              <div>
+              {/* Action Buttons Section */}
+              <div className="mb-10">
                 <h3 className="text-[15px] font-bold text-tertiary dark:text-neutral-500 mb-3 flex items-center gap-1.5 transition-colors">
-                  <span className="w-1.5 h-4 bg-primary dark:bg-white rounded-full transition-colors"></span> 연락처 및 링크
+                  <span className="w-1.5 h-4 bg-primary dark:bg-white rounded-full transition-colors"></span> 액션 및 연락처
                 </h3>
-                {team.contact?.url ? (
-                  isUrl(team.contact.url) ? (
-                    <a
-                      href={team.contact.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 bg-blue-50 dark:bg-cta/20 text-cta px-5 py-3.5 rounded-[16px] font-bold hover:bg-cta hover:text-white transition-colors"
-                    >
-                      오픈 채팅 / 연락망 열기 <ExternalLink className="w-4 h-4" />
-                    </a>
-                  ) : (
-                    <div className="inline-flex items-center gap-2 bg-gray-50 dark:bg-neutral-800 text-primary dark:text-white px-5 py-3.5 rounded-[16px] font-bold border border-gray-200 dark:border-neutral-700 select-all transition-colors">
-                      <Mail className="w-4 h-4 text-primary dark:text-white transition-colors" /> {team.contact.url}
+                <div className="flex flex-col gap-3">
+                  {onJoin && onMessage && (!currentUser || (currentUser.nickname !== team.leaderName && (!team.members || !team.members.includes(currentUser.nickname)))) && (
+                    <div className="flex gap-3 mb-2">
+                       <button
+                         onClick={() => onJoin(team)}
+                         disabled={!team.isOpen}
+                         className={`flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-[16px] font-bold transition-all shadow-sm ${team.isOpen ? 'bg-cta text-white hover:bg-blue-600' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed border-none shadow-none'}`}
+                       >
+                         <PlusCircle className="w-5 h-5" />
+                         {team.isOpen ? '합류 신청하기' : '모집 완료'}
+                       </button>
+                       <button
+                         onClick={() => onMessage(team)}
+                         className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-[16px] font-bold transition-colors border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 text-primary dark:text-white shrink-0 shadow-sm"
+                       >
+                         <Send className="w-5 h-5" />
+                         쪽지 보내기
+                       </button>
                     </div>
-                  )
-                ) : (
-                  <div className="text-[14px] text-tertiary dark:text-neutral-500 bg-gray-50 dark:bg-neutral-800 p-4 rounded-[16px] transition-colors">
-                    등록된 연락처가 없습니다.
-                  </div>
-                )}
+                  )}
+
+                  {team.contact?.url ? (
+                    isUrl(team.contact.url) ? (
+                      <a
+                        href={team.contact.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2 bg-blue-50 dark:bg-cta/20 text-cta px-5 py-3.5 rounded-[16px] font-bold hover:bg-cta hover:text-white transition-colors"
+                      >
+                        오픈 채팅 / 연락망 열기 <ExternalLink className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 bg-gray-50 dark:bg-neutral-800 text-primary dark:text-white px-5 py-4 rounded-[16px] font-bold border border-gray-200 dark:border-neutral-700 select-all transition-colors w-full">
+                        <Mail className="w-4 h-4 text-primary dark:text-white transition-colors shrink-0" /> {team.contact.url}
+                      </div>
+                    )
+                  ) : (
+                    <div className="text-[14px] text-tertiary dark:text-neutral-500 bg-gray-50 dark:bg-neutral-800 p-4 rounded-[16px] transition-colors text-center font-medium">
+                      등록된 연락처가 없습니다.
+                    </div>
+                  )}
+                </div>
               </div>
 
             </div>

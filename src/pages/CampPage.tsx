@@ -401,7 +401,24 @@ export default function CampPage() {
       </div>
 
       {/* Modals */}
-      <TeamDetailModal isOpen={!!selectedTeam} onClose={() => setSelectedTeam(null)} team={selectedTeam} />
+      <TeamDetailModal
+        isOpen={!!selectedTeam}
+        onClose={() => setSelectedTeam(null)}
+        team={selectedTeam}
+        currentUser={currentUser}
+        onJoin={(t) => {
+          setSelectedTeam(null);
+          if (!currentUser) { showToast('로그인이 필요합니다.', 'error'); return; }
+          setJoinTarget(t);
+          setJoinModalOpen(true);
+        }}
+        onMessage={(t) => {
+          setSelectedTeam(null);
+          if (!currentUser) { showToast('로그인이 필요합니다.', 'error'); return; }
+          setMessageTarget(t);
+          setMessageModalOpen(true);
+        }}
+      />
 
       {/* Join Request Modal */}
       <AnimatePresence>
@@ -416,7 +433,7 @@ export default function CampPage() {
               <p className="text-[14px] text-tertiary mb-6 leading-relaxed">
                 <strong className="text-primary">[{joinTarget.name}]</strong> 팀 리더에게 보낼 메시지입니다.
               </p>
-              <textarea value={joinMessage} onChange={(e) => setJoinMessage(e.target.value)} placeholder="자신 있는 분야와 참여 동기를 짧게 적어주세요." className="w-full bg-gray-50 border border-gray-100 rounded-[28px] px-6 py-5 text-primary font-bold outline-none focus:border-cta transition-all h-32 resize-none placeholder:text-tertiary mb-8" />
+              <textarea value={joinMessage} onChange={(e) => setJoinMessage(e.target.value)} placeholder="자신 있는 분야와 참여 동기를 적어주세요." className="w-full bg-gray-50 border border-gray-100 rounded-[28px] px-6 py-5 text-primary font-bold outline-none focus:border-cta transition-all h-32 resize-none placeholder:text-tertiary mb-8" />
               <div className="flex gap-3">
                 <button onClick={() => setJoinModalOpen(false)} className="flex-1 py-4 bg-gray-100 dark:bg-neutral-800 text-tertiary dark:text-neutral-400 font-black rounded-2xl hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors">취소</button>
                 <button onClick={() => {
