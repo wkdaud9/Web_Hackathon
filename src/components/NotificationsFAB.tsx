@@ -50,7 +50,7 @@ export default function NotificationsFAB() {
     const totalCount = apps.length + invs.length;
     if (prevTotalRef.current !== -1 && totalCount > prevTotalRef.current) {
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('LinkTon 액셔너블 알림', {
+        new Notification('LinkThon 액셔너블 알림', {
           body: '새로운 팀 빌딩 매칭 관련 알림이 도착했습니다!',
         });
       } else {

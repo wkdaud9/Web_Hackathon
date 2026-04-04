@@ -52,7 +52,7 @@ export default function Layout() {
             <div className="w-10 h-10 bg-cta rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100 dark:shadow-none group-hover:scale-110 transition-transform overflow-hidden">
               <span className="text-xl font-black leading-none">L</span>
             </div>
-            <span className="text-xl font-black tracking-tighter text-primary dark:text-white uppercase">LinkTon</span>
+            <span className="text-xl font-black tracking-tighter text-primary dark:text-white uppercase">LinkThon</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1.5 flex-1 max-w-2xl justify-center">
@@ -227,7 +227,7 @@ export default function Layout() {
       </main>
 
       <footer className="w-full py-8 text-center text-sm text-tertiary">
-        &copy; {new Date().getFullYear()} LinkTon. Built for monthly hackathon challenge.
+        &copy; {new Date().getFullYear()} LinkThon. Built for monthly hackathon challenge.
       </footer>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

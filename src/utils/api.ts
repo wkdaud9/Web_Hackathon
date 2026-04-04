@@ -253,7 +253,7 @@ export function getUsers() {
       loginId: 'admin',
       password: '123',
       nickname: '관리자',
-      email: 'admin@linkton.com',
+      email: 'admin@linkthon.com',
       points: 0,
       createdAt: new Date().toISOString(),
       isProfilePublic: true,
