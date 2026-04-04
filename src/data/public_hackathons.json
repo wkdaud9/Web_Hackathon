@@ -34,8 +34,8 @@
     "thumbnailUrl": "https://example.com/public/img/vibe202602.png",
     "period": {
       "timezone": "Asia/Seoul",
-      "submissionDeadlineAt": "2026-03-03T10:00:00+09:00",
-      "endAt": "2026-03-09T10:00:00+09:00"
+      "submissionDeadlineAt": "2026-05-10T10:00:00+09:00",
+      "endAt": "2026-05-12T10:00:00+09:00"
     },
     "links": {
       "detail": "/hackathons/monthly-vibe-coding-2026-02",
@@ -46,7 +46,7 @@
   {
     "slug": "daker-handover-2026-03",
     "title": "긴급 인수인계 해커톤: 명세서만 보고 구현하라",
-    "status": "upcoming",
+    "status": "ongoing",
     "description": "기존 개발자가 남기고 간 API 명세서와 요구사항 문서만을 바탕으로, 프론트엔드와 백엔드를 완벽하게 복원하는 극한의 구현 해커톤입니다.",
     "tags": [
       "VibeCoding",
@@ -57,8 +57,8 @@
     "thumbnailUrl": "https://example.com/public/img/daker-handover-202603.png",
     "period": {
       "timezone": "Asia/Seoul",
-      "submissionDeadlineAt": "2026-03-30T10:00:00+09:00",
-      "endAt": "2026-04-27T10:00:00+09:00"
+      "submissionDeadlineAt": "2026-05-10T10:00:00+09:00",
+      "endAt": "2026-05-12T10:00:00+09:00"
     },
     "links": {
       "detail": "/hackathons/daker-handover-2026-03",
@@ -79,8 +79,8 @@
     "thumbnailUrl": "https://example.com/public/img/mystery202604.png",
     "period": {
       "timezone": "Asia/Seoul",
-      "submissionDeadlineAt": "2026-04-20T10:00:00+09:00",
-      "endAt": "2026-04-25T10:00:00+09:00"
+      "submissionDeadlineAt": "2026-05-10T10:00:00+09:00",
+      "endAt": "2026-05-12T10:00:00+09:00"
     },
     "links": {
       "detail": "/hackathons/mystery-hackathon-2026-04",

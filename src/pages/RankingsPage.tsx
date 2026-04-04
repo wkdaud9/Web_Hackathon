@@ -99,7 +99,10 @@ export default function RankingsPage() {
   };
 
   const rankedUsers = useMemo(() => {
-    let sorted = [...users].sort((a, b) => b.points - a.points);
+    // Filter out operators (admins) from the rankings
+    const baseUsers = users.filter(u => u.role !== 'operator');
+    
+    let sorted = [...baseUsers].sort((a, b) => b.points - a.points);
     if (period === '7d') sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.3) }));
     else if (period === '30d') sorted = sorted.map(u => ({ ...u, points: Math.floor(u.points * 0.7) }));
 

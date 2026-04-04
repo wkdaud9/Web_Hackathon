@@ -37,6 +37,34 @@ export function getHackathons() {
   return readFromStorage<Hackathon[]>('hackathons', []);
 }
 
+export function createHackathon(hackathon: Hackathon) {
+  const parsed = readFromStorage<Hackathon[]>('hackathons', []);
+  parsed.push(hackathon);
+  writeToStorage('hackathons', parsed);
+  dispatchUpdate();
+}
+
+export function updateHackathon(hackathon: Hackathon) {
+  const parsed = readFromStorage<Hackathon[]>('hackathons', []);
+  const updated = parsed.map((h) => (h.slug === hackathon.slug ? hackathon : h));
+  writeToStorage('hackathons', updated);
+  dispatchUpdate();
+}
+
+export function createHackathonDetail(detail: HackathonDetail) {
+  const parsed = readFromStorage<HackathonDetail[]>('hackathon_details', []);
+  parsed.push(detail);
+  writeToStorage('hackathon_details', parsed);
+  dispatchUpdate();
+}
+
+export function updateHackathonDetail(detail: HackathonDetail) {
+  const parsed = readFromStorage<HackathonDetail[]>('hackathon_details', []);
+  const updated = parsed.map((d) => (d.slug === detail.slug ? detail : d));
+  writeToStorage('hackathon_details', updated);
+  dispatchUpdate();
+}
+
 export function getHackathonDetail(slug: string) {
   const parsed = readFromStorage<HackathonDetail[]>('hackathon_details', []);
   return parsed.find((h) => h.slug === slug) || null;
@@ -226,7 +254,7 @@ export function getUsers() {
       password: '123',
       nickname: '관리자',
       email: 'admin@linkton.com',
-      points: 999999,
+      points: 0,
       createdAt: new Date().toISOString(),
       isProfilePublic: true,
       role: 'operator',

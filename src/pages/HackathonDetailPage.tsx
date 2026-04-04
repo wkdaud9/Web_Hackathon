@@ -456,23 +456,23 @@ export default function HackathonDetailPage() {
                       <h2 className="text-2xl font-bold font-heading mb-6 text-primary dark:text-white transition-colors flex items-center gap-3">
                         <Gift className="w-6 h-6 text-primary dark:text-white" /> 상금 리스트
                       </h2>
-                      <div className="space-y-4">
+                      <div className="space-y-2.5">
                         {detail.sections?.prize?.items?.map((item, i) => (
-                          <div key={i} className="bg-white dark:bg-neutral-800 transition-colors shadow-[0_4px_20px_rgb(0,0,0,0.03)] p-6 rounded-[24px] flex justify-between items-center border border-gray-100 dark:border-neutral-700 hover:border-cta/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all">
-                            <div className="flex items-center gap-5">
-                              <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center border transition-colors shadow-sm ${item.place === '1st' ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/30 text-amber-500' :
+                          <div key={i} className="bg-white dark:bg-neutral-800 transition-colors shadow-[0_4px_15px_rgb(0,0,0,0.02)] p-4 rounded-[16px] flex justify-between items-center border border-gray-100 dark:border-neutral-700 hover:border-cta/30 hover:shadow-[0_8px_25px_rgb(0,0,0,0.05)] transition-all">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center border transition-colors shadow-sm ${item.place === '1st' ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/30 text-amber-500' :
                                 item.place === '2nd' ? 'bg-slate-50 border-slate-100 dark:bg-neutral-700/50 dark:border-neutral-600 text-slate-400' :
                                   item.place === '3rd' ? 'bg-orange-50 border-orange-100 dark:bg-orange-900/10 dark:border-orange-900/30 text-orange-400' :
                                     'bg-gray-50 border-gray-100 dark:bg-neutral-800 dark:border-neutral-700 text-tertiary'
                                 }`}>
-                                <Trophy className="w-5 h-5" />
+                                <Trophy className="w-4 h-4" />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-tertiary dark:text-neutral-500 uppercase tracking-[0.2em] leading-none mb-1.5">RANK</span>
-                                <strong className="text-[18px] text-primary dark:text-white transition-colors uppercase font-black tracking-tight">{item.place}</strong>
+                                <span className="text-[9px] font-black text-tertiary dark:text-neutral-500 uppercase tracking-[0.2em] leading-none mb-1">RANK</span>
+                                <strong className="text-[16px] text-primary dark:text-white transition-colors uppercase font-black tracking-tight">{item.place}</strong>
                               </div>
                             </div>
-                            <span className="font-black text-[22px] text-cta font-mono">{item.amountKRW.toLocaleString()} KRW</span>
+                            <span className="font-black text-[18px] text-cta font-mono">{item.amountKRW.toLocaleString()} KRW</span>
                           </div>
                         )) || <p className="text-tertiary dark:text-neutral-400 transition-colors font-medium">상금 정보가 준비되지 않았습니다.</p>}
                       </div>
@@ -681,27 +681,28 @@ export default function HackathonDetailPage() {
                           </h3>
                           <div className="space-y-4">
                             {recentSubmissions.map((s) => (
-                              <div key={s.id} className="bg-gray-50/50 dark:bg-neutral-800/40 transition-all duration-300 p-6 rounded-[24px] border border-gray-100 dark:border-neutral-700 flex flex-col gap-2 relative overflow-hidden group hover:border-cta/40 hover:bg-white dark:hover:bg-neutral-700/50 hover:shadow-md dark:hover:shadow-[0_0_25px_rgba(49,130,246,0.12)]">
-                                <div className="flex justify-between text-tertiary dark:text-neutral-400 transition-colors text-[13px] font-bold mb-2">
-                                  <span>제출 시간</span>
-                                  <span className="font-mono">{new Date(s.submittedAt).toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <div className="text-primary dark:text-white transition-colors text-[16px] font-bold flex items-center gap-2">
-                                    <span className="bg-white dark:bg-neutral-800 transition-colors px-2.5 py-1 rounded-md border border-gray-200 dark:border-neutral-700 text-[13px] text-tertiary dark:text-neutral-400 font-bold">팀</span> {s.teamName || '미상'}
+                              <div key={s.id} className="bg-gray-50/50 dark:bg-neutral-800/40 transition-all duration-300 p-5 rounded-[20px] border border-gray-100 dark:border-neutral-700 flex items-center justify-between group hover:border-cta/40 hover:bg-white dark:hover:bg-neutral-700/50">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-10 h-10 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center border border-gray-200 dark:border-neutral-700 text-tertiary dark:text-neutral-400">
+                                    <Users className="w-5 h-5" />
                                   </div>
-                                  {s.teamName === submitTeamName && (
-                                    <button
-                                      onClick={() => handleDeleteSubmission(s.id, s.teamName!)}
-                                      className="text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors bg-red-50 dark:bg-red-900/20 px-2.5 py-1.5 rounded-lg flex items-center gap-1"
-                                    >
-                                      삭제
-                                    </button>
-                                  )}
+                                  <div>
+                                    <h4 className="text-[16px] font-bold text-primary dark:text-white transition-colors">
+                                      {s.teamName || '미상'}
+                                    </h4>
+                                    <p className="text-[13px] text-tertiary dark:text-neutral-500 font-mono">
+                                      {new Date(s.submittedAt).toLocaleString()}
+                                    </p>
+                                  </div>
                                 </div>
-                                {s.fileName && <div className="text-secondary dark:text-neutral-300 transition-colors text-[14px] font-medium mt-2">첨부: {s.fileName}</div>}
-                                <div className="text-cta mt-1 font-mono font-bold truncate bg-blue-50/50 dark:bg-cta/10 transition-colors p-3 rounded-[12px] inline-block w-fit mt-2 border border-blue-100/50 dark:border-cta/20">{s.fileUrl}</div>
-                                {s.notes && <div className="text-secondary dark:text-neutral-300 transition-colors font-medium mt-4 bg-white dark:bg-neutral-800 p-4 rounded-[14px] border border-gray-100 dark:border-neutral-700">{s.notes}</div>}
+                                {s.teamName === submitTeamName && (
+                                  <button
+                                    onClick={() => handleDeleteSubmission(s.id, s.teamName!)}
+                                    className="text-[12px] font-bold text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors bg-red-50 dark:bg-red-900/10 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/20"
+                                  >
+                                    제출 취소
+                                  </button>
+                                )}
                               </div>
                             ))}
                           </div>

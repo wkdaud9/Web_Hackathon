@@ -12,12 +12,12 @@ import type { Hackathon, Team } from '../types/models';
 const STATUS_META: Record<string, { label: string; color: string; dot: string }> = {
   ongoing: {
     label: '진행 중',
-    color: 'bg-emerald-500 text-white',
-    dot: 'bg-emerald-500'
+    color: 'bg-blue-600 text-white',
+    dot: 'bg-blue-600'
   },
   upcoming: {
     label: '시작 전',
-    color: 'bg-blue-500 text-white',
+    color: 'bg-white dark:bg-neutral-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50',
     dot: 'bg-blue-500'
   },
   ended: {

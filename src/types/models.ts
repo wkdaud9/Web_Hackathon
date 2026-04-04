@@ -3,12 +3,16 @@ export type HackathonStatus = 'ongoing' | 'upcoming' | 'ended';
 export interface Hackathon {
   slug: string;
   title: string;
+  description: string;
   status: HackathonStatus;
   tags: string[];
   thumbnailUrl?: string;
   period: {
     timezone?: string;
+    registrationStartAt?: string;
+    registrationEndAt?: string;
     submissionDeadlineAt?: string;
+    startAt?: string;
     endAt?: string;
   };
   links?: {
@@ -46,6 +50,7 @@ export interface Submission {
   teamName?: string;
   notes: string;
   fileUrl: string;
+  githubUrl?: string;
   fileName?: string;
   submittedAt: string;
 }

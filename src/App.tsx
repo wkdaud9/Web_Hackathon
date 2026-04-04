@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import HackathonsPage from './pages/HackathonsPage';
@@ -23,6 +23,18 @@ function ScrollToTop() {
   return null;
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { currentUser, isLoading } = useAuth();
+  
+  if (isLoading) return null;
+  
+  if (!currentUser || currentUser.role !== 'operator') {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -39,7 +51,11 @@ function App() {
                 <Route path="rankings" element={<RankingsPage />} />
                 <Route path="mypage" element={<MyPage />} />
                 <Route path="workspace" element={<TeamWorkspacePage />} />
-                <Route path="admin" element={<AdminDashboard />} />
+                <Route path="admin" element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
               </Route>
             </Routes>
           </BrowserRouter>
