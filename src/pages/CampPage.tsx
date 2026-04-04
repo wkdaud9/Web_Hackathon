@@ -9,7 +9,7 @@ import ErrorState from '../components/ui/ErrorState';
 import EmptyState from '../components/ui/EmptyState';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Users, X, Plus, Hash, Send, Settings, Sparkles, Loader2, Zap } from 'lucide-react';
+import { Users, X, Plus, Send, Settings, Sparkles, Loader2, Zap } from 'lucide-react';
 import type { Hackathon, Team } from '../types/models';
 import { getTeamRecommendations, type AIMatchResult } from '../services/geminiService';
 
